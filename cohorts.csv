@@ -1,0 +1,8 @@
+Contributor,Abbreviation,contributor_code,HCM_individuals,DCM_individuals,HVOL_individuals,Genes
+"Royal Brompton and Harefield Hospitals, London, UK","RBH, UK",RBH,568,879,1973,ACTC1 BAG3 DES DSP LMNA MYBPC3 MYH7 MYL2 MYL3 PLN RBM20 SCN5A TNNC1 TNNI3 TNNT2 TPM1 TTN
+"Aswan Heart Center, Egypt","AHC, Egypt",EGY,457,80,516,ACTC1 BAG3 DES DSP LMNA MYBPC3 MYH7 MYL2 MYL3 PLN RBM20 SCN5A TNNC1 TNNI3 TNNT2 TPM1 TTN
+"National Heart Centre Singapore, Singapore","NHCS, Singapore",SNG,91,107,746,ACTC1 BAG3 DES DSP LMNA MYBPC3 MYH7 MYL2 MYL3 PLN RBM20 SCN5A TNNC1 TNNI3 TNNT2 TPM1 TTN
+"GeneDx, Maryland, US","GeneDx, US",GDX,2370,NA,NA,ACTC1 MYBPC3 MYH7 MYL2 MYL3 TNNC1 TNNI3 TNNT2 TPM1
+"Laboratory for Molecular Medicine, Partners HealthCare Personalized Medicine, Boston, US","LMM, US",LMM,2912,939,NA,ACTC1 DES DSP LMNA MYBPC3 MYH7 MYL2 MYL3 PLN RBM20 TNNC1 TNNI3 TNNT2 TPM1 TTN
+"Northern Ireland Regional Genetics Laboratory, Belfast, UK","NIRGL, UK",BLF,630,NA,NA,MYBPC3 MYH7 TNNI3 TNNT2
+"Oxford Regional Genetics Laboratory, UK","ORGL, UK",OMG,3267,559,NA,ACTC1 LMNA MYBPC3 MYH7 MYL2 MYL3 PLN TNNC1 TNNI3 TNNT2 TPM1
