@@ -48,7 +48,7 @@
 "DCM","SCN5A","Odds Ratio","95% confidence intervals for OR","All_Vars",0.97,"0.38 - 2.02","OR"
 "DCM","TNNC1","Excess in Disease","Fisher's exact test p-values are displayed for case excess","All_Vars",1.86,"p=0.0001","XS"
 "DCM","TNNC1","Etiological Fraction","95% confidence intervals for EF","All_Vars",0.97,"0.84 - 0.99","EF"
-"DCM","TNNC1","Odds Ratio","95% confidence intervals for OR","All_Vars",33.1,"26.45 - 106.78","OR"
+"DCM","TNNC1","Odds Ratio","95% confidence intervals for OR","All_Vars",33.12,"6.45 - 106.78","OR"
 "DCM","LMNA","Excess in Disease","Fisher's exact test p-values are displayed for case excess","Truncating",1.52,"p<0.0001","XS"
 "DCM","LMNA","Etiological Fraction","95% confidence intervals for EF","Truncating",0.99,"0.98 - 1.00","EF"
 "DCM","LMNA","Odds Ratio","95% confidence intervals for OR","Truncating",99.61,"40.10 - 269.28","OR"
