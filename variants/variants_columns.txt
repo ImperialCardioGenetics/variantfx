@@ -1,336 +1,349 @@
-column names	20220209_sorted.txt	fixed	ignore	description
-var_id	TRUE	TRUE		variant id in form [chromosome]:[position]:[reference]:[alternate]
-ID	TRUE	TRUE		variant id in form [chromosome]_[position]_[reference]_[alternate]
-Consequence	TRUE	TRUE		Consequence annotated by VEP105
-SYMBOL	TRUE	TRUE		Gene symbol
-Gene	TRUE	TRUE		Ensembl gene ID
-Feature	TRUE	TRUE		Ensembl transcript ID
-HGVSc	TRUE	TRUE		variant id in HGVSc format
-HGVSp	TRUE	TRUE		variant id in HGVSp format
-EXON	FALSE	TRUE		[exon that contains variant] / [total exons]
-CANONICAL	TRUE	TRUE		Binary field (YES/NO) identifying canonical transcript
-AC_EXT_DCM	TRUE	TRUE	ignore	
-AC_EXT_HCM	TRUE	TRUE	ignore	
-AC_INT_DCM	TRUE	TRUE	ignore	
-AC_INT_HCM	TRUE	TRUE	ignore	
-AN_EXT_DCM	TRUE	TRUE	ignore	
-AN_EXT_HCM	TRUE	TRUE	ignore	
-AN_INT_DCM	TRUE	TRUE	ignore	
-AN_INT_HCM	TRUE	TRUE	ignore	
-AN_EXT_DCM_max	FALSE	TRUE	ignore	
-AN_EXT_HCM_max	FALSE	TRUE	ignore	
-AN_INT_DCM_max	FALSE	TRUE	ignore	
-AN_INT_HCM_max	FALSE	TRUE	ignore	
-AC_BLF_HCM	TRUE	TRUE		Allele count in BLF HCM individuals
-AC_EGY	TRUE	TRUE		"Allele count in EGY individuals (HCM, DCM, HVOL)"
-AC_EGY_DCM	TRUE	TRUE		Allele count in EGY DCM individuals
-AC_EGY_DCM_0-10	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 0-10"
-AC_EGY_DCM_11-20	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 11-20"
-AC_EGY_DCM_21-30	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 21-30"
-AC_EGY_DCM_31-40	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 31-40"
-AC_EGY_DCM_41-50	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 41-50"
-AC_EGY_DCM_51-60	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 51-60"
-AC_EGY_DCM_61-70	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 61-70"
-AC_EGY_DCM_71-80	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 71-80"
-AC_EGY_DCM_AFR	TRUE	TRUE		"Allele count in EGY DCM individuals, identified as AFR descent"
-AC_EGY_DCM_F	TRUE	TRUE		Allele count in EGY DCM females
-AC_EGY_DCM_M	TRUE	TRUE		Allele count in EGY DCM males
-AC_EGY_HCM	TRUE	TRUE		Allele count in EGY HCM individuals
-AC_EGY_HCM_0-10	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 0-10"
-AC_EGY_HCM_11-20	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 11-20"
-AC_EGY_HCM_21-30	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 21-30"
-AC_EGY_HCM_31-40	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 31-40"
-AC_EGY_HCM_41-50	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 41-50"
-AC_EGY_HCM_51-60	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 51-60"
-AC_EGY_HCM_61-70	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 61-70"
-AC_EGY_HCM_71-80	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 71-80"
-AC_EGY_HCM_AFR	TRUE	TRUE		"Allele count in EGY HCM individuals, identified as AFR descent"
-AC_EGY_HCM_F	TRUE	TRUE		Allele count in EGY HCM females
-AC_EGY_HCM_M	TRUE	TRUE		Allele count in EGY HCM males
-AC_EGY_HVOL	TRUE	TRUE		Allele count in EGY HVOL individuals
-AC_EGY_HVOL_11-20	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 11-20"
-AC_EGY_HVOL_21-30	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 21-30"
-AC_EGY_HVOL_31-40	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 31-40"
-AC_EGY_HVOL_41-50	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 41-50"
-AC_EGY_HVOL_51-60	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 51-60"
-AC_EGY_HVOL_61-70	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 61-70"
-AC_EGY_HVOL_71-80	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 71-80"
-AC_EGY_HVOL_81-90	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 81-90"
-AC_EGY_HVOL_AFR	TRUE	TRUE		"Allele count in EGY HVOL individuals, identified as AFR descent"
-AC_EGY_HVOL_F	TRUE	TRUE		Allele count in EGY HVOL females
-AC_EGY_HVOL_M	TRUE	TRUE		Allele count in EGY HVOL males
-AC_GDX_HCM	TRUE	TRUE		Allele count in GDX HCM individuals
-AC_GDX_HCM_0-10	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 0-10"
-AC_GDX_HCM_11-20	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 11-20"
-AC_GDX_HCM_21-30	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 21-30"
-AC_GDX_HCM_31-40	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 31-40"
-AC_GDX_HCM_41-50	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 41-50"
-AC_GDX_HCM_51-60	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 51-60"
-AC_GDX_HCM_61-70	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 61-70"
-AC_GDX_HCM_71-80	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 71-80"
-AC_GDX_HCM_81-90	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 81-90"
-AC_GDX_HCM_F	TRUE	TRUE		Allele count in GDX HCM females
-AC_GDX_HCM_M	TRUE	TRUE		Allele count in GDX HCM males
-AC_LMM_DCM	TRUE	TRUE		Allele count in LMM DCM individuals
-AC_LMM_HCM	TRUE	TRUE		Allele count in LMM HCM individuals
-AC_OMG_DCM	TRUE	TRUE		Allele count in OMG DCM individuals
-AC_OMG_HCM	TRUE	TRUE		Allele count in OMG HCM individuals
-AC_RBH	TRUE	TRUE		"Allele count in RBH individuals (HCM, DCM, HVOL)"
-AC_RBH_DCM	TRUE	TRUE		Allele count in RBH DCM individuals
-AC_RBH_DCM_0-10	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 0-10"
-AC_RBH_DCM_11-20	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 11-20"
-AC_RBH_DCM_21-30	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 21-30"
-AC_RBH_DCM_31-40	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 31-40"
-AC_RBH_DCM_41-50	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 41-50"
-AC_RBH_DCM_51-60	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 51-60"
-AC_RBH_DCM_61-70	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 61-70"
-AC_RBH_DCM_71-80	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 71-80"
-AC_RBH_DCM_81-90	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 81-90"
-AC_RBH_DCM_AFR	TRUE	TRUE		"Allele count in RBH DCM individuals, identified as AFR descent"
-AC_RBH_DCM_EAS	TRUE	TRUE		"Allele count in RBH DCM individuals, identified as EAS descent"
-AC_RBH_DCM_EUR	TRUE	TRUE		"Allele count in RBH DCM individuals, identified as EUR descent"
-AC_RBH_DCM_F	TRUE	TRUE		Allele count in RBH DCM females
-AC_RBH_DCM_M	TRUE	TRUE		Allele count in RBH DCM males
-AC_RBH_DCM_OTH	TRUE	TRUE		"Allele count in RBH DCM individuals, identified as OTH descent"
-AC_RBH_DCM_SAS	TRUE	TRUE		"Allele count in RBH DCM individuals, identified as SAS descent"
-AC_RBH_HCM	TRUE	TRUE		Allele count in RBH HCM individuals
-AC_RBH_HCM_0-10	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 0-10"
-AC_RBH_HCM_11-20	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 11-20"
-AC_RBH_HCM_21-30	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 21-30"
-AC_RBH_HCM_31-40	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 31-40"
-AC_RBH_HCM_41-50	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 41-50"
-AC_RBH_HCM_51-60	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 51-60"
-AC_RBH_HCM_61-70	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 61-70"
-AC_RBH_HCM_71-80	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 71-80"
-AC_RBH_HCM_81-90	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 81-90"
-AC_RBH_HCM_AFR	TRUE	TRUE		"Allele count in RBH HCM individuals, identified as AFR descent"
-AC_RBH_HCM_EAS	TRUE	TRUE		"Allele count in RBH HCM individuals, identified as EAS descent"
-AC_RBH_HCM_EUR	TRUE	TRUE		Allele count in RBH HCM individuals identified as EUR descent
-AC_RBH_HCM_F	TRUE	TRUE		Allele count in RBH HCM females
-AC_RBH_HCM_M	TRUE	TRUE		Allele count in RBH HCM males
-AC_RBH_HCM_OTH	TRUE	TRUE		"Allele count in RBH HCM individuals, identified as OTH descent"
-AC_RBH_HCM_SAS	TRUE	TRUE		"Allele count in RBH HCM individuals, identified as SAS descent"
-AC_RBH_HVOL	TRUE	TRUE		Allele count in RBH HVOL individuals
-AC_RBH_HVOL_11-20	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 11-20"
-AC_RBH_HVOL_21-30	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 21-30"
-AC_RBH_HVOL_31-40	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 31-40"
-AC_RBH_HVOL_41-50	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 41-50"
-AC_RBH_HVOL_51-60	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 51-60"
-AC_RBH_HVOL_61-70	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 61-70"
-AC_RBH_HVOL_71-80	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 71-80"
-AC_RBH_HVOL_AFR	TRUE	TRUE		"Allele count in RBH HVOL individuals, identified as AFR descent"
-AC_RBH_HVOL_EAS	TRUE	TRUE		"Allele count in RBH HVOL individuals, identified as EAS descent"
-AC_RBH_HVOL_EUR	TRUE	TRUE		"Allele count in RBH HVOL individuals, identified as EUR descent"
-AC_RBH_HVOL_F	TRUE	TRUE		Allele count in RBH HVOL females
-AC_RBH_HVOL_M	TRUE	TRUE		Allele count in RBH HVOL males
-AC_RBH_HVOL_OTH	TRUE	TRUE		"Allele count in RBH HVOL individuals, identified as OTH descent"
-AC_RBH_HVOL_SAS	TRUE	TRUE		"Allele count in RBH HVOL individuals, identified as SAS descent"
-AC_SNG	TRUE	TRUE		"Allele count in SNG individuals (HCM, DCM, HVOL)"
-AC_SNG_DCM	TRUE	TRUE		Allele count in SNG DCM individuals
-AC_SNG_DCM_EAS	TRUE	TRUE		"Allele count in SNG DCM individuals, identified as EAS descent"
-AC_SNG_DCM_EUR	TRUE	TRUE		"Allele count in SNG DCM individuals, identified as EUR descent"
-AC_SNG_DCM_F	TRUE	TRUE		Allele count in SNG DCM females
-AC_SNG_DCM_M	TRUE	TRUE		Allele count in SNG DCM males
-AC_SNG_DCM_SAS	TRUE	TRUE		"Allele count in SNG DCM individuals, identified as SAS descent"
-AC_SNG_DCM_UNKage	TRUE	TRUE	ignore	
-AC_SNG_HCM	TRUE	TRUE		Allele count in SNG HCM individuals
-AC_SNG_HCM_EAS	TRUE	TRUE		"Allele count in SNG HCM individuals, identified as EAS descent"
-AC_SNG_HCM_F	TRUE	TRUE		Allele count in SNG HCM females
-AC_SNG_HCM_M	TRUE	TRUE		Allele count in SNG HCM males
-AC_SNG_HCM_SAS	TRUE	TRUE		"Allele count in SNG HCM individuals, identified as SAS descent"
-AC_SNG_HCM_UNKage	TRUE	TRUE	ignore	
-AC_SNG_HVOL	TRUE	TRUE		Allele count in SNG HVOL individuals
-AC_SNG_HVOL_EAS	TRUE	TRUE		"Allele count in SNG HVOL individuals, identified as EAS descent"
-AC_SNG_HVOL_EUR	TRUE	TRUE		"Allele count in SNG HVOL individuals, identified as EUR descent"
-AC_SNG_HVOL_F	TRUE	TRUE		Allele count in SNG HVOL females
-AC_SNG_HVOL_M	TRUE	TRUE		Allele count in SNG HVOL males
-AC_SNG_HVOL_OTH	TRUE	TRUE		"Allele count in SNG HVOL individuals, identified as OTH descent"
-AC_SNG_HVOL_SAS	TRUE	TRUE		"Allele count in SNG HVOL individuals, identified as SAS descent"
-AC_SNG_HVOL_UNKage	TRUE	TRUE	ignore	
-AN_BLF_HCM	TRUE	TRUE		Allele number in BLF HCM individuals
-AN_EGY	TRUE	TRUE		"Allele number in EGY individuals (HCM, DCM, HVOL)"
-AN_EGY_DCM	TRUE	TRUE		Allele number in EGY DCM individuals
-AN_EGY_DCM_0-10	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 0-10"
-AN_EGY_DCM_11-20	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 11-20"
-AN_EGY_DCM_21-30	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 21-30"
-AN_EGY_DCM_31-40	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 31-40"
-AN_EGY_DCM_41-50	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 41-50"
-AN_EGY_DCM_51-60	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 51-60"
-AN_EGY_DCM_61-70	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 61-70"
-AN_EGY_DCM_71-80	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 71-80"
-AN_EGY_DCM_AFR	TRUE	TRUE		"Allele number in EGY DCM individuals, identified as AFR descent"
-AN_EGY_DCM_F	TRUE	TRUE		Allele number in EGY DCM females
-AN_EGY_DCM_M	TRUE	TRUE		Allele number in EGY DCM males
-AN_EGY_HCM	TRUE	TRUE		Allele number in EGY HCM individuals
-AN_EGY_HCM_0-10	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 0-10"
-AN_EGY_HCM_11-20	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 11-20"
-AN_EGY_HCM_21-30	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 21-30"
-AN_EGY_HCM_31-40	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 31-40"
-AN_EGY_HCM_41-50	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 41-50"
-AN_EGY_HCM_51-60	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 51-60"
-AN_EGY_HCM_61-70	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 61-70"
-AN_EGY_HCM_71-80	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 71-80"
-AN_EGY_HCM_AFR	TRUE	TRUE		"Allele number in EGY HCM individuals, identified as AFR descent"
-AN_EGY_HCM_F	TRUE	TRUE		Allele number in EGY HCM females
-AN_EGY_HCM_M	TRUE	TRUE		Allele number in EGY HCM males
-AN_EGY_HVOL	TRUE	TRUE		Allele number in EGY HVOL individuals
-AN_EGY_HVOL_11-20	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 11-20"
-AN_EGY_HVOL_21-30	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 21-30"
-AN_EGY_HVOL_31-40	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 31-40"
-AN_EGY_HVOL_41-50	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 41-50"
-AN_EGY_HVOL_51-60	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 51-60"
-AN_EGY_HVOL_61-70	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 61-70"
-AN_EGY_HVOL_71-80	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 71-80"
-AN_EGY_HVOL_81-90	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 81-90"
-AN_EGY_HVOL_AFR	TRUE	TRUE		"Allele number in EGY HVOL individuals, identified as AFR descent"
-AN_EGY_HVOL_F	TRUE	TRUE		Allele number in EGY HVOL females
-AN_EGY_HVOL_M	TRUE	TRUE		Allele number in EGY HVOL males
-AN_GDX_HCM	TRUE	TRUE		Allele number in GDX HCM individuals
-AN_GDX_HCM_0-10	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 0-10"
-AN_GDX_HCM_11-20	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 11-20"
-AN_GDX_HCM_21-30	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 21-30"
-AN_GDX_HCM_31-40	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 31-40"
-AN_GDX_HCM_41-50	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 41-50"
-AN_GDX_HCM_51-60	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 51-60"
-AN_GDX_HCM_61-70	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 61-70"
-AN_GDX_HCM_71-80	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 71-80"
-AN_GDX_HCM_81-90	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 81-90"
-AN_GDX_HCM_F	TRUE	TRUE		Allele number in GDX HCM females
-AN_GDX_HCM_M	TRUE	TRUE		Allele number in GDX HCM males
-AN_GDX_HCM_UNKsex	TRUE	TRUE	ignore	
-AN_LMM_DCM	TRUE	TRUE		Allele number in LMM DCM individuals
-AN_LMM_HCM	TRUE	TRUE		Allele number in LMM HCM individuals
-AN_OMG_DCM	TRUE	TRUE		Allele number in OMG DCM individuals
-AN_OMG_HCM	TRUE	TRUE		Allele number in OMG HCM individuals
-AN_RBH	TRUE	TRUE		"Allele number in RBH individuals (HCM, DCM, HVOL)"
-AN_RBH_DCM	TRUE	TRUE		Allele number in RBH DCM individuals
-AN_RBH_DCM_0-10	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 0-10"
-AN_RBH_DCM_11-20	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 11-20"
-AN_RBH_DCM_21-30	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 21-30"
-AN_RBH_DCM_31-40	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 31-40"
-AN_RBH_DCM_41-50	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 41-50"
-AN_RBH_DCM_51-60	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 51-60"
-AN_RBH_DCM_61-70	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 61-70"
-AN_RBH_DCM_71-80	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 71-80"
-AN_RBH_DCM_81-90	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 81-90"
-AN_RBH_DCM_AFR	TRUE	TRUE		"Allele number in RBH DCM individuals, identified as AFR descent"
-AN_RBH_DCM_EAS	TRUE	TRUE		"Allele number in RBH DCM individuals, identified as EAS descent"
-AN_RBH_DCM_EUR	TRUE	TRUE		"Allele number in RBH DCM individuals, identified as EUR descent"
-AN_RBH_DCM_F	TRUE	TRUE		Allele number in RBH DCM females
-AN_RBH_DCM_M	TRUE	TRUE		Allele number in RBH DCM males
-AN_RBH_DCM_OTH	TRUE	TRUE		"Allele number in RBH DCM individuals, identified as OTH descent"
-AN_RBH_DCM_SAS	TRUE	TRUE		"Allele number in RBH DCM individuals, identified as SAS descent"
-AN_RBH_HCM	TRUE	TRUE		Allele number in RBH HCM individuals
-AN_RBH_HCM_0-10	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 0-10"
-AN_RBH_HCM_11-20	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 11-20"
-AN_RBH_HCM_21-30	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 21-30"
-AN_RBH_HCM_31-40	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 31-40"
-AN_RBH_HCM_41-50	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 41-50"
-AN_RBH_HCM_51-60	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 51-60"
-AN_RBH_HCM_61-70	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 61-70"
-AN_RBH_HCM_71-80	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 71-80"
-AN_RBH_HCM_81-90	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 81-90"
-AN_RBH_HCM_AFR	TRUE	TRUE		"Allele number in RBH HCM individuals, identified as AFR descent"
-AN_RBH_HCM_EAS	TRUE	TRUE		"Allele number in RBH HCM individuals, identified as EAS descent"
-AN_RBH_HCM_EUR	TRUE	TRUE		Allele number in RBH HCM individuals identified as EUR descent
-AN_RBH_HCM_F	TRUE	TRUE		Allele number in RBH HCM females
-AN_RBH_HCM_M	TRUE	TRUE		Allele number in RBH HCM males
-AN_RBH_HCM_OTH	TRUE	TRUE		"Allele number in RBH HCM individuals, identified as OTH descent"
-AN_RBH_HCM_SAS	TRUE	TRUE		"Allele number in RBH HCM individuals, identified as SAS descent"
-AN_RBH_HVOL	TRUE	TRUE		Allele number in RBH HVOL individuals
-AN_RBH_HVOL_11-20	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 11-20"
-AN_RBH_HVOL_21-30	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 21-30"
-AN_RBH_HVOL_31-40	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 31-40"
-AN_RBH_HVOL_41-50	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 41-50"
-AN_RBH_HVOL_51-60	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 51-60"
-AN_RBH_HVOL_61-70	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 61-70"
-AN_RBH_HVOL_71-80	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 71-80"
-AN_RBH_HVOL_AFR	TRUE	TRUE		"Allele number in RBH HVOL individuals, identified as AFR descent"
-AN_RBH_HVOL_EAS	TRUE	TRUE		"Allele number in RBH HVOL individuals, identified as EAS descent"
-AN_RBH_HVOL_EUR	TRUE	TRUE		"Allele number in RBH HVOL individuals, identified as EUR descent"
-AN_RBH_HVOL_F	TRUE	TRUE		Allele number in RBH HVOL females
-AN_RBH_HVOL_M	TRUE	TRUE		Allele number in RBH HVOL males
-AN_RBH_HVOL_OTH	TRUE	TRUE		"Allele number in RBH HVOL individuals, identified as OTH descent"
-AN_RBH_HVOL_SAS	TRUE	TRUE		"Allele number in RBH HVOL individuals, identified as SAS descent"
-AN_SNG	TRUE	TRUE		"Allele number in SNG individuals (HCM, DCM, HVOL)"
-AN_SNG_DCM	TRUE	TRUE		Allele number in SNG DCM individuals
-AN_SNG_DCM_EAS	TRUE	TRUE		"Allele number in SNG DCM individuals, identified as EAS descent"
-AN_SNG_DCM_EUR	TRUE	TRUE		"Allele number in SNG DCM individuals, identified as EUR descent"
-AN_SNG_DCM_F	TRUE	TRUE		Allele number in SNG DCM females
-AN_SNG_DCM_M	TRUE	TRUE		Allele number in SNG DCM males
-AN_SNG_DCM_SAS	TRUE	TRUE		"Allele number in SNG DCM individuals, identified as SAS descent"
-AN_SNG_DCM_UNKage	TRUE	TRUE	ignore	
-AN_SNG_HCM	TRUE	TRUE		Allele number in SNG HCM individuals
-AN_SNG_HCM_EAS	TRUE	TRUE		"Allele number in SNG HCM individuals, identified as EAS descent"
-AN_SNG_HCM_F	TRUE	TRUE		Allele number in SNG HCM females
-AN_SNG_HCM_M	TRUE	TRUE		Allele number in SNG HCM males
-AN_SNG_HCM_SAS	TRUE	TRUE		"Allele number in SNG HCM individuals, identified as SAS descent"
-AN_SNG_HCM_UNKage	TRUE	TRUE	ignore	
-AN_SNG_HVOL	TRUE	TRUE		Allele number in SNG HVOL individuals
-AN_SNG_HVOL_EAS	TRUE	TRUE		"Allele number in SNG HVOL individuals, identified as EAS descent"
-AN_SNG_HVOL_EUR	TRUE	TRUE		"Allele number in SNG HVOL individuals, identified as EUR descent"
-AN_SNG_HVOL_F	TRUE	TRUE		Allele number in SNG HVOL females
-AN_SNG_HVOL_M	TRUE	TRUE		Allele number in SNG HVOL males
-AN_SNG_HVOL_OTH	TRUE	TRUE		"Allele number in SNG HVOL individuals, identified as OTH descent"
-AN_SNG_HVOL_SAS	TRUE	TRUE		"Allele number in SNG HVOL individuals, identified as SAS descent"
-AN_SNG_HVOL_UNKage	TRUE	TRUE	ignore	
-AC_LMM_DCM_AFR	TRUE	TRUE		"Allele count in LMM DCM individuals, identified as AFR descent"
-AC_LMM_DCM_EAS	TRUE	TRUE		"Allele count in LMM DCM individuals, identified as EAS descent"
-AC_LMM_DCM_EUR	TRUE	TRUE		"Allele count in LMM DCM individuals, identified as EUR descent"
-AC_LMM_DCM_OTH	TRUE	TRUE		"Allele count in LMM DCM individuals, identified as OTH descent"
-AC_LMM_DCM_UNKpop	TRUE	TRUE		"Allele count in LMM DCM individuals, identified as UNK descent"
-AN_LMM_DCM_AFR	TRUE	TRUE		"Allele number in LMM DCM individuals, identified as AFR descent"
-AN_LMM_DCM_EAS	TRUE	TRUE		"Allele number in LMM DCM individuals, identified as EAS descent"
-AN_LMM_DCM_EUR	TRUE	TRUE		"Allele number in LMM DCM individuals, identified as EUR descent"
-AN_LMM_DCM_OTH	TRUE	TRUE		"Allele number in LMM DCM individuals, identified as OTH descent"
-AN_LMM_DCM_UNKpop	TRUE	TRUE		"Allele number in LMM DCM individuals, identified as UNK descent"
-CHROM	TRUE	FALSE		
-POS	TRUE	FALSE		
-REF	TRUE	FALSE		
-ALT	TRUE	FALSE		
-AC_ALL	TRUE	FALSE		
-AC_ALL_DCM	TRUE	FALSE		
-AC_ALL_HCM	TRUE	FALSE		
-AC_EXT	TRUE	FALSE		
-AC_INT	TRUE	FALSE		
-AC_INT_0-10	TRUE	FALSE		
-AC_INT_11-20	TRUE	FALSE		
-AC_INT_21-30	TRUE	FALSE		
-AC_INT_31-40	TRUE	FALSE		
-AC_INT_41-50	TRUE	FALSE		
-AC_INT_51-60	TRUE	FALSE		
-AC_INT_61-70	TRUE	FALSE		
-AC_INT_71-80	TRUE	FALSE		
-AC_INT_81-90	TRUE	FALSE		
-AC_INT_AFR	TRUE	FALSE		
-AC_INT_EAS	TRUE	FALSE		
-AC_INT_EUR	TRUE	FALSE		
-AC_INT_F	TRUE	FALSE		
-AC_INT_HVOL	TRUE	FALSE		
-AC_INT_M	TRUE	FALSE		
-AC_INT_OTH	TRUE	FALSE		
-AC_INT_SAS	TRUE	FALSE		
-AC_INT_UNKage	TRUE	FALSE		
-AN_ALL	TRUE	FALSE		
-AN_ALL_DCM	TRUE	FALSE		
-AN_ALL_HCM	TRUE	FALSE		
-AN_EXT	TRUE	FALSE		
-AN_INT	TRUE	FALSE		
-AN_INT_0-10	TRUE	FALSE		
-AN_INT_11-20	TRUE	FALSE		
-AN_INT_21-30	TRUE	FALSE		
-AN_INT_31-40	TRUE	FALSE		
-AN_INT_41-50	TRUE	FALSE		
-AN_INT_51-60	TRUE	FALSE		
-AN_INT_61-70	TRUE	FALSE		
-AN_INT_71-80	TRUE	FALSE		
-AN_INT_81-90	TRUE	FALSE		
-AN_INT_AFR	TRUE	FALSE		
-AN_INT_EAS	TRUE	FALSE		
-AN_INT_EUR	TRUE	FALSE		
-AN_INT_F	TRUE	FALSE		
-AN_INT_HVOL	TRUE	FALSE		
-AN_INT_M	TRUE	FALSE		
-AN_INT_OTH	TRUE	FALSE		
-AN_INT_SAS	TRUE	FALSE		
-AN_INT_UNKage	TRUE	FALSE		
+column names	fixed	20220209	20220322	flag	description
+var_id	TRUE	TRUE	TRUE		variant id in form [chromosome]:[position]:[reference]:[alternate]
+ID	TRUE	TRUE	TRUE		variant id in form [chromosome]_[position]_[reference]_[alternate]
+Consequence	TRUE	TRUE	TRUE		Consequence annotated by VEP105
+SYMBOL	TRUE	TRUE	TRUE		Gene symbol
+Gene	TRUE	TRUE	TRUE		Ensembl gene ID
+Feature	TRUE	TRUE	TRUE		Ensembl transcript ID
+HGVSc	TRUE	TRUE	TRUE		variant id in HGVSc format
+HGVSp	TRUE	TRUE	TRUE		variant id in HGVSp format
+EXON	TRUE	FALSE	TRUE		[exon that contains variant] / [total exons]
+CANONICAL	TRUE	TRUE	TRUE		Binary field (YES/NO) identifying canonical transcript
+AC_EXT_DCM	TRUE	TRUE	TRUE	ignore	
+AC_EXT_HCM	TRUE	TRUE	TRUE	ignore	
+AC_INT_DCM	TRUE	TRUE	TRUE	ignore	
+AC_INT_HCM	TRUE	TRUE	TRUE	ignore	
+AN_EXT_DCM	TRUE	TRUE	TRUE	ignore	
+AN_EXT_HCM	TRUE	TRUE	TRUE	ignore	
+AN_INT_DCM	TRUE	TRUE	TRUE	ignore	
+AN_INT_HCM	TRUE	TRUE	TRUE	ignore	
+AN_EXT_DCM_max	TRUE	FALSE	TRUE	ignore	
+AN_EXT_HCM_max	TRUE	FALSE	TRUE	ignore	
+AN_INT_DCM_max	TRUE	FALSE	TRUE	ignore	
+AN_INT_HCM_max	TRUE	FALSE	TRUE	ignore	
+AC_BLF_HCM	TRUE	TRUE	TRUE		Allele count in BLF HCM individuals
+AC_EGY	TRUE	TRUE	TRUE		"Allele count in EGY individuals (HCM, DCM, HVOL)"
+AC_EGY_DCM	TRUE	TRUE	TRUE		Allele count in EGY DCM individuals
+AC_EGY_DCM_0-10	TRUE	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 0-10"
+AC_EGY_DCM_11-20	TRUE	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 11-20"
+AC_EGY_DCM_21-30	TRUE	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 21-30"
+AC_EGY_DCM_31-40	TRUE	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 31-40"
+AC_EGY_DCM_41-50	TRUE	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 41-50"
+AC_EGY_DCM_51-60	TRUE	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 51-60"
+AC_EGY_DCM_61-70	TRUE	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 61-70"
+AC_EGY_DCM_71-80	TRUE	TRUE	TRUE		"Allele count in EGY DCM individuals, aged 71-80"
+AC_EGY_DCM_AFR	TRUE	TRUE	TRUE		"Allele count in EGY DCM individuals, identified as AFR descent"
+AC_EGY_DCM_F	TRUE	TRUE	TRUE		Allele count in EGY DCM females
+AC_EGY_DCM_M	TRUE	TRUE	TRUE		Allele count in EGY DCM males
+AC_EGY_HCM	TRUE	TRUE	TRUE		Allele count in EGY HCM individuals
+AC_EGY_HCM_0-10	TRUE	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 0-10"
+AC_EGY_HCM_11-20	TRUE	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 11-20"
+AC_EGY_HCM_21-30	TRUE	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 21-30"
+AC_EGY_HCM_31-40	TRUE	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 31-40"
+AC_EGY_HCM_41-50	TRUE	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 41-50"
+AC_EGY_HCM_51-60	TRUE	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 51-60"
+AC_EGY_HCM_61-70	TRUE	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 61-70"
+AC_EGY_HCM_71-80	TRUE	TRUE	TRUE		"Allele count in EGY HCM individuals, aged 71-80"
+AC_EGY_HCM_AFR	TRUE	TRUE	TRUE		"Allele count in EGY HCM individuals, identified as AFR descent"
+AC_EGY_HCM_F	TRUE	TRUE	TRUE		Allele count in EGY HCM females
+AC_EGY_HCM_M	TRUE	TRUE	TRUE		Allele count in EGY HCM males
+AC_EGY_HVOL	TRUE	TRUE	TRUE		Allele count in EGY HVOL individuals
+AC_EGY_HVOL_11-20	TRUE	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 11-20"
+AC_EGY_HVOL_21-30	TRUE	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 21-30"
+AC_EGY_HVOL_31-40	TRUE	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 31-40"
+AC_EGY_HVOL_41-50	TRUE	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 41-50"
+AC_EGY_HVOL_51-60	TRUE	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 51-60"
+AC_EGY_HVOL_61-70	TRUE	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 61-70"
+AC_EGY_HVOL_71-80	TRUE	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 71-80"
+AC_EGY_HVOL_81-90	TRUE	TRUE	TRUE		"Allele count in EGY HVOL individuals, aged 81-90"
+AC_EGY_HVOL_AFR	TRUE	TRUE	TRUE		"Allele count in EGY HVOL individuals, identified as AFR descent"
+AC_EGY_HVOL_F	TRUE	TRUE	TRUE		Allele count in EGY HVOL females
+AC_EGY_HVOL_M	TRUE	TRUE	TRUE		Allele count in EGY HVOL males
+AC_GDX_HCM	TRUE	TRUE	TRUE		Allele count in GDX HCM individuals
+AC_GDX_HCM_0-10	TRUE	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 0-10"
+AC_GDX_HCM_11-20	TRUE	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 11-20"
+AC_GDX_HCM_21-30	TRUE	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 21-30"
+AC_GDX_HCM_31-40	TRUE	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 31-40"
+AC_GDX_HCM_41-50	TRUE	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 41-50"
+AC_GDX_HCM_51-60	TRUE	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 51-60"
+AC_GDX_HCM_61-70	TRUE	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 61-70"
+AC_GDX_HCM_71-80	TRUE	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 71-80"
+AC_GDX_HCM_81-90	TRUE	TRUE	TRUE		"Allele count in GDX HCM individuals, aged 81-90"
+AC_GDX_HCM_F	TRUE	TRUE	TRUE		Allele count in GDX HCM females
+AC_GDX_HCM_M	TRUE	TRUE	TRUE		Allele count in GDX HCM males
+AC_LMM_DCM	TRUE	TRUE	TRUE		Allele count in LMM DCM individuals
+AC_LMM_HCM	TRUE	TRUE	TRUE		Allele count in LMM HCM individuals
+AC_OMG_DCM	TRUE	TRUE	TRUE		Allele count in OMG DCM individuals
+AC_OMG_HCM	TRUE	TRUE	TRUE		Allele count in OMG HCM individuals
+AC_RBH	TRUE	TRUE	TRUE		"Allele count in RBH individuals (HCM, DCM, HVOL)"
+AC_RBH_DCM	TRUE	TRUE	TRUE		Allele count in RBH DCM individuals
+AC_RBH_DCM_0-10	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 0-10"
+AC_RBH_DCM_11-20	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 11-20"
+AC_RBH_DCM_21-30	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 21-30"
+AC_RBH_DCM_31-40	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 31-40"
+AC_RBH_DCM_41-50	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 41-50"
+AC_RBH_DCM_51-60	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 51-60"
+AC_RBH_DCM_61-70	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 61-70"
+AC_RBH_DCM_71-80	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 71-80"
+AC_RBH_DCM_81-90	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, aged 81-90"
+AC_RBH_DCM_AFR	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, identified as AFR descent"
+AC_RBH_DCM_EAS	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, identified as EAS descent"
+AC_RBH_DCM_EUR	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, identified as EUR descent"
+AC_RBH_DCM_F	TRUE	TRUE	TRUE		Allele count in RBH DCM females
+AC_RBH_DCM_M	TRUE	TRUE	TRUE		Allele count in RBH DCM males
+AC_RBH_DCM_OTH	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, identified as OTH descent"
+AC_RBH_DCM_SAS	TRUE	TRUE	TRUE		"Allele count in RBH DCM individuals, identified as SAS descent"
+AC_RBH_HCM	TRUE	TRUE	TRUE		Allele count in RBH HCM individuals
+AC_RBH_HCM_0-10	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 0-10"
+AC_RBH_HCM_11-20	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 11-20"
+AC_RBH_HCM_21-30	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 21-30"
+AC_RBH_HCM_31-40	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 31-40"
+AC_RBH_HCM_41-50	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 41-50"
+AC_RBH_HCM_51-60	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 51-60"
+AC_RBH_HCM_61-70	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 61-70"
+AC_RBH_HCM_71-80	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 71-80"
+AC_RBH_HCM_81-90	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, aged 81-90"
+AC_RBH_HCM_AFR	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, identified as AFR descent"
+AC_RBH_HCM_EAS	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, identified as EAS descent"
+AC_RBH_HCM_EUR	TRUE	TRUE	TRUE		Allele count in RBH HCM individuals identified as EUR descent
+AC_RBH_HCM_F	TRUE	TRUE	TRUE		Allele count in RBH HCM females
+AC_RBH_HCM_M	TRUE	TRUE	TRUE		Allele count in RBH HCM males
+AC_RBH_HCM_OTH	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, identified as OTH descent"
+AC_RBH_HCM_SAS	TRUE	TRUE	TRUE		"Allele count in RBH HCM individuals, identified as SAS descent"
+AC_RBH_HVOL	TRUE	TRUE	TRUE		Allele count in RBH HVOL individuals
+AC_RBH_HVOL_11-20	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 11-20"
+AC_RBH_HVOL_21-30	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 21-30"
+AC_RBH_HVOL_31-40	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 31-40"
+AC_RBH_HVOL_41-50	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 41-50"
+AC_RBH_HVOL_51-60	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 51-60"
+AC_RBH_HVOL_61-70	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 61-70"
+AC_RBH_HVOL_71-80	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, aged 71-80"
+AC_RBH_HVOL_AFR	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, identified as AFR descent"
+AC_RBH_HVOL_EAS	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, identified as EAS descent"
+AC_RBH_HVOL_EUR	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, identified as EUR descent"
+AC_RBH_HVOL_F	TRUE	TRUE	TRUE		Allele count in RBH HVOL females
+AC_RBH_HVOL_M	TRUE	TRUE	TRUE		Allele count in RBH HVOL males
+AC_RBH_HVOL_OTH	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, identified as OTH descent"
+AC_RBH_HVOL_SAS	TRUE	TRUE	TRUE		"Allele count in RBH HVOL individuals, identified as SAS descent"
+AC_SNG	TRUE	TRUE	TRUE		"Allele count in SNG individuals (HCM, DCM, HVOL)"
+AC_SNG_DCM	TRUE	TRUE	TRUE		Allele count in SNG DCM individuals
+AC_SNG_DCM_EAS	TRUE	TRUE	TRUE		"Allele count in SNG DCM individuals, identified as EAS descent"
+AC_SNG_DCM_EUR	TRUE	TRUE	TRUE		"Allele count in SNG DCM individuals, identified as EUR descent"
+AC_SNG_DCM_F	TRUE	TRUE	TRUE		Allele count in SNG DCM females
+AC_SNG_DCM_M	TRUE	TRUE	TRUE		Allele count in SNG DCM males
+AC_SNG_DCM_SAS	TRUE	TRUE	TRUE		"Allele count in SNG DCM individuals, identified as SAS descent"
+AC_SNG_DCM_UNKage	TRUE	TRUE	TRUE	ignore	
+AC_SNG_HCM	TRUE	TRUE	TRUE		Allele count in SNG HCM individuals
+AC_SNG_HCM_EAS	TRUE	TRUE	TRUE		"Allele count in SNG HCM individuals, identified as EAS descent"
+AC_SNG_HCM_F	TRUE	TRUE	TRUE		Allele count in SNG HCM females
+AC_SNG_HCM_M	TRUE	TRUE	TRUE		Allele count in SNG HCM males
+AC_SNG_HCM_SAS	TRUE	TRUE	TRUE		"Allele count in SNG HCM individuals, identified as SAS descent"
+AC_SNG_HCM_UNKage	TRUE	TRUE	TRUE	ignore	
+AC_SNG_HVOL	TRUE	TRUE	TRUE		Allele count in SNG HVOL individuals
+AC_SNG_HVOL_EAS	TRUE	TRUE	TRUE		"Allele count in SNG HVOL individuals, identified as EAS descent"
+AC_SNG_HVOL_EUR	TRUE	TRUE	TRUE		"Allele count in SNG HVOL individuals, identified as EUR descent"
+AC_SNG_HVOL_F	TRUE	TRUE	TRUE		Allele count in SNG HVOL females
+AC_SNG_HVOL_M	TRUE	TRUE	TRUE		Allele count in SNG HVOL males
+AC_SNG_HVOL_OTH	TRUE	TRUE	TRUE		"Allele count in SNG HVOL individuals, identified as OTH descent"
+AC_SNG_HVOL_SAS	TRUE	TRUE	TRUE		"Allele count in SNG HVOL individuals, identified as SAS descent"
+AC_SNG_HVOL_UNKage	TRUE	TRUE	TRUE	ignore	
+AN_BLF_HCM	TRUE	TRUE	TRUE		Allele number in BLF HCM individuals
+AN_EGY	TRUE	TRUE	TRUE		"Allele number in EGY individuals (HCM, DCM, HVOL)"
+AN_EGY_DCM	TRUE	TRUE	TRUE		Allele number in EGY DCM individuals
+AN_EGY_DCM_0-10	TRUE	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 0-10"
+AN_EGY_DCM_11-20	TRUE	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 11-20"
+AN_EGY_DCM_21-30	TRUE	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 21-30"
+AN_EGY_DCM_31-40	TRUE	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 31-40"
+AN_EGY_DCM_41-50	TRUE	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 41-50"
+AN_EGY_DCM_51-60	TRUE	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 51-60"
+AN_EGY_DCM_61-70	TRUE	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 61-70"
+AN_EGY_DCM_71-80	TRUE	TRUE	TRUE		"Allele number in EGY DCM individuals, aged 71-80"
+AN_EGY_DCM_AFR	TRUE	TRUE	TRUE		"Allele number in EGY DCM individuals, identified as AFR descent"
+AN_EGY_DCM_F	TRUE	TRUE	TRUE		Allele number in EGY DCM females
+AN_EGY_DCM_M	TRUE	TRUE	TRUE		Allele number in EGY DCM males
+AN_EGY_HCM	TRUE	TRUE	TRUE		Allele number in EGY HCM individuals
+AN_EGY_HCM_0-10	TRUE	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 0-10"
+AN_EGY_HCM_11-20	TRUE	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 11-20"
+AN_EGY_HCM_21-30	TRUE	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 21-30"
+AN_EGY_HCM_31-40	TRUE	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 31-40"
+AN_EGY_HCM_41-50	TRUE	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 41-50"
+AN_EGY_HCM_51-60	TRUE	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 51-60"
+AN_EGY_HCM_61-70	TRUE	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 61-70"
+AN_EGY_HCM_71-80	TRUE	TRUE	TRUE		"Allele number in EGY HCM individuals, aged 71-80"
+AN_EGY_HCM_AFR	TRUE	TRUE	TRUE		"Allele number in EGY HCM individuals, identified as AFR descent"
+AN_EGY_HCM_F	TRUE	TRUE	TRUE		Allele number in EGY HCM females
+AN_EGY_HCM_M	TRUE	TRUE	TRUE		Allele number in EGY HCM males
+AN_EGY_HVOL	TRUE	TRUE	TRUE		Allele number in EGY HVOL individuals
+AN_EGY_HVOL_11-20	TRUE	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 11-20"
+AN_EGY_HVOL_21-30	TRUE	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 21-30"
+AN_EGY_HVOL_31-40	TRUE	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 31-40"
+AN_EGY_HVOL_41-50	TRUE	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 41-50"
+AN_EGY_HVOL_51-60	TRUE	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 51-60"
+AN_EGY_HVOL_61-70	TRUE	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 61-70"
+AN_EGY_HVOL_71-80	TRUE	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 71-80"
+AN_EGY_HVOL_81-90	TRUE	TRUE	TRUE		"Allele number in EGY HVOL individuals, aged 81-90"
+AN_EGY_HVOL_AFR	TRUE	TRUE	TRUE		"Allele number in EGY HVOL individuals, identified as AFR descent"
+AN_EGY_HVOL_F	TRUE	TRUE	TRUE		Allele number in EGY HVOL females
+AN_EGY_HVOL_M	TRUE	TRUE	TRUE		Allele number in EGY HVOL males
+AN_GDX_HCM	TRUE	TRUE	TRUE		Allele number in GDX HCM individuals
+AN_GDX_HCM_0-10	TRUE	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 0-10"
+AN_GDX_HCM_11-20	TRUE	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 11-20"
+AN_GDX_HCM_21-30	TRUE	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 21-30"
+AN_GDX_HCM_31-40	TRUE	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 31-40"
+AN_GDX_HCM_41-50	TRUE	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 41-50"
+AN_GDX_HCM_51-60	TRUE	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 51-60"
+AN_GDX_HCM_61-70	TRUE	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 61-70"
+AN_GDX_HCM_71-80	TRUE	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 71-80"
+AN_GDX_HCM_81-90	TRUE	TRUE	TRUE		"Allele number in GDX HCM individuals, aged 81-90"
+AN_GDX_HCM_F	TRUE	TRUE	TRUE		Allele number in GDX HCM females
+AN_GDX_HCM_M	TRUE	TRUE	TRUE		Allele number in GDX HCM males
+AN_GDX_HCM_UNKsex	TRUE	TRUE	TRUE	ignore	
+AN_LMM_DCM	TRUE	TRUE	TRUE		Allele number in LMM DCM individuals
+AN_LMM_HCM	TRUE	TRUE	TRUE		Allele number in LMM HCM individuals
+AN_OMG_DCM	TRUE	TRUE	TRUE		Allele number in OMG DCM individuals
+AN_OMG_HCM	TRUE	TRUE	TRUE		Allele number in OMG HCM individuals
+AN_RBH	TRUE	TRUE	TRUE		"Allele number in RBH individuals (HCM, DCM, HVOL)"
+AN_RBH_DCM	TRUE	TRUE	TRUE		Allele number in RBH DCM individuals
+AN_RBH_DCM_0-10	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 0-10"
+AN_RBH_DCM_11-20	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 11-20"
+AN_RBH_DCM_21-30	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 21-30"
+AN_RBH_DCM_31-40	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 31-40"
+AN_RBH_DCM_41-50	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 41-50"
+AN_RBH_DCM_51-60	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 51-60"
+AN_RBH_DCM_61-70	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 61-70"
+AN_RBH_DCM_71-80	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 71-80"
+AN_RBH_DCM_81-90	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, aged 81-90"
+AN_RBH_DCM_AFR	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, identified as AFR descent"
+AN_RBH_DCM_EAS	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, identified as EAS descent"
+AN_RBH_DCM_EUR	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, identified as EUR descent"
+AN_RBH_DCM_F	TRUE	TRUE	TRUE		Allele number in RBH DCM females
+AN_RBH_DCM_M	TRUE	TRUE	TRUE		Allele number in RBH DCM males
+AN_RBH_DCM_OTH	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, identified as OTH descent"
+AN_RBH_DCM_SAS	TRUE	TRUE	TRUE		"Allele number in RBH DCM individuals, identified as SAS descent"
+AN_RBH_HCM	TRUE	TRUE	TRUE		Allele number in RBH HCM individuals
+AN_RBH_HCM_0-10	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 0-10"
+AN_RBH_HCM_11-20	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 11-20"
+AN_RBH_HCM_21-30	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 21-30"
+AN_RBH_HCM_31-40	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 31-40"
+AN_RBH_HCM_41-50	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 41-50"
+AN_RBH_HCM_51-60	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 51-60"
+AN_RBH_HCM_61-70	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 61-70"
+AN_RBH_HCM_71-80	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 71-80"
+AN_RBH_HCM_81-90	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, aged 81-90"
+AN_RBH_HCM_AFR	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, identified as AFR descent"
+AN_RBH_HCM_EAS	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, identified as EAS descent"
+AN_RBH_HCM_EUR	TRUE	TRUE	TRUE		Allele number in RBH HCM individuals identified as EUR descent
+AN_RBH_HCM_F	TRUE	TRUE	TRUE		Allele number in RBH HCM females
+AN_RBH_HCM_M	TRUE	TRUE	TRUE		Allele number in RBH HCM males
+AN_RBH_HCM_OTH	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, identified as OTH descent"
+AN_RBH_HCM_SAS	TRUE	TRUE	TRUE		"Allele number in RBH HCM individuals, identified as SAS descent"
+AN_RBH_HVOL	TRUE	TRUE	TRUE		Allele number in RBH HVOL individuals
+AN_RBH_HVOL_11-20	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 11-20"
+AN_RBH_HVOL_21-30	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 21-30"
+AN_RBH_HVOL_31-40	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 31-40"
+AN_RBH_HVOL_41-50	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 41-50"
+AN_RBH_HVOL_51-60	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 51-60"
+AN_RBH_HVOL_61-70	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 61-70"
+AN_RBH_HVOL_71-80	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, aged 71-80"
+AN_RBH_HVOL_AFR	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, identified as AFR descent"
+AN_RBH_HVOL_EAS	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, identified as EAS descent"
+AN_RBH_HVOL_EUR	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, identified as EUR descent"
+AN_RBH_HVOL_F	TRUE	TRUE	TRUE		Allele number in RBH HVOL females
+AN_RBH_HVOL_M	TRUE	TRUE	TRUE		Allele number in RBH HVOL males
+AN_RBH_HVOL_OTH	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, identified as OTH descent"
+AN_RBH_HVOL_SAS	TRUE	TRUE	TRUE		"Allele number in RBH HVOL individuals, identified as SAS descent"
+AN_SNG	TRUE	TRUE	TRUE		"Allele number in SNG individuals (HCM, DCM, HVOL)"
+AN_SNG_DCM	TRUE	TRUE	TRUE		Allele number in SNG DCM individuals
+AN_SNG_DCM_EAS	TRUE	TRUE	TRUE		"Allele number in SNG DCM individuals, identified as EAS descent"
+AN_SNG_DCM_EUR	TRUE	TRUE	TRUE		"Allele number in SNG DCM individuals, identified as EUR descent"
+AN_SNG_DCM_F	TRUE	TRUE	TRUE		Allele number in SNG DCM females
+AN_SNG_DCM_M	TRUE	TRUE	TRUE		Allele number in SNG DCM males
+AN_SNG_DCM_SAS	TRUE	TRUE	TRUE		"Allele number in SNG DCM individuals, identified as SAS descent"
+AN_SNG_DCM_UNKage	TRUE	TRUE	TRUE	ignore	
+AN_SNG_HCM	TRUE	TRUE	TRUE		Allele number in SNG HCM individuals
+AN_SNG_HCM_EAS	TRUE	TRUE	TRUE		"Allele number in SNG HCM individuals, identified as EAS descent"
+AN_SNG_HCM_F	TRUE	TRUE	TRUE		Allele number in SNG HCM females
+AN_SNG_HCM_M	TRUE	TRUE	TRUE		Allele number in SNG HCM males
+AN_SNG_HCM_SAS	TRUE	TRUE	TRUE		"Allele number in SNG HCM individuals, identified as SAS descent"
+AN_SNG_HCM_UNKage	TRUE	TRUE	TRUE	ignore	
+AN_SNG_HVOL	TRUE	TRUE	TRUE		Allele number in SNG HVOL individuals
+AN_SNG_HVOL_EAS	TRUE	TRUE	TRUE		"Allele number in SNG HVOL individuals, identified as EAS descent"
+AN_SNG_HVOL_EUR	TRUE	TRUE	TRUE		"Allele number in SNG HVOL individuals, identified as EUR descent"
+AN_SNG_HVOL_F	TRUE	TRUE	TRUE		Allele number in SNG HVOL females
+AN_SNG_HVOL_M	TRUE	TRUE	TRUE		Allele number in SNG HVOL males
+AN_SNG_HVOL_OTH	TRUE	TRUE	TRUE		"Allele number in SNG HVOL individuals, identified as OTH descent"
+AN_SNG_HVOL_SAS	TRUE	TRUE	TRUE		"Allele number in SNG HVOL individuals, identified as SAS descent"
+AN_SNG_HVOL_UNKage	TRUE	TRUE	TRUE	ignore	
+AC_LMM_DCM_AFR	TRUE	TRUE	TRUE		"Allele count in LMM DCM individuals, identified as AFR descent"
+AC_LMM_DCM_EAS	TRUE	TRUE	TRUE		"Allele count in LMM DCM individuals, identified as EAS descent"
+AC_LMM_DCM_EUR	TRUE	TRUE	TRUE		"Allele count in LMM DCM individuals, identified as EUR descent"
+AC_LMM_DCM_OTH	TRUE	TRUE	TRUE		"Allele count in LMM DCM individuals, identified as OTH descent"
+AC_LMM_DCM_UNKpop	TRUE	TRUE	TRUE		"Allele count in LMM DCM individuals, identified as UNK descent"
+AN_LMM_DCM_AFR	TRUE	TRUE	TRUE		"Allele number in LMM DCM individuals, identified as AFR descent"
+AN_LMM_DCM_EAS	TRUE	TRUE	TRUE		"Allele number in LMM DCM individuals, identified as EAS descent"
+AN_LMM_DCM_EUR	TRUE	TRUE	TRUE		"Allele number in LMM DCM individuals, identified as EUR descent"
+AN_LMM_DCM_OTH	TRUE	TRUE	TRUE		"Allele number in LMM DCM individuals, identified as OTH descent"
+AN_LMM_DCM_UNKpop	TRUE	TRUE	TRUE		"Allele number in LMM DCM individuals, identified as UNK descent"
+CHROM	FALSE	TRUE	FALSE		
+POS	FALSE	TRUE	FALSE		
+REF	FALSE	TRUE	FALSE		
+ALT	FALSE	TRUE	FALSE		
+AC_ALL	FALSE	TRUE	TRUE	removed	
+AC_ALL_DCM	FALSE	TRUE	TRUE	removed	
+AC_ALL_HCM	FALSE	TRUE	TRUE	removed	
+AC_EXT	FALSE	TRUE	TRUE	removed	
+AC_INT	FALSE	TRUE	TRUE	removed	
+AC_INT_0-10	FALSE	TRUE	TRUE	removed	
+AC_INT_11-20	FALSE	TRUE	TRUE	removed	
+AC_INT_21-30	FALSE	TRUE	TRUE	removed	
+AC_INT_31-40	FALSE	TRUE	TRUE	removed	
+AC_INT_41-50	FALSE	TRUE	TRUE	removed	
+AC_INT_51-60	FALSE	TRUE	TRUE	removed	
+AC_INT_61-70	FALSE	TRUE	TRUE	removed	
+AC_INT_71-80	FALSE	TRUE	TRUE	removed	
+AC_INT_81-90	FALSE	TRUE	TRUE	removed	
+AC_INT_AFR	FALSE	TRUE	TRUE	removed	
+AC_INT_EAS	FALSE	TRUE	TRUE	removed	
+AC_INT_EUR	FALSE	TRUE	TRUE	removed	
+AC_INT_F	FALSE	TRUE	TRUE	removed	
+AC_INT_HVOL	FALSE	TRUE	TRUE	removed	
+AC_INT_M	FALSE	TRUE	TRUE	removed	
+AC_INT_OTH	FALSE	TRUE	TRUE	removed	
+AC_INT_SAS	FALSE	TRUE	TRUE	removed	
+AC_INT_UNKage	FALSE	TRUE	TRUE	removed	
+AN_ALL	FALSE	TRUE	TRUE	removed	
+AN_ALL_DCM	FALSE	TRUE	TRUE	removed	
+AN_ALL_HCM	FALSE	TRUE	TRUE	removed	
+AN_EXT	FALSE	TRUE	TRUE	removed	
+AN_INT	FALSE	TRUE	TRUE	removed	
+AN_INT_0-10	FALSE	TRUE	TRUE	removed	
+AN_INT_11-20	FALSE	TRUE	TRUE	removed	
+AN_INT_21-30	FALSE	TRUE	TRUE	removed	
+AN_INT_31-40	FALSE	TRUE	TRUE	removed	
+AN_INT_41-50	FALSE	TRUE	TRUE	removed	
+AN_INT_51-60	FALSE	TRUE	TRUE	removed	
+AN_INT_61-70	FALSE	TRUE	TRUE	removed	
+AN_INT_71-80	FALSE	TRUE	TRUE	removed	
+AN_INT_81-90	FALSE	TRUE	TRUE	removed	
+AN_INT_AFR	FALSE	TRUE	TRUE	removed	
+AN_INT_EAS	FALSE	TRUE	TRUE	removed	
+AN_INT_EUR	FALSE	TRUE	TRUE	removed	
+AN_INT_F	FALSE	TRUE	TRUE	removed	
+AN_INT_HVOL	FALSE	TRUE	TRUE	removed	
+AN_INT_M	FALSE	TRUE	TRUE	removed	
+AN_INT_OTH	FALSE	TRUE	TRUE	removed	
+AN_INT_SAS	FALSE	TRUE	TRUE	removed	
+AN_INT_UNKage	FALSE	TRUE	TRUE	removed	
+AC_EGY_DCM_81-90	FALSE	FALSE	TRUE	no data	
+AC_EGY_HCM_81-90	FALSE	FALSE	TRUE	no data	
+AC_EGY_HVOL_0-10	FALSE	FALSE	TRUE	no data	
+AC_GDX_HCM_UNKsex	FALSE	FALSE	TRUE	no data	
+AC_GDX_HCM_UNKage	FALSE	FALSE	TRUE	new	
+AC_RBH_HVOL_0-10	FALSE	FALSE	TRUE	no data	
+AC_RBH_HVOL_81-90	FALSE	FALSE	TRUE	no data	
+AN_EGY_DCM_81-90	FALSE	FALSE	TRUE	no data	
+AN_EGY_HCM_81-90	FALSE	FALSE	TRUE	no data	
+AN_EGY_HVOL_0-10	FALSE	FALSE	TRUE	no data	
+AN_GDX_HCM_UNKage	FALSE	FALSE	TRUE	new	
+AN_RBH_HVOL_0-10	FALSE	FALSE	TRUE	no data	
+AN_RBH_HVOL_81-90	FALSE	FALSE	TRUE	no data	
