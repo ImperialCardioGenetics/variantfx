@@ -74,4 +74,4 @@ You can contact us by email to report data problems, feature suggestions, or wit
 
 # Notes
 
-Gene metrics.csv file contains data from "Reassessment of Mendelian gene pathogenicity using 7,855 cardiomyopathy cases and 60,706 reference samples" (Genet Med. 2016 doi:10.1038/gim.2016.90). (PMID: 27532257)
+genemetrics.csv contains data from "Reassessment of Mendelian gene pathogenicity using 7,855 cardiomyopathy cases and 60,706 reference samples" (Genet Med. 2016 doi:10.1038/gim.2016.90). (PMID: 27532257)
