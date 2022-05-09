@@ -21,6 +21,8 @@ Magdi Yacoub
 Sanjay Prasad
 Stuart Cook
 Yasmine Aguib
+William Wright
+Daniela Macaya
 
 ## Contributing Centres (release 1.0)
 
