@@ -1,6 +1,6 @@
 # Cardiac VariantFX
 
-VartiantFX is a resource that collates patient variants from the Cardiac Variant Interpretation Consortium. Collated data, provided here in table form, is browsable by the DECIPHER platform.
+VartiantFX is a resource that collates patient variants from the Cardiac Variant Interpretation Consortium. Collated data, provided here in table form, is browsable in the [DECIPHER](https://www.deciphergenomics.org/) platform.
 
 # About
 
@@ -12,28 +12,28 @@ One central characteristic of this effort is the use of quantitative methods for
 
 ## Contributing Principal Investigators (release 1.0)
 
-James Ware
-Birgit Funke
-Daniel MacArthur
-Declan O'Regan
-Hugh Watkins
-Magdi Yacoub
-Sanjay Prasad
-Stuart Cook
-Yasmine Aguib
-William Wright
-Daniela Macaya
+- James Ware
+- Birgit Funke
+- Daniel MacArthur
+- Declan O'Regan
+- Hugh Watkins
+- Magdi Yacoub
+- Sanjay Prasad
+- Stuart Cook
+- Yasmine Aguib
+- William Wright
+- Daniela Macaya
 
 ## Contributing Centres (release 1.0)
 
-Royal Brompton and Harefield Hospitals, London, UK
-Aswan Heart Center, Egypt
-National Heart Centre Singapore, Singapore
-Laboratory for Molecular Medicine, Partners HealthCare Personalized Medicine, Boston, US
-Oxford Regional Genetics Laboratory, UK
-GeneDx, Maryland, US
-Northern Ireland Regional Genetics Laboratory, Belfast, UK
-The Genome Aggregation Database (gnomAD)
+- Royal Brompton and Harefield Hospitals, London, UK
+- Aswan Heart Center, Egypt
+- National Heart Centre Singapore, Singapore
+- Laboratory for Molecular Medicine, Partners HealthCare Personalized Medicine, Boston, US
+- Oxford Regional Genetics Laboratory, UK
+- GeneDx, Maryland, US
+- Northern Ireland Regional Genetics Laboratory, Belfast, UK
+- The Genome Aggregation Database (gnomAD)
 
 # Terms of Use
 
@@ -42,6 +42,7 @@ You may freely search the data, and use this aggregated data to support the inte
 We ask that you refrain from publication of global analyses of the aggregated data set or the newly available quantitative metrics presented, or analyses of the unpublished cohorts included here for the first time (specifically NHCS, Singapore & AHC, Egypt) until analyses already underway are reported. This would include using this data in publications reporting population-specific variants observed in these new cohorts.
 
 If you are unsure whether your analysis or use would fall within the scope of these Terms please contact us. It may be appropriate to collaborate directly in some cases.
+
 The data are available under the ODC Open Database License (ODbL) (summary here). You are free to share and modify the Cardiac VariantFX data so long as you:
 
 - attribute any public use of the database
@@ -63,7 +64,9 @@ Only variants with allele frequency in gnomAD < 0.0001 (combined exomes and geno
 
 Variants are split into the following categories (as defined by the Ensembl variant effect predictor (VEP):
 
-Truncating -> Frameshift, nonsense and essential splice-site (+-2) Missense -> Non-synonymous Other Non-truncating -> splice region variant (+-8), inframe insertion, inframe deletion, stop lost and start lost
+- Truncating -> Frameshift, nonsense and essential splice-site (+-2) 
+- Missense -> Non-synonymous 
+- Other Non-truncating -> splice region variant (+-8), inframe insertion, inframe deletion, stop lost and start lost
 
 Protein Altering -> A aggregation of all truncating, missense and other non-truncating variants
 
