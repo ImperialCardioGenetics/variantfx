@@ -72,5 +72,6 @@ We are continously looking to expand the dataset of inhertied cardiac disease ca
 
 You can contact us by email to report data problems, feature suggestions, or with queries about our Terms of Use at j.ware@imperial.ac.uk
 
+# Notes
 
 Gene metrics.csv file contains data from "Reassessment of Mendelian gene pathogenicity using 7,855 cardiomyopathy cases and 60,706 reference samples" (Genet Med. 2016 doi:10.1038/gim.2016.90). (PMID: 27532257)
