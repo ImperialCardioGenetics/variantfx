@@ -1,6 +1,6 @@
 # Cardiac VariantFX
 
-VartiantFX is a resource that collates patient variants from the Cardiac Variant Interpretation Consortium. Collated data, provided here in table form, is browsable in the [DECIPHER](https://www.deciphergenomics.org/) platform.
+VariantFX is a resource that collates patient variants from the Cardiac Variant Interpretation Consortium. Collated data, provided here in table form, is browsable in the [DECIPHER](https://www.deciphergenomics.org/) platform.
 
 # About
 
