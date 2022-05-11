@@ -17,6 +17,7 @@ One central characteristic of this effort is the use of quantitative methods for
 - Daniel MacArthur
 - Declan O'Regan
 - Hugh Watkins
+- Kate Thomson
 - Magdi Yacoub
 - Sanjay Prasad
 - Stuart Cook
@@ -27,13 +28,13 @@ One central characteristic of this effort is the use of quantitative methods for
 ## Contributing Centres (release 1.0)
 
 - Royal Brompton and Harefield Hospitals, London, UK
+- Imperial College London
 - Aswan Heart Center, Egypt
 - National Heart Centre Singapore, Singapore
 - Laboratory for Molecular Medicine, Partners HealthCare Personalized Medicine, Boston, US
 - Oxford Regional Genetics Laboratory, UK
 - GeneDx, Maryland, US
 - Northern Ireland Regional Genetics Laboratory, Belfast, UK
-- The Genome Aggregation Database (gnomAD)
 
 # Terms of Use
 
@@ -43,7 +44,7 @@ We ask that you refrain from publication of global analyses of the aggregated da
 
 If you are unsure whether your analysis or use would fall within the scope of these Terms please contact us. It may be appropriate to collaborate directly in some cases.
 
-The data are available under the ODC Open Database License (ODbL) (summary here). You are free to share and modify the Cardiac VariantFX data so long as you:
+The data are available under the ODC Open Database License (ODbL) (summary here: https://opendatacommons.org/licenses/odbl/summary/). You are free to share and modify the Cardiac VariantFX data so long as you:
 
 - attribute any public use of the database
 - attribute any or works produced from the database
@@ -57,7 +58,7 @@ e.g. Cardiac Variant Interpretation Consortium. (2022). Cardiac VariantFX. [onli
 # FAQ
 
 ## How was the ethnicity of each sample determined?
-In version 0.1 of Cardiac VariantFX ethnicity determination is via self-report at sample recruitment. Local ethnicity codes were then assigned to one of the eight population codes used in gnomAD to allow ethnicity matching across all cohorts.
+In version 1.0 of Cardiac VariantFX ethnicity determination is via self-report at sample recruitment. Local ethnicity codes were then assigned to one of the eight population codes used in gnomAD to allow ethnicity matching across all cohorts.
 
 ## How are variant types assigned in the VariantFX browser?
 Only variants with allele frequency in gnomAD < 0.0001 (combined exomes and genomes) are displayed in the cohort summary table and used for the disease burden analysis calculations.
@@ -75,7 +76,7 @@ We are continously looking to expand the dataset of inhertied cardiac disease ca
 
 # Contact
 
-You can contact us by email to report data problems, feature suggestions, or with queries about our Terms of Use at j.ware@imperial.ac.uk
+You can contact us by email to report data problems, feature suggestions (k.mcgurk@imperial.ac.uk or p.theotokis@imperial.ac.uk), or with queries about our Terms of Use (j.ware@imperial.ac.uk) 
 
 # Notes
 
