@@ -44,7 +44,10 @@ We ask that you refrain from publication of global analyses of the aggregated da
 
 If you are unsure whether your analysis or use would fall within the scope of these Terms please contact us. It may be appropriate to collaborate directly in some cases.
 
-The data are available under the ODC Open Database License (ODbL) (summary here: https://opendatacommons.org/licenses/odbl/summary/). You are free to share and modify the Cardiac VariantFX data so long as you:
+The data are available under the ODC Open Database License (ODbL) 
+(summary here: https://opendatacommons.org/licenses/odbl/summary/). 
+
+You are free to share and modify the Cardiac VariantFX data so long as you:
 
 - attribute any public use of the database
 - attribute any or works produced from the database
