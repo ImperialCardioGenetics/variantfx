@@ -28,7 +28,7 @@ One central characteristic of this effort is the use of quantitative methods for
 ## Contributing Centres (release 1.0)
 
 - Royal Brompton and Harefield Hospitals, London, UK
-- Imperial College London
+- Imperial College London, London, UK
 - Aswan Heart Center, Egypt
 - National Heart Centre Singapore, Singapore
 - Laboratory for Molecular Medicine, Partners HealthCare Personalized Medicine, Boston, US
