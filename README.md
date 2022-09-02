@@ -61,9 +61,11 @@ e.g. Cardiac Variant Interpretation Consortium. (2022). Cardiac VariantFX. [onli
 # FAQ
 
 ## How was the ethnicity of each sample determined?
+
 In version 1.0 of Cardiac VariantFX ethnicity determination is via self-report at sample recruitment. Local ethnicity codes were then assigned to one of the eight population codes used in gnomAD to allow ethnicity matching across all cohorts.
 
 ## How are variant types assigned in the VariantFX browser?
+
 Only variants with allele frequency in gnomAD < 0.0001 (combined exomes and genomes) are displayed in the cohort summary table and used for the disease burden analysis calculations.
 
 Variants are split into the following categories (as defined by the Ensembl variant effect predictor (VEP):
@@ -75,6 +77,7 @@ Variants are split into the following categories (as defined by the Ensembl vari
 Protein Altering -> A aggregation of all truncating, missense and other non-truncating variants
 
 ## How do I contribute?
+
 We are continously looking to expand the dataset of inhertied cardiac disease cases included in Cardiac VariantFX. If you would like to contribute your data please contact us at j.ware@imperial.ac.uk
 
 # Contact
