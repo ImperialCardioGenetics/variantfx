@@ -1,13 +1,6 @@
----
-title: "Penetrance_github"
-output: html_document
----
-
 # set up and packages
 
 ```{r library or install.packages}
-#setwd()
-
 #my_packages <- c("data.table", "ggplot2", "dplyr", "plyr") #e.g.
 #not_installed <- my_packages[!(my_packages %in% installed.packages()[ , "Package"])]
 #if(length(not_installed)) install.packages(not_installed)   
@@ -1610,7 +1603,7 @@ doneant2$NMD[doneant2$Consequence == "missense_variant,splice_region_variant" & 
 DCM1 <- doneant2
 
 #TTN PSI 90 regions
-psi <- read.table("TTNpsi90.txt", header=F)
+psi <- read.table("TTNpsi90.txt", header=F) ## a file containing regions of exons PSI>90%
 DCM1$ttnfound <- ifelse(sapply(DCM1$POS, function(p) any (psi$V1 > p & psi$V2 < p)), "YES", "NO")
 table(DCM1$ttnfound)
 # NO  YES 
