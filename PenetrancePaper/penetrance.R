@@ -1,4 +1,4 @@
-penetrance <- function(x_D, n_D, x_AgD, n_AgD, x_A, n_A){
+penetrance <- function(x_D, n_D, x_AgD, n_AgD, x_A, n_A){ ## x=AC; n=AN; D=disease; A=allele.
 set.seed(28061971)
 digits <- 6   
 alpha <- 0.05  
