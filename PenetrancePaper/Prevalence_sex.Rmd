@@ -1,0 +1,211 @@
+# Sex prevalences
+
+```{r}
+# ref malecase malepop femalecase femalepop
+# "Zou et al. 2004" 9 4064 4 4016
+# "Maron et al. 2004" 4 1316 4 2185
+# "Maron et al. 1995" 5 1913 2 2198
+# "de Marvao et al. 2021" 58 18820 14 20454
+
+# DCM
+# ref malecase malepop femalecase femalepop
+# UKB 117 18687 60 20316
+#=~ 1 in 160 for men and 1 in 340 for women
+60/20316 *100 #women
+#0.295%
+binom.test(60,20316)
+#0.002254441 0.003799918
+
+117/18687 *100
+#0.626%
+binom.test(117,18687)
+#0.005180719 0.007499021
+
+library(tidyverse)
+library(meta)
+library(metafor)
+
+#https://rpubs.com/pekong/532068
+#https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/metareg.html#metareg-R
+#https://www.rdocumentation.org/packages/meta/versions/4.18-2/topics/forest.meta
+
+#### MEN
+meta <- metaprop(as.integer(malecase), malepop, studlab=ref, sm="PFT", data=hcm, method="Inverse", method.tau="DL")
+summary(meta)
+#                       proportion           95%-CI %W(common) %W(random)
+# Zou et al. 2004           0.0022 [0.0010; 0.0042]       15.6       15.6
+# Maron et al. 2004         0.0030 [0.0008; 0.0078]        5.0        5.0
+# Maron et al. 1995         0.0026 [0.0008; 0.0061]        7.3        7.3
+# de Marvao et al. 2021     0.0031 [0.0023; 0.0040]       72.1       72.1
+# 
+# Number of studies combined: k = 4
+# Number of observations: o = 26113
+# Number of events: e = 76
+# 
+#                      proportion           95%-CI
+# Common effect model      0.0028 [0.0022; 0.0035]
+# Random effects model     0.0028 [0.0022; 0.0035]
+# 
+# Quantifying heterogeneity:
+#  tau^2 = 0 [0.0000; 0.0002]; tau = 0 [0.0000; 0.0123]
+#  I^2 = 0.0% [0.0%; 84.7%]; H = 1.00 [1.00; 2.56]
+# 
+# Test of heterogeneity:
+#     Q d.f. p-value
+#  0.82    3  0.8435
+# 
+# Details on meta-analytical method:
+# - Inverse variance method
+# - DerSimonian-Laird estimator for tau^2
+# - Jackson method for confidence interval of tau^2 and tau
+# - Freeman-Tukey double arcsine transformation
+# - Clopper-Pearson confidence interval for individual studies
+
+forest.meta(meta, layout="meta", xlab="Proportion", comb.r=T, comb.f=F, xlim = c(0,0.008), fontsize=10, digits=6, col.square="black", col.square.lines="black", col.inside="black")
+
+######
+
+rm(list = ls())
+set.seed(28061971)
+digits <- 6   # ***
+alpha <- 0.05  # ***
+z <- qnorm(1 - alpha /2)
+# Input from meta-analysis #
+#0.002784 [0.002161; 0.003481]
+phat <- 0.002784   # From meta-analysis results
+qhat <- 1 - phat
+CI_phat_LL <- 0.002161   # From meta-analysis results
+CI_phat_UL <- 0.003481   # From meta-analysis results
+
+# Agresti–Coull method #
+
+nStore <- NULL
+xStore <- NULL
+
+dif <- 1
+C0 <- 1e-6   # ***
+iter <- 1
+
+while (dif > 0)
+{
+    ptilda <- phat + C0 * (iter - 1)
+    qtilda <- 1 - ptilda
+    
+    n <- ceiling(ptilda * qtilda / ((ptilda - CI_phat_LL) / z) ^2 - z ^2)
+    ntilda <- n + z ^2
+    xtilda <- ntilda * ptilda
+    x <- ceiling(xtilda - z ^2 /2)
+    pest <- x / n
+    
+    nStore <- c(nStore, n)
+    xStore <- c(xStore, x)
+    
+    dif <- phat - pest
+    
+    print(c("Iter:", iter))
+    print(c("phat:", round(phat, digits = digits), "pest:", round(pest, digits = digits)))
+    print(c("ptilda:", round((x + z ^2 /2) / (n + z ^2), digits = digits), "ptildaest:", round((phat + z ^2 / (2 * n)) / (1 + z ^2 / n), digits = digits)))
+    
+    print(c("Agresti–Coull method estimated n:", n, "Agresti–Coull method estimated x:", x))
+    print(c("Agresti–Coull method estimated ntilda:", round(ntilda, digits = digits), "Agresti–Coull method estimated xtilda:", round(xtilda, digits = digits)))
+    
+    iter <- iter + 1
+}
+
+c("Agresti–Coull method n:", n, "Agresti–Coull method x:", x)
+#"Agresti–Coull method n:" "24411"                   "Agresti–Coull method x:" "68"                
+c("Agresti–Coull method ntilda:", round(ntilda, digits = digits), "Agresti–Coull method xtilda:", round(xtilda, digits = digits))
+#"Agresti–Coull method ntilda:" "24414.841459"                 "Agresti–Coull method xtilda:""69.020757"      
+
+#68 in 24411 == HCM Men
+
+#### Women
+meta <- metaprop(as.integer(femalecase), femalepop, studlab=ref, sm="PFT", data=hcm, method="Inverse", method.tau="DL")
+summary(meta)
+#                       proportion           95%-CI %W(common) %W(random)
+# Zou et al. 2004           0.0010 [0.0003; 0.0025]       13.9       16.5
+# Maron et al. 2004         0.0018 [0.0005; 0.0047]        7.6        9.3
+# Maron et al. 1995         0.0009 [0.0001; 0.0033]        7.6        9.3
+# de Marvao et al. 2021     0.0007 [0.0004; 0.0011]       70.9       65.0
+# 
+# Number of studies combined: k = 4
+# Number of observations: o = 28853
+# Number of events: e = 24
+# 
+#                      proportion           95%-CI
+# Common effect model      0.0007 [0.0004; 0.0011]
+# Random effects model     0.0008 [0.0004; 0.0012]
+# 
+# Quantifying heterogeneity:
+#  tau^2 < 0.0001 [0.0000; 0.0008]; tau = 0.0022 [0.0000; 0.0291]
+#  I^2 = 7.9% [0.0%; 85.9%]; H = 1.04 [1.00; 2.66]
+# 
+# Test of heterogeneity:
+#     Q d.f. p-value
+#  3.26    3  0.3539
+# 
+# Details on meta-analytical method:
+# - Inverse variance method
+# - DerSimonian-Laird estimator for tau^2
+# - Jackson method for confidence interval of tau^2 and tau
+# - Freeman-Tukey double arcsine transformation
+# - Clopper-Pearson confidence interval for individual studies
+
+forest.meta(meta, layout="meta", xlab="Proportion", comb.r=T, comb.f=F, xlim = c(0,0.005), fontsize=10, digits=6, col.square="black", col.square.lines="black", col.inside="black")
+
+######
+
+rm(list = ls())
+set.seed(28061971)
+digits <- 6   # ***
+alpha <- 0.05  # ***
+z <- qnorm(1 - alpha /2)
+# Input from meta-analysis #
+#0.000762 [0.000416; 0.001194] #random effects
+phat <- 0.000762   # From meta-analysis results
+qhat <- 1 - phat
+CI_phat_LL <- 0.000416   # From meta-analysis results
+CI_phat_UL <- 0.001194   # From meta-analysis results
+
+# Agresti–Coull method #
+
+nStore <- NULL
+xStore <- NULL
+
+dif <- 1
+C0 <- 1e-6   # ***
+iter <- 1
+
+while (dif > 0)
+{
+    ptilda <- phat + C0 * (iter - 1)
+    qtilda <- 1 - ptilda
+    
+    n <- ceiling(ptilda * qtilda / ((ptilda - CI_phat_LL) / z) ^2 - z ^2)
+    ntilda <- n + z ^2
+    xtilda <- ntilda * ptilda
+    x <- ceiling(xtilda - z ^2 /2)
+    pest <- x / n
+    
+    nStore <- c(nStore, n)
+    xStore <- c(xStore, x)
+    
+    dif <- phat - pest
+    
+    print(c("Iter:", iter))
+    print(c("phat:", round(phat, digits = digits), "pest:", round(pest, digits = digits)))
+    print(c("ptilda:", round((x + z ^2 /2) / (n + z ^2), digits = digits), "ptildaest:", round((phat + z ^2 / (2 * n)) / (1 + z ^2 / n), digits = digits)))
+    
+    print(c("Agresti–Coull method estimated n:", n, "Agresti–Coull method estimated x:", x))
+    print(c("Agresti–Coull method estimated ntilda:", round(ntilda, digits = digits), "Agresti–Coull method estimated xtilda:", round(xtilda, digits = digits)))
+    
+    iter <- iter + 1
+}
+
+c("Agresti–Coull method n:", n, "Agresti–Coull method x:", x)
+#"Agresti–Coull method n:" "19646"                   "Agresti–Coull method x:" "15"                
+c("Agresti–Coull method ntilda:", round(ntilda, digits = digits), "Agresti–Coull method xtilda:", round(xtilda, digits = digits))
+#"Agresti–Coull method ntilda:"  "19649.841459"                  "Agresti–Coull method xtilda:"16.014621"      
+
+#15 in 19646 == HCM Women
+```
