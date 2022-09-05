@@ -3,9 +3,7 @@
 # HCM estimate penetrance
 
 ```{r}
-df <- read.table("HCMpen.txt", header=T, sep="\t")
-dim(df)
-#256
+df <- read.table("HCMpen.txt", header=T, sep="\t") ## variants for penetrance estimate
 
 #### as a function
 penetrance <- function(x_D, n_D, x_AgD, n_AgD, x_A, n_A){
@@ -132,9 +130,7 @@ write.table(df, "HCM_penetrance.txt", quote=F, row.names=F, sep="\t")
 # DCM estimate penetrance
 
 ```{r}
-df <- read.table("DCMpen.txt", header=T, sep="\t")
-dim(df)
-#59
+df <- read.table("DCMpen.txt", header=T, sep="\t") ## variants for penetrance estimate
 
 #### as a function
 penetrance <- function(x_D, n_D, x_AgD, n_AgD, x_A, n_A){
@@ -254,4 +250,36 @@ df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(177*(df$AN_DCM_80s/df$AN_DCM_80
 colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_80s", "lci_80s", "uci_80s")
 
 write.table(df, "DCM_penetrance.txt", quote=F, row.names=F, sep="\t")
+```
+
+# plot HCM + DCM individual variants - Figure 4
+
+```{r}
+#All by Penetrance and correlation with classification
+a <- ggplot(test, aes(x=AC_ALL_HCM, y=penetrance, col=Curation)) + 
+   theme_minimal() +
+  ylab("Penetrance") +   
+  xlab("HCM AC")  +
+    scale_x_log10(breaks = c(2,3,4,5,10,25,50,100,150)) +
+  scale_color_manual(values=c("darkgrey", "lightgoldenrod4", "orange", "red"), labels=c("B/LB", "VUS", "LP", "P"), drop = FALSE)+
+  scale_linetype_manual(values = c(2,1), guide="none") +
+  theme(text = element_text(size=16)) +
+  theme(legend.position="top", legend.box="vertical", legend.margin=margin()) + 
+   geom_pointrange(aes(ymin = lci, ymax = uci), position=position_jitter(width=0.1))
+
+#All by Penetrance and correlation with classification - Manual
+b <- ggplot(test2, aes(x=AC_ALL_DCM, y=penetrance, col=Curation)) + 
+  xlim(1.5,5.5) + 
+  theme_minimal() +
+  ylab("Penetrance") +   
+  xlab("DCM AC")  +
+  scale_color_manual(values=c("darkgrey", "lightgoldenrod4", "orange", "red"), labels=c("B/LB", "VUS", "LP", "P"), drop = FALSE)+
+    theme(text = element_text(size=16),
+        panel.grid.major.x = element_blank()) +
+    scale_linetype_manual(values = c(2,1), guide="none") +
+  theme(legend.position="top", legend.box="vertical", legend.margin=margin()) + 
+  geom_pointrange(aes(ymin = lci, ymax = uci), position=position_dodge2(width=0.8))
+
+library(ggpubr)
+ggarrange(a, b, ncol = 1, nrow = 2, widths=c(0.1,0.1), align='v', common.legend = TRUE, legend = "top")
 ```
