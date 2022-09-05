@@ -1,0 +1,226 @@
+# ancestry
+
+```{r}
+##HCM
+df2 <- read.table("HCM_penetrance.txt", header=T, sep="\t")
+names(df2)
+
+df2$AF_HCM_AFR <- df2$AC_HCM_AFR/df2$AN_HCM_AFR
+df2$AF_HCM_EUR <- df2$AC_HCM_EUR/df2$AN_HCM_EUR
+df2$AF_HCM_SAS <- df2$AC_HCM_SAS/df2$AN_HCM_SAS
+df2$AF_HCM_EAS <- df2$AC_HCM_EAS/df2$AN_HCM_EAS
+
+df2$popmax <- ""
+
+for(i in (1:nrow(df2))){
+   if((df2$AF_HCM_AFR[i] > df2$AF_HCM_EUR[i]) & df2$gnukb_AC_afr[i] > 1 & df2$AC_HCM_AFR[i] > 1) {
+    df2$popmax[i] <- "AFR"
+  }
+   else if((df2$AF_HCM_EAS[i] > df2$AF_HCM_EUR[i]) & df2$gnukb_AC_eas[i] > 1 & df2$AC_HCM_EAS[i] > 1) {
+    df2$popmax[i] <- "EAS"
+   }
+    else if((df2$AF_HCM_SAS[i] > df2$AF_HCM_EUR[i]) & df2$gnukb_AC_sas[i] > 1 & df2$AC_HCM_SAS[i] > 1) {
+    df2$popmax[i] <- "SAS"
+    }
+  else if(df2$gnukb_AC_eu[i] > 1 & df2$AC_HCM_EUR[i] > 1) {
+    df2$popmax[i] <- "EUR"
+  }
+}
+
+df2$popmax[df2$popmax == ""] <- "ALL"
+table(df2$popmax)
+# AFR ALL EAS EUR 
+#   8  53   3 193 
+
+### DCM
+df2 <- read.table("DCM_penetrance.txt", header=T, sep="\t")
+names(df2)
+
+df2$AF_DCM_AFR <- df2$AC_DCM_AFR/df2$AN_DCM_AFR
+df2$AF_DCM_EUR <- df2$AC_DCM_EUR/df2$AN_DCM_EUR
+df2$AF_DCM_SAS <- df2$AC_DCM_SAS/df2$AN_DCM_SAS
+df2$AF_DCM_EAS <- df2$AC_DCM_EAS/df2$AN_DCM_EAS
+
+df2$popmax <- ""
+
+for(i in (1:nrow(df2))){
+   if((df2$AF_DCM_AFR[i] > df2$AF_DCM_EUR[i]) & df2$gnukb_AC_afr[i] > 1 & df2$AC_DCM_AFR[i] > 1) {
+    df2$popmax[i] <- "AFR"
+  }
+   else if((df2$AF_DCM_EAS[i] > df2$AF_DCM_EUR[i]) & df2$gnukb_AC_eas[i] > 1 & df2$AC_DCM_EAS[i] > 1) {
+    df2$popmax[i] <- "EAS"
+   }
+    else if((df2$AF_DCM_SAS[i] > df2$AF_DCM_EUR[i]) & df2$gnukb_AC_sas[i] > 1 & df2$AC_DCM_SAS[i] > 1) {
+    df2$popmax[i] <- "SAS"
+    }
+  else if(df2$gnukb_AC_eu[i] > 1 & df2$AC_DCM_EUR[i] > 1) {
+    df2$popmax[i] <- "EUR"
+  }
+}
+
+df2$popmax[df2$popmax == ""] <- "ALL"
+table(df2$popmax)
+# AFR ALL EAS EUR 
+#  6  15   3  35 
+```
+
+# age
+
+```{r}
+# diag_group  age_mean    age_min age_max
+# EGY_DCM 38.925  2   72
+# EGY_HCM 36.84682713347921   0   77
+# RBH_DCM 54.91467576791809   0   90
+# RBH_HCM 54.5    7   89
+# SLD_HCM 56.96078431372549   18  85
+
+##HCM
+df2 <- read.table("HCM_penetrance.txt", header=T, sep="\t")
+
+df2$AF_HCM_0s <- df2$AC_HCM_0s/df2$AN_HCM_0s
+df2$AF_HCM_10s <- df2$AC_HCM_10s/df2$AN_HCM_10s
+df2$AF_HCM_20s <- df2$AC_HCM_20s/df2$AN_HCM_20s
+df2$AF_HCM_30s <- df2$AC_HCM_30s/df2$AN_HCM_30s
+df2$AF_HCM_40s <- df2$AC_HCM_40s/df2$AN_HCM_40s
+df2$AF_HCM_50s <- df2$AC_HCM_50s/df2$AN_HCM_50s
+df2$AF_HCM_60s <- df2$AC_HCM_60s/df2$AN_HCM_60s
+df2$AF_HCM_70s <- df2$AC_HCM_70s/df2$AN_HCM_70s
+df2$AF_HCM_80s <- df2$AC_HCM_80s/df2$AN_HCM_80s
+
+df2$popmaxage <- ""
+
+for(i in (1:nrow(df2))){
+   if((df2$AF_HCM_0s[i] < df2$AF_HCM_80s[i]) & df2$AC_HCM_0s[i] > 1) {
+    df2$popmaxage[i] <- "0s"
+   }
+  else if((df2$AF_HCM_10s[i] < df2$AF_HCM_80s[i]) & df2$AC_HCM_10s[i] > 1) {
+    df2$popmaxage[i] <- "10s"
+  }
+  else if((df2$AF_HCM_20s[i] < df2$AF_HCM_80s[i]) & df2$AC_HCM_20s[i] > 1) {
+    df2$popmaxage[i] <- "20s"
+  }
+  else if((df2$AF_HCM_30s[i] < df2$AF_HCM_80s[i]) & df2$AC_HCM_30s[i] > 1) {
+    df2$popmaxage[i] <- "30s"
+   }
+   else if((df2$AF_HCM_40s[i] < df2$AF_HCM_80s[i]) & df2$AC_HCM_40s[i] > 1) {
+    df2$popmaxage[i] <- "40s"
+   }
+    else if((df2$AF_HCM_50s[i] < df2$AF_HCM_80s[i]) & df2$AC_HCM_50s[i] > 1) {
+    df2$popmaxage[i] <- "50s"
+    }
+   else if((df2$AF_HCM_60s[i] < df2$AF_HCM_80s[i]) & df2$AC_HCM_60s[i] > 1) {
+    df2$popmaxage[i] <- "60s"
+   }
+  else if((df2$AF_HCM_70s[i] < df2$AF_HCM_80s[i]) & df2$AC_HCM_70s[i] > 1) {
+    df2$popmaxage[i] <- "70s"
+    }
+  else if(df2$AC_HCM_80s[i] > 1) {
+    df2$popmaxage[i] <- "80s"
+  }
+}
+
+df2$popmaxage[df2$popmaxage == ""] <- "ALL"
+table(df2$popmaxage)
+#30s 40s 50s 60s 70s ALL
+# 5   5   5  18   8  77 139
+
+#### DCM
+df2 <- read.table("DCM_penetrance.txt", header=T, sep="\t")
+names(df2)
+
+df2$AF_DCM_0s <- df2$AC_DCM_0s/df2$AN_DCM_0s
+df2$AF_DCM_10s <- df2$AC_DCM_10s/df2$AN_DCM_10s
+df2$AF_DCM_20s <- df2$AC_DCM_20s/df2$AN_DCM_20s
+df2$AF_DCM_30s <- df2$AC_DCM_30s/df2$AN_DCM_30s
+df2$AF_DCM_40s <- df2$AC_DCM_40s/df2$AN_DCM_40s
+df2$AF_DCM_50s <- df2$AC_DCM_50s/df2$AN_DCM_50s
+df2$AF_DCM_60s <- df2$AC_DCM_60s/df2$AN_DCM_60s
+df2$AF_DCM_70s <- df2$AC_DCM_70s/df2$AN_DCM_70s
+df2$AF_DCM_80s <- df2$AC_DCM_80s/df2$AN_DCM_80s
+
+df2$popmaxage <- ""
+
+for(i in (1:nrow(df2))){
+   if((df2$AF_DCM_0s[i] < df2$AF_DCM_80s[i]) & df2$AC_DCM_0s[i] > 1) {
+    df2$popmaxage[i] <- "0s"
+   }
+  else if((df2$AF_DCM_10s[i] < df2$AF_DCM_80s[i]) & df2$AC_DCM_10s[i] > 1) {
+    df2$popmaxage[i] <- "10s"
+  }
+  else if((df2$AF_DCM_20s[i] < df2$AF_DCM_80s[i]) & df2$AC_DCM_20s[i] > 1) {
+    df2$popmaxage[i] <- "20s"
+  }
+  else if((df2$AF_DCM_30s[i] < df2$AF_DCM_80s[i]) & df2$AC_DCM_30s[i] > 1) {
+    df2$popmaxage[i] <- "30s"
+   }
+   else if((df2$AF_DCM_40s[i] < df2$AF_DCM_80s[i]) & df2$AC_DCM_40s[i] > 1) {
+    df2$popmaxage[i] <- "40s"
+   }
+    else if((df2$AF_DCM_50s[i] < df2$AF_DCM_80s[i]) & df2$AC_DCM_50s[i] > 1) {
+    df2$popmaxage[i] <- "50s"
+    }
+   else if((df2$AF_DCM_60s[i] < df2$AF_DCM_80s[i]) & df2$AC_DCM_60s[i] > 1) {
+    df2$popmaxage[i] <- "60s"
+   }
+  else if((df2$AF_DCM_70s[i] < df2$AF_DCM_80s[i]) & df2$AC_DCM_70s[i] > 1) {
+    df2$popmaxage[i] <- "70s"
+    }
+  else if(df2$AC_DCM_80s[i] > 1) {
+    df2$popmaxage[i] <- "80s"
+  }
+}
+
+df2$popmaxage[df2$popmaxage == ""] <- "ALL"
+table(df2$popmaxage)
+# 60s 80s ALL 
+#   2  24  33  
+```
+
+# sex
+
+```{r}
+##HCM
+df2 <- read.table("HCM_penetrance.txt", header=T, sep="\t")
+names(df2)
+
+df2$AF_HCM_male <- df2$AC_HCM_male/df2$AN_HCM_male
+df2$AF_HCM_female <- df2$AC_HCM_female/df2$AN_HCM_female
+
+df2$popmaxsex <- ""
+
+for(i in (1:nrow(df2))){
+   if((df2$AF_HCM_male[i] > df2$AF_HCM_female[i]) & df2$gnukb_AC_male[i] > 1 & df2$AC_HCM_male[i] > 1) {
+    df2$popmaxsex[i] <- "male"
+  }
+   else if((df2$AF_HCM_female[i] > df2$AF_HCM_male[i]) & df2$gnukb_AC_female[i] > 1 & df2$AC_HCM_female[i] > 1) {
+    df2$popmaxsex[i] <- "female"
+   }
+}
+
+df2$popmaxsex[df2$popmaxsex == ""] <- "both"
+table(df2$popmaxsex)
+#  both female   male 
+#   171     38     48 
+
+##DCM
+df2 <- read.table("DCM_penetrance.txt", header=T, sep="\t")
+
+df2$AF_DCM_male <- df2$AC_DCM_male/df2$AN_DCM_male
+df2$AF_DCM_female <- df2$AC_DCM_female/df2$AN_DCM_female
+
+df2$popmaxsex <- ""
+
+for(i in (1:nrow(df2))){
+   if((df2$AF_DCM_male[i] > df2$AF_DCM_female[i]) & df2$gnukb_AC_male[i] > 1 & df2$AC_DCM_male[i] > 1) {
+    df2$popmaxsex[i] <- "male"
+  }
+   else if((df2$AF_DCM_female[i] > df2$AF_DCM_male[i]) & df2$gnukb_AC_female[i] > 1 & df2$AC_DCM_female[i] > 1) {
+    df2$popmaxsex[i] <- "female"
+   }
+}
+
+df2$popmaxsex[df2$popmaxsex == ""] <- "both"
+table(df2$popmaxsex)
+#  both female   male 
+#   39      6     14 
+```
