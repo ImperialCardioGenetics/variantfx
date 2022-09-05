@@ -2,11 +2,11 @@
 
 ```{r}
 #Need to test for samples:
-#HCM_AF
+#HCM_AF ##case cohort
 #min = 0.0001
 #median = 0.0003
 #max = 0.008
-#gnukb_AF
+#gnukb_AF ##pop ref cohort
 #min = 0.000002
 #median = 0.00001
 #max = 0.0009
@@ -53,7 +53,7 @@ return(my_list)
 }
 ```
 
-### gnukb - gnomac = 2
+### Pop simulations
 
 ```{r}
 #HCM_AF = 0.008 + min gnubk = 0.000002
@@ -223,7 +223,7 @@ SoilSciGuylabs <- c("", unique(done2$freq))
 a
 ```
 
-### gnukb testing - HCMAC = 2
+### Case cohort simulations
 
 ```{r}
 rm(done)
@@ -509,7 +509,7 @@ b <- ggplot(data=done3, aes(x=samples, y=diff_slope)) +
   geom_vline(xintercept=0, color="black")+
     geom_hline(yintercept=0, color="black")
 
-########## gnomAD samples
+########## pop samples
 
 c <- ggplot(data=done2, aes(x=gsamples, y=penetrance, col=as.factor(samples))) +
    #     geom_point(position = position_dodge(width = 1), size = 2) +
@@ -784,7 +784,7 @@ b <- ggplot(data=done3, aes(x=samples, y=diff_slope)) +
   geom_vline(xintercept=0, color="black")+
     geom_hline(yintercept=0, color="black")
 
-########## gnomAD samples
+########## pop samples
 
 c <- ggplot(data=done2, aes(x=gsamples, y=penetrance, col=as.factor(samples))) +
    #     geom_point(position = position_dodge(width = 1), size = 2) +
@@ -1021,7 +1021,7 @@ b <- ggplot(data=done3, aes(x=samples, y=diff_slope)) +
   geom_vline(xintercept=0, color="black")+
     geom_hline(yintercept=0, color="black")
 
-########## gnomAD samples
+########## pop samples
 
 c <- ggplot(data=done2, aes(x=gsamples, y=penetrance, col=as.factor(samples))) +
    #     geom_point(position = position_dodge(width = 1), size = 2) +
@@ -1258,7 +1258,7 @@ b <- ggplot(data=done3, aes(x=samples, y=diff_slope)) +
   geom_vline(xintercept=0, color="black")+
     geom_hline(yintercept=0, color="black")
 
-########## gnomAD samples
+########## pop samples
 
 c <- ggplot(data=done2, aes(x=gsamples, y=penetrance, col=as.factor(samples))) +
    #     geom_point(position = position_dodge(width = 1), size = 2) +
