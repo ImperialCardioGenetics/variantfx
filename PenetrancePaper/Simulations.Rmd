@@ -1,3 +1,18 @@
+# set up and packages
+
+```{r library or install.packages}
+#my_packages <- c("data.table", "ggplot2", "dplyr", "plyr") #e.g.
+#not_installed <- my_packages[!(my_packages %in% installed.packages()[ , "Package"])]
+#if(length(not_installed)) install.packages(not_installed)   
+library(data.table)
+library(ggplot2)
+library(dplyr)
+library(plyr)
+library(tidyr)
+library(ggpubr)
+set.seed(28061971)
+```
+
 # testing 
 
 ```{r}
