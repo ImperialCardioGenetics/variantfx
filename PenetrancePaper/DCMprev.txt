@@ -1,0 +1,13 @@
+Reference	Prevalence(%)	DCM(n)	Cohort(n)	colour
+"Haggerty et al. 2019 PMBB"	0.05957819	613	10289	3
+"Haggerty et al. 2019 MyCode"	0.010190039	622	61040	3
+"Torp, 1978"	0.000236	59	250000	3
+"Codd et al. 1989"	0.000365	36.5	100000	1
+"Bagger et al. 1984"	0.000015	41	2798000	1
+"Miura et al. 2002"	0.000140	14	100000	1
+"Lannou et al. 2020"	0.000428	428	1000000	1
+"Williams and Olsen, 1985" 	0.000083	76	913836	1
+"Razali et al. 2018"	0.000505	1	1982	2
+"Rakar et al. 1997"	0.004570	24	5252	3
+"Pirruccello et al. 2020"	0.001082	388	358556	1
+"UK Biobank Imaging data"	0.004538	177	39003	2

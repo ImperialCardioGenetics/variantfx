@@ -1,0 +1,23 @@
+Reference	Prevalence(%)	HCM(n)	Cohort(n)	colour
+"Codd et al. 1989"	0.000197	19.7	100000	1
+"Husser et al. 2018"	0.000728	4000	5490810	1
+"Moon et al. 2020"	0.000314	13035	41498830	1
+"Zou et al. 2004"	0.001609	13	8080	2
+"Bagger et al. 1984"	0.000007	20	2798000	1
+"Maron et al. 2004"	0.002285	8	3501	2
+"Maron et al. 1995"	0.001703	7	4111	2
+"Massera et al. 2019"	0.013475	67	4972	3
+"Magnusson et al. 2017"	0.000404	74	183337	1
+"de Marvao et al. 2021"	0.001935	76	39274	2
+"Maron et al. 1999"	0.002907	44	15137	3
+"Hada et al. 1987"	0.001713	22	12841	3
+"Maro et al. 2006"	0.020060	134	6680	3
+"Miura et al. 2002"	0.000173	17.3	100000	1
+"Corrado et al. 1998"	0.000652	22	33735	3
+"Nistri et al. 2003"	0.000544	19	34910	3
+"Basavarajaiah et al. 2008"	0.000857	3	3500	3
+"Aronow et al. 1988"	0.044855	17	379	3
+"Shapiro et al. 1983"	0.0065	39	6000	3
+"Maron et al. 2016"	0.000349	59009	169089614	1
+"Ng et al. 2011"	0.000054	1	18476	3
+"Lannou et al. 2020"	0.000101	101	1000000	1
