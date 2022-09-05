@@ -1,0 +1,53 @@
+
+# world map of MYBPC3 variant
+
+```{r}
+#https://sarahpenir.github.io/r/making-maps/
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(maps)
+
+options(scipen = 999)
+
+world <- map_data("world")
+head(world)
+
+worldplot <- ggplot() +
+  geom_polygon(data = world, aes(x=long, y = lat, group = group)) + 
+  coord_fixed(1.3)
+
+worldplot
+
+country <- fread("country.txt", header=T)
+country <- data.frame(country)
+colnames(country)[1] <- "region" 
+
+done <- join(world, country, type="left", by="region")
+table(done$fill)
+#    1     2 
+#20605  6743
+
+plain <- theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank(),
+  panel.background = element_rect(fill = "white"),
+  plot.title = element_text(hjust = 0.5)
+)
+
+hmm <- done[!done$region == "Antarctica",]
+
+worldHDI <- ggplot(data = hmm, mapping = aes(x = long, y = lat, group = group)) + 
+  coord_fixed(1.3) +
+  geom_polygon(aes(fill = fill)) +
+  scale_fill_distiller(palette ="RdBu", direction = -1) + # or direction=1
+  ggtitle("MYBPC3 R502W in HCM cases") +
+  plain +
+  theme(legend.position = "none")
+
+worldHDI
+```
