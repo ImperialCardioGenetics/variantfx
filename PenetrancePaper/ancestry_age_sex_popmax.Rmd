@@ -2,8 +2,7 @@
 
 ```{r}
 ##HCM
-df2 <- read.table("HCM_penetrance.txt", header=T, sep="\t")
-names(df2)
+df2 <- read.table("HCM_penetrance.txt", header=T, sep="\t") #variants with penetrance estimated
 
 df2$AF_HCM_AFR <- df2$AC_HCM_AFR/df2$AN_HCM_AFR
 df2$AF_HCM_EUR <- df2$AC_HCM_EUR/df2$AN_HCM_EUR
@@ -67,13 +66,6 @@ table(df2$popmax)
 # age
 
 ```{r}
-# diag_group  age_mean    age_min age_max
-# EGY_DCM 38.925  2   72
-# EGY_HCM 36.84682713347921   0   77
-# RBH_DCM 54.91467576791809   0   90
-# RBH_HCM 54.5    7   89
-# SLD_HCM 56.96078431372549   18  85
-
 ##HCM
 df2 <- read.table("HCM_penetrance.txt", header=T, sep="\t")
 
@@ -126,7 +118,6 @@ table(df2$popmaxage)
 
 #### DCM
 df2 <- read.table("DCM_penetrance.txt", header=T, sep="\t")
-names(df2)
 
 df2$AF_DCM_0s <- df2$AC_DCM_0s/df2$AN_DCM_0s
 df2$AF_DCM_10s <- df2$AC_DCM_10s/df2$AN_DCM_10s
@@ -181,7 +172,6 @@ table(df2$popmaxage)
 ```{r}
 ##HCM
 df2 <- read.table("HCM_penetrance.txt", header=T, sep="\t")
-names(df2)
 
 df2$AF_HCM_male <- df2$AC_HCM_male/df2$AN_HCM_male
 df2$AF_HCM_female <- df2$AC_HCM_female/df2$AN_HCM_female
