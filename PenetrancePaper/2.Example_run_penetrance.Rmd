@@ -252,7 +252,7 @@ colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_80s", "lci_80s", "uci_80s
 write.table(df, "DCM_penetrance.txt", quote=F, row.names=F, sep="\t")
 ```
 
-# plot HCM + DCM individual variants - Figure 4
+# plot HCM + DCM individual variants - Figure
 
 ```{r}
 #All by Penetrance and correlation with classification
