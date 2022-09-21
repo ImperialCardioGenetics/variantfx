@@ -58,6 +58,8 @@ For citations in publications and public presentations, we request that any use 
 
 e.g. Cardiac Variant Interpretation Consortium. (2022). Cardiac VariantFX. [online] Available at: https://github.com/ImperialCardioGenetics/variantfx/ [Accessed date accessed].
 
+and McGurk et al. 2022 medRxiv (final draft).
+
 # FAQ
 
 ## How was the ethnicity of each sample determined?
