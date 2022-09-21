@@ -2239,7 +2239,7 @@ ggplot( aes(x=Curation, y=Penetrance, colour=type, group=type)) +
   ggtitle("DCM")
 ```
 
-# Figure 1
+# Figure
 
 ```{r}
 #library(ggpubr)
