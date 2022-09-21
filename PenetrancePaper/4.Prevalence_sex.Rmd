@@ -1,16 +1,20 @@
 # Sex prevalences
 
 ```{r}
+# hcm df == 
 # ref malecase malepop femalecase femalepop
 # "Zou et al. 2004" 9 4064 4 4016
 # "Maron et al. 2004" 4 1316 4 2185
 # "Maron et al. 1995" 5 1913 2 2198
 # "de Marvao et al. 2021" 58 18820 14 20454
 
-# DCM
+#######
+
+# DCM - only UKB
 # ref malecase malepop femalecase femalepop
 # UKB 117 18687 60 20316
 #=~ 1 in 160 for men and 1 in 340 for women
+
 60/20316 *100 #women
 #0.295%
 binom.test(60,20316)
@@ -20,6 +24,8 @@ binom.test(60,20316)
 #0.626%
 binom.test(117,18687)
 #0.005180719 0.007499021
+
+#######
 
 library(tidyverse)
 library(meta)
