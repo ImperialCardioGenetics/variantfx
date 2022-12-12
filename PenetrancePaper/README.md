@@ -20,9 +20,6 @@ Code for the meta analyses of the estimated prevalence of CMs by sex.
 ### VariantCuration.Rmd
 Code for curating and filtering variants for inclusion in the study.
 
-### Aggregate_penetrance.Rmd
-Code for estimating penetrance by aggregated/subgroups of variants.
-
 ### OR.Rmd
 Code for estimating odds ratio and association of the variants with CM.
 
