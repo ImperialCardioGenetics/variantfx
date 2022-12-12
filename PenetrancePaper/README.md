@@ -3,12 +3,10 @@
 
 ### penetrance.R
 R function for estimating penetrance, 
-where x_D = count of disease prevalence, n_D = number of disease prevalence, x_AgD = AC in patients, n_AgD = AN in patients, x_A = AC in population, n_A = AN in population.
+where x_D = count of disease prevalence, n_D = number of disease prevalence, x_AgD = AC in patients, n_AgD = AN in patients, x_A = AC in population, n_A = AN in population. x_D = 97 and n_D = 52660 for HCM, x_D = 177 and n_D = 39003 for DCM.
 
 Example below (Example_run_penetrance.Rmd) of estimating individual variant penetrance.
-Can also estimate penetrance in aggregate, where sum(AC_ALL_HCM) == x_AgD; max(AN_ALL_HCM) == n_AgD; sum(AC_UKB) == x_A; max(AN_UKB) == n_A.
-
-x_D = 97 and n_D = 52660 for HCM, x_D = 177 and n_D = 39003 for DCM.
+Can also estimate penetrance in aggregate, where sum(AC_ALL_HCM) = x_AgD; max(AN_ALL_HCM) = n_AgD; sum(AC_UKB) = x_A; max(AN_UKB) = n_A.
 
 ### Example_run_penetrance.Rmd
 Example code for how to apply the penetrance function to a dataframe in R.
