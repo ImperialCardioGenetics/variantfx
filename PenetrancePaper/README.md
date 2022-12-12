@@ -19,11 +19,6 @@ Code for the meta analyses of the estimated prevalence of CMs by sex.
 
 ### VariantCuration.Rmd
 Code for curating and filtering variants for inclusion in the study.
-
-### ancestry_age_sex_popmax.Rmd
-Code for flagging the population maximum by ancestry, sex, and age, to decide which is the best penetrance estimate to report.
-* HCM_penetrance.txt used here (df of estimated penetrance for 257 HCM-associated variants).
-* DCM_penetrance.txt used here (df of estimated penetrance for 59 DCM-associated variants).
 	
 ### WorldMap_MYBPC3.Rmd
 Code for creating the world map of MYBPC3:R502W.
