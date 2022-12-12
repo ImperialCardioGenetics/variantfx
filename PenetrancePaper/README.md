@@ -2,7 +2,8 @@
 ## The penetrance of rare variants in cardiomyopathy-associated genes: a cross-sectional approach to estimate penetrance for secondary findings.
 
 ### penetrance.R
-R function for estimating variant penetrance.
+R function for estimating penetrance, where x_
+Example below (Example_run_penetrance.Rmd) of estimating individual variant penetrance or can also estimate penetrance in aggregate where sum(AC_ALL_HCM) == x_AgD; max(AN_ALL_HCM) == n_AgD; sum(AC_UKB) == x_A; max(AN_UKB) == n_A.
 
 ### Example_run_penetrance.Rmd
 Example code for how to apply the penetrance function to a dataframe in R.
