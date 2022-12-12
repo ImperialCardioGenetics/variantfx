@@ -20,9 +20,6 @@ Code for the meta analyses of the estimated prevalence of CMs by sex.
 ### VariantCuration.Rmd
 Code for curating and filtering variants for inclusion in the study.
 
-### OR.Rmd
-Code for estimating odds ratio and association of the variants with CM.
-
 ### ancestry_age_sex_popmax.Rmd
 Code for flagging the population maximum by ancestry, sex, and age, to decide which is the best penetrance estimate to report.
 * HCM_penetrance.txt used here (df of estimated penetrance for 257 HCM-associated variants).
