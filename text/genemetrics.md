@@ -1,4 +1,4 @@
-Gene metrics are calculated using 3 sources of genetic data as previously described ["Reassessment of Mendelian gene pathogenicity using 7,855 cardiomyopathy cases and 60,706 reference samples" (Genet Med. 2016 doi:10.1038/gim.2016.90). (PMID: 27532257)] comparing clinical data from the Oxford Molecular Genetics Laboratory (OMGL) and the Laboratory of Molecular Medicine (LMM)  with population data from the Exome Aggregation Consortium (ExAC, 2016). Equivalent statistics generated with newer reference populations will be available shortly.
+Gene metrics are calculated using multiple sources of data, as described in _The penetrance of rare variants in cardiomyopathy-associated genes: a cross-sectional approach to estimate penetrance for secondary findings_ (McGurk, et al., 2023)[link: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10502871/]. The gene metrics were calculated comparing clinical referral data to UK Biobank data.
 
 
 Case excess
