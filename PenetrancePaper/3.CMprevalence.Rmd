@@ -1,0 +1,342 @@
+# HCM prevalence plot - baseline risk
+
+```{r}
+hcm <- read.table("HCMprev.txt", header=T)
+colnames(hcm) <- c("Reference", "Prevalence", "HCM", "Cohort", "colour")
+pvl <- function(a, b, p=0.5) {binom.test(a, b, 0.5, alternative=
+                            c("two.sided"), conf.level = 0.95)$p.value}
+lci <- function(a, b, p=0.5) {binom.test(a, b, 0.5, alternative=
+                            c("two.sided"), conf.level = 0.95)$conf.int[1]}
+uci <- function(a, b, p=0.5) {binom.test(a, b, 0.5, alternative=
+                            c("two.sided"), conf.level = 0.95)$conf.int[2]}
+#slow
+hcm$p <- mapply(pvl, a=as.integer(hcm$HCM), b=hcm$Cohort)
+hcm$lci <- mapply(lci, a=as.integer(hcm$HCM), b=hcm$Cohort)
+hcm$uci <- mapply(uci, a=as.integer(hcm$HCM), b=hcm$Cohort)
+library(ggplot2)
+library(forcats)
+#binom.test(1, 500, 0.5, alternative="two.sided", conf.level=0.95)
+#hcm$Reference <- as.character(hcm$Reference)
+#hcm[23,] <- c("1 in 500", "0.002", "0", "0", "0", "0", "5.063433e-05", "1.109248e-02")
+hcm$Prevalence <- as.numeric(hcm$Prevalence)
+hcm$Reference <- as.factor(hcm$Reference)
+hcm$uci <- as.numeric(hcm$uci)
+hcm$lci <- as.numeric(hcm$lci)
+library(scales)
+library(dplyr)
+
+a <-hcm %>%
+   mutate(Reference = fct_relevel(Reference, 
+            "Aronow et al. 1988", "Maro et al. 2006", "Massera et al. 2019", 
+            "Shapiro et al. 1983", "Maron et al. 1999", "Hada et al. 1987", 
+            "Basavarajaiah et al. 2008", "Corrado et al. 1998",
+            "Nistri et al. 2003", "Ng et al. 2011",  
+            
+            "Maron et al. 2004", "de Marvao et al. 2021", "Maron et al. 1995", 
+            "Zou et al. 2004", 
+            
+            "Husser et al. 2018", "Magnusson et al. 2017", "Maron et al. 2016", 
+            "Moon et al. 2020", "Codd et al. 1989", "Miura et al. 2002", 
+            "Lannou et al. 2020", "Bagger et al. 1984"             )) %>%
+ggplot( aes(x=Reference,y=Prevalence, colour=as.factor(colour))) +
+        geom_point(position = position_dodge(width = 1)) +
+        geom_errorbar(aes(ymax = uci, ymin = lci), size=1) +
+    coord_flip() +
+        ylab("Prevalence and 95% CI") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text = element_text(size=16), axis.title = element_text(size=16)) +
+        scale_color_manual(values = c("black", "red", "steelblue2"))+
+  annotate("text", x=22, y=0.035, label= "Coding system", size=6) + 
+  annotate("text", x=14, y=0.035, label= "Imaging", size=6, colour="red") +
+  annotate("text", x=10, y=0.035, label= "Selection bias", size=6, colour="steelblue2")
+
+b <- hcm %>%
+   mutate(Reference = fct_relevel(Reference, 
+            "Aronow et al. 1988", "Maro et al. 2006", "Massera et al. 2019", 
+            "Shapiro et al. 1983", "Maron et al. 1999", "Hada et al. 1987", 
+            "Basavarajaiah et al. 2008", "Corrado et al. 1998",
+            "Nistri et al. 2003", "Ng et al. 2011",  
+            
+            "Maron et al. 2004", "de Marvao et al. 2021", "Maron et al. 1995", 
+            "Zou et al. 2004", 
+            
+            "Husser et al. 2018", "Magnusson et al. 2017", "Maron et al. 2016", 
+            "Moon et al. 2020", "Codd et al. 1989", "Miura et al. 2002", 
+            "Lannou et al. 2020", "Bagger et al. 1984"             )) %>%
+ggplot( aes(x=Reference,y=Prevalence, colour=as.factor(colour))) +
+        geom_point(position = position_dodge(width = 1)) +
+        geom_errorbar(aes(ymax = uci, ymin = lci), size=1) +
+    coord_flip() +
+        ylab("Prevalence and 95% CI") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text.x = element_text(size=16), axis.title.y = element_text(size=16), axis.title.x = element_blank(), axis.text.y=element_blank()) +
+    scale_y_continuous(breaks=c(0, 0.003), limits=c(0,0.005)) +
+  xlab("zoom") +
+        scale_color_manual(values = c("black", "red", "steelblue2")) #+
+ # annotate("text", x=22, y=0.005, label= "Coding system", size=6) + 
+#  annotate("text", x=14, y=0.005, label= "Imaging", size=6, colour="red") +
+#  annotate("text", x=10, y=0.005, label= "Selection Bias", size=6, colour="steelblue2")     
+
+library(ggpubr)
+ggarrange(a, b, ncol = 2, nrow = 1, widths=c(0.4,0.1), align='h')
+```
+
+### HCM meta analysis - baseline risk
+
+```{r}
+library(tidyverse)
+library(meta)
+library(metafor)
+
+#https://rpubs.com/pekong/532068
+#https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/metareg.html#metareg-R
+#https://www.rdocumentation.org/packages/meta/versions/4.18-2/topics/forest.meta
+
+hcm <- read.table("HCMprev.txt", header=T)
+colnames(hcm) <- c("Reference", "Prevalence", "HCM", "Cohort", "Confidence_Groups")
+
+meta <- metaprop(as.integer(HCM), Cohort, studlab=Reference, sm="PFT", data=hcm, method="Inverse", method.tau="DL")
+summary(meta)
+# Number of studies combined: k = 22
+# 
+#                      proportion           95%-CI
+# Fixed effect model       0.0002 [0.0002; 0.0003]
+# Random effects model     0.0007 [0.0006; 0.0009]
+# 
+# Quantifying heterogeneity:
+#  tau^2 < 0.0001 [0.0001; 0.0011]; tau = 0.0042 [0.0078; 0.0329];
+#  I^2 = 99.6% [99.6%; 99.7%]; H = 16.66 [15.78; 17.59]
+# 
+# Test of heterogeneity:
+#        Q d.f. p-value
+#  5828.02   21       0
+# 
+# Details on meta-analytical method:
+# - Inverse variance method
+# - DerSimonian-Laird estimator for tau^2
+# - Jackson method for confidence interval of tau^2 and tau
+# - Freeman-Tukey double arcsine transformation
+
+forest.meta(meta, layout="RevMan5", xlab="Proportion", comb.r=T, comb.f=F, xlim = c(0,0.08), fontsize=10, digits=6, col.square=hcm$Confidence_Groups, col.square.lines=hcm$Confidence_Groups, col.inside="black")
+
+forest.meta(meta, layout="RevMan5", xlab="Proportion", comb.r=T, comb.f=F, xlim = c(0,0.005), fontsize=10, digits=6, col.square=hcm$Confidence_Groups, col.square.lines=hcm$Confidence_Groups, col.inside="black")
+
+meta2 <- metareg(meta, ~ Confidence_Groups)
+meta2
+# Mixed-Effects Model (k = 22; tau^2 estimator: DL)
+# 
+# tau^2 (estimated amount of residual heterogeneity):     0.0000 (SE = 0.0000)
+# tau (square root of estimated tau^2 value):             0.0042
+# I^2 (residual heterogeneity / unaccounted variability): 99.65%
+# H^2 (unaccounted variability / sampling variability):   287.85
+# R^2 (amount of heterogeneity accounted for):            1.13%
+# 
+# Test for Residual Heterogeneity:
+# QE(df = 20) = 5756.9047, p-val < .0001
+# 
+# Test of Moderators (coefficient 2):
+# QM(df = 1) = 47.7316, p-val < .0001
+# 
+# Model Results:
+# 
+#                    estimate      se    zval    pval   ci.lb   ci.ub 
+# intrcpt              0.0093  0.0031  3.0414  0.0024  0.0033  0.0153   ** 
+# Confidence_Groups    0.0082  0.0012  6.9088  <.0001  0.0059  0.0105  *** 
+# 
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+bubble(meta2, studlab = TRUE)
+
+###just group 2
+hcm2 <- hcm[which(hcm$Confidence_Groups == "2"),]
+
+meta <- metaprop(as.integer(HCM), Cohort, studlab=Reference, sm="PFT", data=hcm2, method="Inverse", method.tau="DL")
+summary(meta)
+# Number of studies combined: k = 4
+# 
+#                      proportion           95%-CI
+# Fixed effect model       0.0018 [0.0015; 0.0022]
+# Random effects model     0.0018 [0.0015; 0.0022]
+# 
+# Quantifying heterogeneity:
+#  tau^2 = 0 [0.0000; 0.0001]; tau = 0 [0.0000; 0.0090];
+#  I^2 = 0.0% [0.0%; 37.2%]; H = 1.00 [1.00; 1.26]
+# 
+# Test of heterogeneity:
+#     Q d.f. p-value
+#  0.73    3  0.8657
+# 
+# Details on meta-analytical method:
+# - Inverse variance method
+# - DerSimonian-Laird estimator for tau^2
+# - Jackson method for confidence interval of tau^2 and tau
+# - Freeman-Tukey double arcsine transformation
+
+forest.meta(meta, layout="meta", xlab="Proportion", comb.r=T, comb.f=F, xlim = c(0,0.005), fontsize=10, digits=6, col.square="black", col.square.lines="black", col.inside="black")
+```
+
+### DCM prevalence plot - baseline risk
+
+```{r}
+dcm <- read.table("DCMprev.txt", header=T)
+colnames(dcm) <- c("Reference", "Prevalence", "DCM", "Cohort", "colour")
+pvl <- function(a, b, p=0.5) {binom.test(a, b, 0.5, alternative=
+                            c("two.sided"), conf.level = 0.95)$p.value}
+lci <- function(a, b, p=0.5) {binom.test(a, b, 0.5, alternative=
+                            c("two.sided"), conf.level = 0.95)$conf.int[1]}
+uci <- function(a, b, p=0.5) {binom.test(a, b, 0.5, alternative=
+                            c("two.sided"), conf.level = 0.95)$conf.int[2]}
+dcm$p <- mapply(pvl, a=as.integer(dcm$DCM), b=dcm$Cohort)
+dcm$lci <- mapply(lci, a=as.integer(dcm$DCM), b=dcm$Cohort)
+dcm$uci <- mapply(uci, a=as.integer(dcm$DCM), b=dcm$Cohort)
+library(ggplot2)
+library(forcats)
+#binom.test(1, 250, 0.5, alternative="two.sided", conf.level=0.95)
+#dcm$Reference <- as.character(dcm$Reference)
+#dcm[13,] <- c("1 in 250", 0.004, 0, 0, 0, 0, 0.0001012661, 0.0220838650)
+dcm$Prevalence <- as.numeric(dcm$Prevalence)
+dcm$Reference <- as.factor(dcm$Reference)
+dcm$uci <- as.numeric(dcm$uci)
+dcm$lci <- as.numeric(dcm$lci)
+library(scales)
+library(dplyr)
+
+a <-dcm %>%
+   mutate(Reference = fct_relevel(Reference, 
+            "Haggerty et al. 2019 PMBB", "Haggerty et al. 2019 MyCode", "Rakar et al. 1997", "Torp, 1978", 
+            "UK Biobank Imaging data", "Razali et al. 2018", "Pirruccello et al. 2020", 
+            "Lannou et al. 2020", "Codd et al. 1989",
+            "Miura et al. 2002",  
+            
+            "Williams and Olsen, 1985", "Bagger et al. 1984"          )) %>%
+ggplot( aes(x=Reference,y=Prevalence, colour=as.factor(colour))) +
+        geom_point(position = position_dodge(width = 1)) +
+        geom_errorbar(aes(ymax = uci, ymin = lci), size=1) +
+    coord_flip() +
+        ylab("Prevalence and 95% CI") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text = element_text(size=16), axis.title = element_text(size=16)) +
+        scale_color_manual(values = c("black", "red", "steelblue2"))+
+  annotate("text", x=12, y=0.035, label= "Coding system", size=6) + 
+  annotate("text", x=6, y=0.035, label= "Imaging", size=6, colour="red") +
+  annotate("text", x=4, y=0.035, label= "Selection bias", size=6, colour="steelblue2")
+
+b <- dcm %>%
+   mutate(Reference = fct_relevel(Reference, 
+            "Haggerty et al. 2019 PMBB", "Haggerty et al. 2019 MyCode", "Rakar et al. 1997", "Torp, 1978", 
+            "UK Biobank Imaging data", "Razali et al. 2018", "Pirruccello et al. 2020", 
+            "Lannou et al. 2020", "Codd et al. 1989",
+            "Miura et al. 2002",  
+            
+            "Williams and Olsen, 1985", "Bagger et al. 1984"          )) %>%
+ggplot( aes(x=Reference,y=Prevalence, colour=as.factor(colour))) +
+        geom_point(position = position_dodge(width = 1)) +
+        geom_errorbar(aes(ymax = uci, ymin = lci), size=1) +
+    coord_flip() +
+        ylab("Prevalence and 95% CI") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text.x = element_text(size=16), axis.title.y = element_text(size=16), axis.title.x = element_blank(), axis.text.y=element_blank()) +
+    scale_y_continuous(breaks=c(0, 0.005), limits=c(0,0.008)) +
+  xlab("zoom") +
+        scale_color_manual(values = c("black", "red", "steelblue2")) #+
+ # annotate("text", x=22, y=0.005, label= "Coding system", size=6) + 
+#  annotate("text", x=14, y=0.005, label= "Imaging", size=6, colour="red") +
+#  annotate("text", x=10, y=0.005, label= "Selection Bias", size=6, colour="steelblue2")     
+
+library(ggpubr)
+ggarrange(a, b, ncol = 2, nrow = 1, widths=c(0.4,0.1), align='h')
+```
+
+### DCM meta analysis - baseline risk
+
+```{r}
+library(tidyverse)
+library(meta)
+library(metafor)
+
+#https://rpubs.com/pekong/532068
+#https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/metareg.html#metareg-R
+#https://www.rdocumentation.org/packages/meta/versions/4.18-2/topics/forest.meta
+
+dcm <- read.table("DCMprev.txt", header=T)
+colnames(dcm) <- c("Reference", "Prevalence", "dcm", "Cohort", "Confidence_Groups")
+
+meta <- metaprop(as.integer(dcm), Cohort, studlab=Reference, sm="PFT", data=dcm, method="Inverse", method.tau="DL")
+summary(meta)
+# Number of studies combined: k = 12
+# 
+#                      proportion           95%-CI
+# Fixed effect model       0.0001 [0.0001; 0.0001]
+# Random effects model     0.0026 [0.0015; 0.0040]
+# 
+# Quantifying heterogeneity:
+#  tau^2 = 0.0004 [0.0006; 0.0060]; tau = 0.0204 [0.0243; 0.0776];
+#  I^2 = 99.8% [99.8%; 99.8%]; H = 24.28 [22.93; 25.71]
+# 
+# Test of heterogeneity:
+#        Q d.f. p-value
+#  6486.98   11       0
+# 
+# Details on meta-analytical method:
+# - Inverse variance method
+# - DerSimonian-Laird estimator for tau^2
+# - Jackson method for confidence interval of tau^2 and tau
+# - Freeman-Tukey double arcsine transformation
+
+forest.meta(meta, layout="RevMan5", xlab="Proportion", comb.r=T, comb.f=F, xlim = c(0,0.08), fontsize=10, digits=6, col.square=dcm$Confidence_Groups, col.square.lines=dcm$Confidence_Groups, col.inside="black")
+
+forest.meta(meta, layout="RevMan5", xlab="Proportion", comb.r=T, comb.f=F, xlim = c(0,0.005), fontsize=10, digits=6, col.square=dcm$Confidence_Groups, col.square.lines=dcm$Confidence_Groups, col.inside="black")
+
+meta2 <- metareg(meta, ~ Confidence_Groups)
+meta2
+# Mixed-Effects Model (k = 12; tau^2 estimator: DL)
+# 
+# tau^2 (estimated amount of residual heterogeneity):     0.0003 (SE = 0.0003)
+# tau (square root of estimated tau^2 value):             0.0185
+# I^2 (residual heterogeneity / unaccounted variability): 99.81%
+# H^2 (unaccounted variability / sampling variability):   528.40
+# R^2 (amount of heterogeneity accounted for):            17.52%
+# 
+# Test for Residual Heterogeneity:
+# QE(df = 10) = 5284.0077, p-val < .0001
+# 
+# Test of Moderators (coefficient 2):
+# QM(df = 1) = 40.7404, p-val < .0001
+# 
+# Model Results:
+# 
+#                    estimate      se     zval    pval    ci.lb    ci.ub 
+# intrcpt             -0.0667  0.0193  -3.4611  0.0005  -0.1045  -0.0289  *** 
+# Confidence_Groups    0.0563  0.0088   6.3828  <.0001   0.0390   0.0736  *** 
+# 
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1   
+
+bubble(meta2, studlab = TRUE)
+
+###just group 2
+dcm2 <- dcm[which(dcm$Confidence_Groups == "1"),]
+
+meta <- metaprop(as.integer(dcm), Cohort, studlab=Reference, sm="PFT", data=dcm2, method="Inverse", method.tau="DL")
+summary(meta)
+# Number of studies combined: k = 2
+# 
+#                      proportion           95%-CI
+# Fixed effect model       0.0042 [0.0036; 0.0048]
+# Random effects model     0.0022 [0.0000; 0.0076]
+# 
+# Quantifying heterogeneity:
+#  tau^2 = 0.0007; tau = 0.0274; I^2 = 91.9% [71.9%; 97.7%]; H = 3.51 [1.89; 6.53]
+# 
+# Test of heterogeneity:
+#      Q d.f. p-value
+#  12.32    1  0.0004
+# 
+# Details on meta-analytical method:
+# - Inverse variance method
+# - DerSimonian-Laird estimator for tau^2
+# - Freeman-Tukey double arcsine transformation
+
+forest.meta(meta, layout="RevMan5", xlab="Proportion", comb.r=T, comb.f=F, xlim = c(0,0.005), fontsize=10, digits=6, col.square="black", col.square.lines="black", col.inside="black")
+```

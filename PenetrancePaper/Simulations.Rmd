@@ -1,0 +1,1603 @@
+# set up and packages
+
+```{r library or install.packages}
+#my_packages <- c("data.table", "ggplot2", "dplyr", "plyr") #e.g.
+#not_installed <- my_packages[!(my_packages %in% installed.packages()[ , "Package"])]
+#if(length(not_installed)) install.packages(not_installed)   
+library(data.table)
+library(ggplot2)
+library(dplyr)
+library(plyr)
+library(tidyr)
+library(ggpubr)
+set.seed(28061971)
+```
+
+# testing 
+
+```{r}
+#Need to test for samples:
+#HCM_AF ##case cohort
+#min = 0.0001
+#median = 0.0003
+#max = 0.008
+#gnukb_AF ##pop ref cohort
+#min = 0.000002
+#median = 0.00001
+#max = 0.0009
+
+#HCM_AF <- c(0.00005, 0.0001, 0.0002, 0.0004, 0.0005, 0.001, 0.002, 0.004, 0.008)
+#HCM_AC <- c(1, 2, 4, 8, 10, 20, 40, 80, 160) in 20,000 AN = 10,000 samples
+#hcman <- c(150,250,500,1000,2000,4000,6000,8000,10000,20000,40000,60000,80000,100000)
+#75 - 50,000 samples
+
+#gnukb_AF <- c(0.000002, 0.000003, 0.000007, 0.00001, 0.00002, 0.00008, 0.0002, 0.0004, 0.0009)
+#gnukb_AC <- c(1, 2, 4, 8, 10, 50, 100, 250, 550) in 600,000 AN = 300,000 samples
+#gnukb_AN <- c(100000, 200000, 400000, 600000, 800000, 1000000, 1200000, 1400000, 1600000, 1800000, 2000000)
+#50,000 to 1,000,000 samples
+```
+
+### testing function
+
+```{r}
+#no truncation
+penetrance <- function(x_D, n_D, x_AgD, n_AgD, x_A, n_A){
+set.seed(28061971)
+digits <- 6   
+alpha <- 0.05  
+p_D <- x_D / n_D
+p_AgD <- x_AgD / n_AgD
+p_A <- x_A / n_A
+d <- 0.5   
+p_D_wod <- (x_D + d) / (n_D + d)
+p_AgD_wod <- (x_AgD + d) / (n_AgD + d)
+p_A_wod <- (x_A + d) / (n_A + d)
+log_AR <- log(p_D_wod * p_AgD_wod / p_A_wod) + 1 /2 * ((1 / p_A_wod) * (1 - p_A_wod) / (n_A + d) - 
+                                                       (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) - 
+                                                       (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d))
+Var_log_AR <- (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) + 
+              (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d) + 
+              (1 / p_A_wod) * (1 - p_A_wod) / (n_A + d)
+log_LCI <- log_AR - qnorm(1 - alpha / 2) * sqrt(Var_log_AR)
+log_UCI <- log_AR + qnorm(1 - alpha / 2) * sqrt(Var_log_AR)
+penetrance <- exp(log_AR) #diff
+log_lCI <- exp(log_LCI) #diff
+log_uCI <- exp(log_UCI) #diff
+my_list <- list("penetrance" = penetrance, "lci" = log_lCI, "uci" = log_uCI)
+return(my_list)
+}
+```
+
+### Pop simulations
+
+```{r}
+#HCM_AF = 0.008 + min gnubk = 0.000002
+h_af <- c(0.00005, 0.0001, 0.0002, 0.0004, 0.0005, 0.001, 0.002, 0.004, 0.008)
+hcman <- c(100,500,1000,5000,10000,50000,100000,150000,200000)
+#75 - 50,000 samples
+done <- as.integer(unlist(lapply(1:length(h_af), function(x) lapply(1:length(hcman), function(y) as.matrix(h_af[[x]]) %*%  hcman[[y]]))))
+done <- data.frame(done)
+done$done <- as.integer(done$done)
+done$an <- hcman
+dim(done)
+# 81
+colnames(done) <- c("h_ac", "h_an")
+
+done$group <- rep(c(1,2,3,4,5,6,7,8,9), each = 9)
+done$samples <- done$h_an/2
+done$num <- as.numeric(row.names(done))
+done$group <- as.factor(done$group)
+done$freq <- done$h_ac/done$h_an
+done2 <- done[which(
+  (done$freq == 0.00005 & done$group == "1") |
+  (done$freq == 0.0001 & done$group == "2") |
+  (done$freq == 0.0002 & done$group == "3") |
+  (done$freq == 0.0004 & done$group == "4") |
+  (done$freq == 0.0005 & done$group == "5") |
+  (done$freq == 0.001 & done$group == "6") |
+  (done$freq == 0.002 & done$group == "7") |
+  (done$freq == 0.004 & done$group == "8") |
+  (done$freq == 0.008 & done$group == "9")
+  ),]
+dim(done2)
+#55  
+
+gnoman <- 600000
+gnomac <- 2
+
+#format( 9.19143e-06, scientific = FALSE)
+#AF = 0.00000919143
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac, n_AgD=done2$h_an, x_A=gnomac, n_A=gnoman)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+library(ggrepel)
+library(ggpubr)
+
+done2$samples <- as.factor(done2$samples)
+axis <- unique(done2$freq)
+
+a <- ggplot(data=done2, aes(x=num, y=uci, colour=(samples))) +
+         geom_line(aes(x = num, y = lci, color=(samples), group=freq), size = 0.5) + 
+         geom_line(aes(x = num, y = uci, color=(samples), group=freq), size = 0.5) + 
+         geom_point(aes(x = num, y = lci, color=(samples), group=freq), size = 3) + 
+         geom_point(aes(x = num, y = uci, color=(samples), group=freq), size = 3) + 
+         geom_point(aes(x = num, y = penetrance, group=freq), size = 2, color="black") +
+         ggtitle("Population frequency of 2/600,000") +
+        ylab("Penetrance") +
+        theme_minimal() +
+          geom_hline(yintercept=1, color ="black", size=0.5, linetype="dashed") +
+   theme(legend.position="top", axis.text = element_text(size=14), axis.title = element_text(size=16), legend.title = element_text(size=16), legend.text = element_text(size=14),
+         title = element_text(size=16),
+          panel.grid.minor.y = element_line( size = 0.4),
+                   panel.grid.minor.x = element_blank(),
+          panel.grid.major.y = element_line( size = 0.4))  +
+          scale_x_continuous(breaks = seq(1, 82, 9), labels=SoilSciGuylabs)+labs(colour="Samples")+
+          xlab("Variant frequency in cases")
+
+b <- ggplot(data=done2, aes(x=num, y=uci, colour=(samples))) +
+         geom_line(aes(x = num, y = lci, color=(samples), group=freq), size = 0.5) + 
+         geom_line(aes(x = num, y = uci, color=(samples), group=freq), size = 0.5) + 
+         geom_point(aes(x = num, y = lci, color=(samples), group=freq), size = 3) + 
+         geom_point(aes(x = num, y = uci, color=(samples), group=freq), size = 3) + 
+         geom_point(aes(x = num, y = penetrance, group=freq), size = 2, color="black") +
+        ylab("Penetrance") +
+        xlab("Variant frequency in cases")+
+        theme_minimal() +
+          geom_hline(yintercept=1, color ="black", size=0.5, linetype="dashed") +
+         theme(legend.position="top", axis.text = element_text(size=14), axis.title = element_text(size=16), legend.title = element_text(size=16), legend.text = element_text(size=14),
+         title = element_text(size=16),
+          panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.minor.x = element_blank(),
+          panel.grid.major.y = element_line( size = 0.4))  +
+          scale_x_continuous(breaks = seq(1, 82, 9), labels=SoilSciGuylabs)+labs(colour="Samples")+
+  ylim(0,1)
+
+#library(ggpubr)
+ggarrange(a+rremove("x.text")+rremove("x.title"), b, ncol = 1, nrow = 2, widths=c(0.1,0.1), align='v', common.legend=TRUE)
+
+#### 4
+
+gnomac <- 4
+
+#format( 9.19143e-06, scientific = FALSE)
+#AF = 0.00000919143
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac, n_AgD=done2$h_an, x_A=gnomac, n_A=gnoman)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+#use same ggplot code but change title in a
+
+#### 8
+
+gnomac <- 8
+
+#format( 9.19143e-06, scientific = FALSE)
+#AF = 0.00000919143
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac, n_AgD=done2$h_an, x_A=gnomac, n_A=gnoman)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+#### 10
+
+gnomac <- 10
+
+#format( 9.19143e-06, scientific = FALSE)
+#AF = 0.00000919143
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac, n_AgD=done2$h_an, x_A=gnomac, n_A=gnoman)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+#### 50
+
+gnomac <- 50
+
+#format( 9.19143e-06, scientific = FALSE)
+#AF = 0.00000919143
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac, n_AgD=done2$h_an, x_A=gnomac, n_A=gnoman)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+#ylim is 0-1
+a
+
+#### 100
+
+gnomac <- 100
+
+#format( 9.19143e-06, scientific = FALSE)
+#AF = 0.00000919143
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac, n_AgD=done2$h_an, x_A=gnomac, n_A=gnoman)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+a
+
+#### 250
+
+gnomac <- 250
+
+#format( 9.19143e-06, scientific = FALSE)
+#AF = 0.00000919143
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac, n_AgD=done2$h_an, x_A=gnomac, n_A=gnoman)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+a
+
+#### 550
+
+gnomac <- 550
+
+#format( 9.19143e-06, scientific = FALSE)
+#AF = 0.00000919143
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac, n_AgD=done2$h_an, x_A=gnomac, n_A=gnoman)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+a
+```
+
+### Case cohort simulations
+
+```{r}
+rm(done)
+rm(done2)
+gnukb_AF <- c(0.000002, 0.000003, 0.000007, 0.00001, 0.00002, 0.00008, 0.0002, 0.0004, 0.0009)
+gnukb_AN <- c(50000, 100000, 500000, 1000000, 5000000, 10000000)
+#50,000 to 1,000,000 samples
+done <- as.integer(unlist(lapply(1:length(gnukb_AF), function(x) lapply(1:length(gnukb_AN), function(y) as.matrix(gnukb_AF[[x]]) %*%  gnukb_AN[[y]]))))
+done <- data.frame(done)
+done$done <- as.integer(done$done)
+done$an <- gnukb_AN
+dim(done)
+# 54
+colnames(done) <- c("gnukb_AC", "gnukb_AN")
+
+done$group <- rep(c(1,2,3,4,5,6,7,8,9), each = 6)
+done$samples <- done$gnukb_AN/2
+done$num <- as.numeric(row.names(done))
+done$group <- as.factor(done$group)
+done$freq <- done$gnukb_AC/done$gnukb_AN
+done2 <- done[which(
+  (done$freq == 0.000002 & done$group == "1") |
+  (done$freq == 0.000003 & done$group == "2") |
+  (done$freq == 0.000007 & done$group == "3") |
+  (done$freq == 0.00001 & done$group == "4") |
+  (done$freq == 0.00002 & done$group == "5") |
+  (done$freq == 0.00008 & done$group == "6") |
+  (done$freq == 0.0002 & done$group == "7") |
+  (done$freq == 0.0004 & done$group == "8") |
+  (done$freq == 0.0009 & done$group == "9")
+  ),]
+dim(done2)
+#45 
+
+hcman <- 20000
+hcmac <- 2
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=hcmac, n_AgD=hcman, x_A=done2$gnukb_AC, n_A=done2$gnukb_AN)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+done2$samples <- as.factor(done2$samples)
+axis <- unique(done2$freq)
+
+ggplot(data=done2, aes(x=num, y=uci, colour=(samples))) +
+         geom_line(aes(x = num, y = lci, color=(samples), group=freq), size = 0.5) + 
+         geom_line(aes(x = num, y = uci, color=(samples), group=freq), size = 0.5) + 
+         geom_point(aes(x = num, y = lci, color=(samples), group=freq), size = 3) + 
+         geom_point(aes(x = num, y = uci, color=(samples), group=freq), size = 3) + 
+         geom_point(aes(x = num, y = penetrance, group=freq), size = 2, color="black") +
+         ggtitle("Case frequency of 2/20,000") +
+        ylab("Penetrance") +
+        theme_minimal() +
+          geom_hline(yintercept=1, color ="black", size=0.5, linetype="dashed") +
+   theme(legend.position="top", axis.text = element_text(size=14), axis.title = element_text(size=16), legend.title = element_text(size=16), legend.text = element_text(size=14),
+         title = element_text(size=16),
+          panel.grid.minor.y = element_line( size = 0.4),
+                   panel.grid.minor.x = element_blank(),
+          panel.grid.major.y = element_line( size = 0.4))  +
+          scale_x_continuous(breaks = seq(1, 55, 6), labels=SoilSciGuylabs)+labs(colour="Population")+
+          xlab("Variant frequency in the population")
+
+#### 4
+
+hcmac <- 4
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=hcmac, n_AgD=hcman, x_A=done2$gnukb_AC, n_A=done2$gnukb_AN)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+#### 8
+
+hcmac <- 8
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=hcmac, n_AgD=hcman, x_A=done2$gnukb_AC, n_A=done2$gnukb_AN)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+a <- ggplot(data=done2, aes(x=num, y=uci, colour=(samples))) +
+         geom_line(aes(x = num, y = lci, color=(samples), group=freq), size = 0.5) + 
+         geom_line(aes(x = num, y = uci, color=(samples), group=freq), size = 0.5) + 
+         geom_point(aes(x = num, y = lci, color=(samples), group=freq), size = 3) + 
+         geom_point(aes(x = num, y = uci, color=(samples), group=freq), size = 3) + 
+         geom_point(aes(x = num, y = penetrance, group=freq), size = 2, color="black") +
+         ggtitle("Case frequency of 8/20,000") +
+        ylab("Penetrance") +
+        theme_minimal() +
+          geom_hline(yintercept=1, color ="black", size=0.5, linetype="dashed") +
+   theme(legend.position="top", axis.text = element_text(size=14), axis.title = element_text(size=16), legend.title = element_text(size=16), legend.text = element_text(size=14),
+         title = element_text(size=16),
+          panel.grid.minor.y = element_line( size = 0.4),
+                   panel.grid.minor.x = element_blank(),
+          panel.grid.major.y = element_line( size = 0.4))  +
+          scale_x_continuous(breaks = seq(1, 55, 6), labels=SoilSciGuylabs)+labs(colour="Population")+
+          xlab("Variant frequency in the population")
+
+b <- ggplot(data=done2, aes(x=num, y=uci, colour=(samples))) +
+         geom_line(aes(x = num, y = lci, color=(samples), group=freq), size = 0.5) + 
+         geom_line(aes(x = num, y = uci, color=(samples), group=freq), size = 0.5) + 
+         geom_point(aes(x = num, y = lci, color=(samples), group=freq), size = 3) + 
+         geom_point(aes(x = num, y = uci, color=(samples), group=freq), size = 3) + 
+         geom_point(aes(x = num, y = penetrance, group=freq), size = 2, color="black") +
+#         ggtitle("Case frequency of 8/20,000") +
+        ylab("Penetrance") +
+        theme_minimal() +
+          geom_hline(yintercept=1, color ="black", size=0.5, linetype="dashed") +
+   theme(legend.position="top", axis.text = element_text(size=14), axis.title = element_text(size=16), legend.title = element_text(size=16), legend.text = element_text(size=14),
+         title = element_text(size=16),
+          panel.grid.minor.y = element_line( size = 0.4),
+                   panel.grid.minor.x = element_blank(),
+          panel.grid.major.y = element_line( size = 0.4))  +
+          scale_x_continuous(breaks = seq(1, 55, 6), labels=SoilSciGuylabs)+labs(colour="Population")+
+          xlab("Variant frequency in the population")+
+  ylim(0,1)
+
+ggarrange(a+rremove("x.text")+rremove("x.title"), b, ncol = 1, nrow = 2, widths=c(0.1,0.1), align='v', common.legend=TRUE)
+
+#### 10
+
+hcmac <- 10
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=hcmac, n_AgD=hcman, x_A=done2$gnukb_AC, n_A=done2$gnukb_AN)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+#### 20
+
+hcmac <- 20
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=hcmac, n_AgD=hcman, x_A=done2$gnukb_AC, n_A=done2$gnukb_AN)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+#### 40
+
+hcmac <- 40
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=hcmac, n_AgD=hcman, x_A=done2$gnukb_AC, n_A=done2$gnukb_AN)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+#### 80
+
+hcmac <- 80
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=hcmac, n_AgD=hcman, x_A=done2$gnukb_AC, n_A=done2$gnukb_AN)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+#### 160
+
+hcmac <- 160
+
+done2[7:9] <- penetrance(x_D=97, n_D=52660, x_AgD=hcmac, n_AgD=hcman, x_A=done2$gnukb_AC, n_A=done2$gnukb_AN)
+SoilSciGuylabs <- c("", unique(done2$freq))
+```
+
+### Penetrance Systematic Plots - 10% penetrant variant
+
+```{r}
+#the fixed variant is found twice* in 2,500 cases (0.0008) and 4 times in 300k population (0.000013).
+#*changes with penetrance increase
+
+#for ~10% penetrance
+rm(done)
+rm(done2)
+rm(done3)
+options(scipen=999)
+
+h_ac <- c(2, 4, 8, 16, 64, 160)
+h_ac2 <- rep(h_ac, each= 6)
+h_an <- c(2500, 5000, 10000, 20000, 80000, 200000)
+h_an2 <- rep(h_an, each= 6)
+g_ac <- c(2, 4, 8, 16, 40, 1200)
+g_an <- c(150000, 300000, 600000, 1200000, 3e+06, 90000000)
+done <- data.frame(h_ac2)
+done$h_an2 <- h_an2
+done$g_an <- g_an
+done$g_ac <- g_ac
+done$samples <- done$h_an2/2
+done$num <- as.numeric(row.names(done))
+done$freq <- done$h_ac2/done$h_an2
+done$gfreq <- done$g_ac/done$g_an
+done$gsamples <- done$g_an/2
+dim(done)
+#36  
+
+done2 <- done
+dim(done2)
+#36
+done2[10:12] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac2, n_AgD=done2$h_an2, x_A=done2$g_ac, n_A=done2$g_an)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+scaleFUN <- function(x) sprintf("%.f", x)
+
+a <- ggplot(data=done2, aes(x=as.factor(samples), y=penetrance, colour=as.factor(gsamples))) +
+  geom_line(aes(x = samples, y = lci, color=as.factor(gsamples)), size = 0.5) + 
+  geom_point(aes(x = samples, y = lci, color=as.factor(gsamples)), size = 3) +
+  geom_line(aes(x = samples, y = uci, color=as.factor(gsamples)), size = 0.5) + 
+    geom_point(aes(x = samples, y = uci, color=as.factor(gsamples)), size = 3) +
+  geom_line(aes(x = samples, y = penetrance, group=as.factor(gsamples)), size = 0.5, color="black") +
+  labs(col="Population") +
+  geom_vline(xintercept=10000, color="darkgrey")+
+  scale_x_continuous(trans='log', labels=scaleFUN, breaks = c(1250, 10000,100000)) +
+  geom_vline(xintercept=0, color="black") +
+       xlab("Number of cases (log scale)") +
+        ylab("Penetrance") +
+        ggtitle("10% penetrance") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=18), 
+              axis.title = element_text(size=18),
+              plot.title = element_text(size = 18, face = "bold"),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=18),
+          legend.title=element_text(size=18)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3)
+
+#rate of convergence - UCI
+
+attach(done2)
+done3 <- done2[order(gsamples),]
+detach(done2)
+
+done3$interval <- done3$uci - done3$lci
+
+hmm <- done3[which(done3$samples == 1250),]
+
+done3$maxdiff <- rep(hmm$interval, each = 6)
+
+for (i in 1:nrow(done3)) {
+  done3$error_diff[i] <- (abs((done3$interval[i]-done3$maxdiff[i])/done3$maxdiff[i])*100)
+}
+
+a <- ggplot(data=done3, aes(x=samples, y=error_diff)) +
+  geom_line(aes(color=factor(gsamples)), size=0.5) +
+  geom_point(aes(color=as.factor(gsamples)), size=3) +
+       xlab("Number of cases") +
+        ylab("Percentage decrease in CI uncertainty") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=12), 
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  labs(legend="Population") +
+  geom_vline(xintercept=10000, color="darkgrey")+
+  scale_x_continuous(trans='log', breaks = c(0, 1250,10000,100000))+
+  labs(color="Population") +
+  scale_y_continuous(breaks = c(0,20,40,60,80,100,120,140))+
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=100, color="black")+
+    geom_hline(yintercept=0, color="black")+
+  ggtitle("10% penetrance")
+
+#slope of 2 points
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- (abs(done3$error_diff[i+1]-done3$error_diff[i])/
+     (done3$samples[i+1]-done3$samples[i])) 
+} 
+
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- ifelse(done3$gsamples[i+1] != done3$gsamples[i], "0", done3$diff_slope[i])
+}
+
+done3$diff_slope <- as.numeric(done3$diff_slope)
+
+b <- ggplot(data=done3, aes(x=samples, y=diff_slope)) +
+  geom_line(aes(color=factor(gsamples)), size=0.5) +
+  geom_point(aes(color=as.factor(gsamples)), size=3) +
+       xlab("Number of cases") +
+        ylab("Rate of convergence") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  geom_vline(xintercept=10000, color="darkgrey") +
+  scale_x_continuous(trans='log', breaks = c(1250, 10000, 100000))+ labs(col="Population")+
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+########## pop samples
+
+c <- ggplot(data=done2, aes(x=gsamples, y=penetrance, col=as.factor(samples))) +
+   #     geom_point(position = position_dodge(width = 1), size = 2) +
+        xlab("Number of population participants (log scale)")+
+        ylab("Penetrance and 95% CI") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=16), axis.title = element_text(size=16),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=16),
+          axis.text.x = element_text(size=16),
+          legend.text=element_text(size=16),
+          legend.title=element_text(size=16)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3) +
+  geom_line(aes(x = gsamples, y = lci), size = 0.5, color="black", group=done2$gsamples) + 
+  geom_point(aes(x = gsamples, y = lci), size = 2) +
+  geom_line(aes(x = gsamples, y = uci), size = 0.5, color="black", group=done2$gsamples) + 
+    geom_point(aes(x = gsamples, y = uci), size = 2) +
+  geom_line(aes(x = gsamples, y = penetrance), size = 0.5, color="black", group=done2$gsamples) + labs(col="Number of cases")   +
+  geom_vline(xintercept=300000, color="darkgrey") +
+    scale_x_continuous(trans='log', breaks = c(75000, 300000,1500000,45000000))+
+  geom_vline(xintercept=0, color="black")
+
+#rate of convergence
+
+attach(done2)
+done3 <- done2[order(samples),]
+detach(done2)
+
+done3$interval <- done3$uci - done3$lci
+
+hmm <- done3[which(done3$gsamples == 75000),]
+
+done3$maxdiff <- rep(hmm$interval, each = 6)
+
+for (i in 1:nrow(done3)) {
+  done3$error_diff[i] <- (abs((done3$interval[i]-done3$maxdiff[i])/done3$maxdiff[i])*100)
+}
+
+d <- ggplot(data=done3, aes(x=gsamples, y=error_diff)) +
+  geom_line(aes(colour=factor(samples)), size=0.5) +
+  geom_point(aes(color=as.factor(samples)), size=3) +
+       xlab("Number of population participants") +
+        ylab("Percentage decrease in uncertainty") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  labs(legend="Cases") +
+  geom_vline(xintercept=300000, color="darkgrey") +
+    scale_x_continuous(trans='log', breaks = c(75000, 1500000,45000000)) +
+  labs(color="Cases") +
+  scale_y_continuous(breaks = c(0,20,40,60,80,100,120,140))+
+  ylim(0,100) +
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=100, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+#slope of 2 points
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- (abs(done3$error_diff[i+1]-done3$error_diff[i])/
+     (done3$gsamples[i+1]-done3$gsamples[i])) 
+} 
+
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- ifelse(done3$samples[i+1] != done3$samples[i], "0", done3$diff_slope[i])
+}
+
+done3$diff_slope <- as.numeric(done3$diff_slope)
+
+e <- ggplot(data=done3, aes(x=gsamples, y=diff_slope)) +
+  geom_line(aes(color=factor(samples)), size=0.5) +
+  geom_point(aes(color=as.factor(samples)), size=3) +
+       xlab("Number of population participants") +
+        ylab("Rate of convergence") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  geom_vline(xintercept=300000, color="darkgrey") +
+      scale_x_continuous(trans='log', breaks = c(75000, 1500000,45000000)) +
+ labs(col="Cases") +
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+#####
+ggarrange(a , b , d, e, ncol = 2, nrow = 2, align = "v")
+```
+
+### Penetrance Systematic Plots - 20% penetrant variant - Figure 8
+
+```{r}
+#the fixed variant is found twice* in 2,500 cases (0.0008) and 4 times in 300k population (0.000013).
+#*changes with penetrance increase
+
+#for ~20% penetrance
+rm(done)
+rm(done2)
+rm(done3)
+options(scipen=999)
+
+h_ac <- c(2*2, 4*2, 8*2, 16*2, 64*2, 160*2)
+h_ac2 <- rep(h_ac, each= 6)
+h_an <- c(2500, 5000, 10000, 20000, 80000, 200000)
+h_an2 <- rep(h_an, each= 6)
+g_ac <- c(2, 4, 8, 16, 40, 1200)
+g_an <- c(150000, 300000, 600000, 1200000, 3e+06, 90000000)
+done <- data.frame(h_ac2)
+done$h_an2 <- h_an2
+done$g_an <- g_an
+done$g_ac <- g_ac
+done$samples <- done$h_an2/2
+done$num <- as.numeric(row.names(done))
+done$freq <- done$h_ac2/done$h_an2
+done$gfreq <- done$g_ac/done$g_an
+done$gsamples <- done$g_an/2
+dim(done)
+#36  
+
+done2 <- done
+dim(done2)
+#36
+done2[10:12] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac2, n_AgD=done2$h_an2, x_A=done2$g_ac, n_A=done2$g_an)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+g1 <- done2[which(done2$samples == "10000" & done2$gsamples == "300000"),]
+
+scaleFUN <- function(x) sprintf("%.f", x)
+
+b <-  ggplot(data=done2, aes(x=as.factor(samples), y=penetrance, colour=as.factor(gsamples))) +
+  geom_line(aes(x = samples, y = lci, color=as.factor(gsamples)), size = 0.5) + 
+  geom_point(aes(x = samples, y = lci, color=as.factor(gsamples)), size = 3) +
+  geom_line(aes(x = samples, y = uci, color=as.factor(gsamples)), size = 0.5) + 
+    geom_point(aes(x = samples, y = uci, color=as.factor(gsamples)), size = 3) +
+  geom_line(aes(x = samples, y = penetrance, group=as.factor(gsamples)), size = 0.5, color="black") +
+  labs(col="Population") +
+  geom_vline(xintercept=10000, color="darkgrey")+
+  scale_x_continuous(trans='log', labels=scaleFUN, breaks = c(1250, 10000,100000)) +
+  geom_vline(xintercept=0, color="black") +
+       xlab("Number of cases (log scale)") +
+        ylab("Penetrance") +
+  ggtitle("20% penetrance") +
+        theme_minimal() +
+        theme(legend.position="top", 
+              axis.text = element_text(size=18), 
+              axis.title = element_text(size=18),
+              plot.title = element_text(size = 18, face = "bold"),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=18),
+          legend.title=element_text(size=18)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3) #+
+  # annotate(geom="text", x=10000, y=0.4816566, label="O", color="black")+
+  #   annotate(geom="text", x=10000, y=0.1011015, label="O", color="black")+
+  #     annotate(geom="text", x=10000, y=0.2206722, label="O", color="black")+
+# annotate('segment', x = 10000, y = 0.4816566, xend = 10000, yend = 0.1011015,  size=10, alpha=1/3, color="grey")+
+#  scale_alpha(guide="none")+scale_size(guide="none")
+
+ggplot(data=done2, aes(x=as.factor(samples), y=penetrance, colour=as.factor(gsamples))) +
+  geom_line(aes(x = samples, y = lci, color=as.factor(gsamples)), size = 0.5) + 
+  geom_point(aes(x = samples, y = lci, color=as.factor(gsamples)), size = 3) +
+  geom_line(aes(x = samples, y = uci, color=as.factor(gsamples)), size = 0.5) + 
+    geom_point(aes(x = samples, y = uci, color=as.factor(gsamples)), size = 3) +
+  geom_line(aes(x = samples, y = penetrance, group=as.factor(gsamples)), size = 0.5, color="black") +
+  labs(col="Population") +
+  geom_vline(xintercept=10000, color="darkgrey")+
+  scale_x_continuous(trans='log', labels=scaleFUN, breaks = c(1250, 10000,100000)) +
+  geom_vline(xintercept=0, color="black") +
+       xlab("Number of cases (log scale)") +
+        ylab("Penetrance") +
+        theme_minimal() +
+        theme(legend.position="top", 
+              axis.text = element_text(size=18), 
+              axis.title = element_text(size=18),
+              plot.title = element_text(size = 18, face = "bold"),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=18),
+          legend.title=element_text(size=18)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3) +
+   annotate(geom="text", x=10000, y=0.4816566, label="O", color="black")+
+     annotate(geom="text", x=10000, y=0.1011015, label="O", color="black")+
+       annotate(geom="text", x=10000, y=0.2206722, label="O", color="black")+
+ annotate('segment', x = 10000, y = 0.4816566, xend = 10000, yend = 0.1011015,  size=10, alpha=1/3, color="grey")+
+  scale_alpha(guide="none")+scale_size(guide="none")
+
+#rate of convergence - UCI
+
+attach(done2)
+done3 <- done2[order(gsamples),]
+detach(done2)
+
+done3$interval <- done3$uci - done3$lci
+
+hmm <- done3[which(done3$samples == 1250),]
+
+done3$maxdiff <- rep(hmm$interval, each = 6)
+
+for (i in 1:nrow(done3)) {
+  done3$error_diff[i] <- (abs((done3$interval[i]-done3$maxdiff[i])/done3$maxdiff[i])*100)
+}
+
+a <- ggplot(data=done3, aes(x=samples, y=error_diff)) +
+  geom_line(aes(colour=factor(gsamples)), size=0.5) +
+  geom_point(aes(color=as.factor(gsamples)), size=3) +
+       xlab("Number of cases") +
+        ylab("Percentage decrease in CI uncertainty") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=14), 
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  labs(legend="Population") +
+  geom_vline(xintercept=10000, color="darkgrey")+
+  scale_x_continuous(trans='log', breaks = c(0, 1250,10000, 100000))+
+  labs(color="Population") +
+  scale_y_continuous(breaks = c(0,20,40,60,80,100,120,140))+
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=100, color="black")+
+    geom_hline(yintercept=0, color="black")+
+  ggtitle("20% penetrance")
+
+#slope of 2 points
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- (abs(done3$error_diff[i+1]-done3$error_diff[i])/
+     (done3$samples[i+1]-done3$samples[i])) 
+} 
+
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- ifelse(done3$gsamples[i+1] != done3$gsamples[i], "0", done3$diff_slope[i])
+}
+
+done3$diff_slope <- as.numeric(done3$diff_slope)
+
+b <- ggplot(data=done3, aes(x=samples, y=diff_slope)) +
+  geom_line(aes(color=factor(gsamples)), size=0.5) +
+  geom_point(aes(color=as.factor(gsamples)), size=3) +
+       xlab("Number of cases") +
+        ylab("Rate of convergence") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  geom_vline(xintercept=10000, color="darkgrey") +
+  scale_x_continuous(trans='log', breaks = c(1250, 10000, 100000))+ labs(col="Population")+
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+########## pop samples
+
+c <- ggplot(data=done2, aes(x=gsamples, y=penetrance, col=as.factor(samples))) +
+   #     geom_point(position = position_dodge(width = 1), size = 2) +
+        xlab("Number of population participants (log scale)")+
+        ylab("Penetrance and 95% CI") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=12),
+              axis.title = element_text(size=12),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=12),
+          axis.text.x = element_text(size=12),
+          legend.text=element_text(size=12),
+          legend.title=element_text(size=12)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3) +
+  geom_line(aes(x = gsamples, y = lci), size = 0.5, color="black", group=done2$gsamples) + 
+  geom_point(aes(x = gsamples, y = lci), size = 2) +
+  geom_line(aes(x = gsamples, y = uci), size = 0.5, color="black", group=done2$gsamples) + 
+    geom_point(aes(x = gsamples, y = uci), size = 2) +
+  geom_line(aes(x = gsamples, y = penetrance), size = 0.5, color="black", group=done2$gsamples) + labs(col="Number of cases")   +
+  geom_vline(xintercept=300000, color="darkgrey") +
+    scale_x_continuous(trans='log', breaks = c(75000, 300000,1500000,45000000))+
+  geom_vline(xintercept=0, color="black")
+
+#rate of convergence
+
+attach(done2)
+done3 <- done2[order(samples),]
+detach(done2)
+
+done3$interval <- done3$uci - done3$lci
+
+hmm <- done3[which(done3$gsamples == 75000),]
+
+done3$maxdiff <- rep(hmm$interval, each = 6)
+
+for (i in 1:nrow(done3)) {
+  done3$error_diff[i] <- (abs((done3$interval[i]-done3$maxdiff[i])/done3$maxdiff[i])*100)
+}
+
+d <- ggplot(data=done3, aes(x=gsamples, y=error_diff)) +
+  geom_line(aes(color=factor(samples)), size=0.5) +
+  geom_point(aes(color=as.factor(samples)), size=3) +
+       xlab("Number of population participants") +
+        ylab("Percentage decrease in uncertainty") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  labs(legend="Cases") +
+  geom_vline(xintercept=300000, color="darkgrey") +
+    scale_x_continuous(trans='log', breaks = c(75000, 1500000,45000000)) +
+  labs(color="Cases") +
+  scale_y_continuous(breaks = c(0,20,40,60,80,100,120,140))+
+  ylim(0,100) +
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=100, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+#slope of 2 points
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- (abs(done3$error_diff[i+1]-done3$error_diff[i])/
+     (done3$gsamples[i+1]-done3$gsamples[i])) 
+} 
+
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- ifelse(done3$samples[i+1] != done3$samples[i], "0", done3$diff_slope[i])
+}
+
+done3$diff_slope <- as.numeric(done3$diff_slope)
+
+e <- ggplot(data=done3, aes(x=gsamples, y=diff_slope)) +
+  geom_line(aes(colour=factor(samples)), size=0.5) +
+  geom_point(aes(color=as.factor(samples)), size=3) +
+       xlab("Number of population participants") +
+        ylab("Rate of convergence") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  geom_vline(xintercept=300000, color="darkgrey") +
+      scale_x_continuous(trans='log', breaks = c(75000, 1500000,45000000)) +
+ labs(col="Cases") +
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+#### plot
+
+ggarrange(a , b , d, e, ncol = 2, nrow = 2, align = "v")
+```
+
+### Penetrance Systematic Plots - 55%
+
+```{r}
+#the fixed variant is found twice* in 2,500 cases (0.0008) and 4 times in 300k population (0.000013).
+#*changes with penetrance increase
+
+#for ~10% penetrance
+rm(done)
+rm(done2)
+rm(done3)
+options(scipen=999)
+
+h_ac <- c(2*5, 4*5, 8*5, 16*5, 64*5, 160*5)
+h_ac2 <- rep(h_ac, each= 6)
+h_an <- c(2500, 5000, 10000, 20000, 80000, 200000)
+h_an2 <- rep(h_an, each= 6)
+g_ac <- c(2, 4, 8, 16, 40, 1200)
+g_an <- c(150000, 300000, 600000, 1200000, 3e+06, 90000000)
+done <- data.frame(h_ac2)
+done$h_an2 <- h_an2
+done$g_an <- g_an
+done$g_ac <- g_ac
+done$samples <- done$h_an2/2
+done$num <- as.numeric(row.names(done))
+done$freq <- done$h_ac2/done$h_an2
+done$gfreq <- done$g_ac/done$g_an
+done$gsamples <- done$g_an/2
+dim(done)
+#36  
+
+done2 <- done
+dim(done2)
+#36
+done2[10:12] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac2, n_AgD=done2$h_an2, x_A=done2$g_ac, n_A=done2$g_an)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+scaleFUN <- function(x) sprintf("%.f", x)
+c <-  ggplot(data=done2, aes(x=as.factor(samples), y=penetrance, colour=as.factor(gsamples))) +
+  geom_line(aes(x = samples, y = lci, color=as.factor(gsamples)), size = 0.5) + 
+  geom_point(aes(x = samples, y = lci, color=as.factor(gsamples)), size = 3) +
+  geom_line(aes(x = samples, y = uci, color=as.factor(gsamples)), size = 0.5) + 
+    geom_point(aes(x = samples, y = uci, color=as.factor(gsamples)), size = 3) +
+  geom_line(aes(x = samples, y = penetrance, group=as.factor(gsamples)), size = 0.5, color="black") +
+  labs(col="Population") +
+  geom_vline(xintercept=10000, color="darkgrey")+
+    scale_x_continuous(trans='log', labels=scaleFUN, breaks = c(1250, 10000,100000)) +
+  geom_vline(xintercept=0, color="black") +
+       xlab("Number of cases (log scale)") +
+        ylab("Penetrance") +
+  ggtitle("55% penetrance") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=18), 
+              axis.title = element_text(size=18),
+              plot.title = element_text(size = 18, face = "bold"),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=18),
+          legend.title=element_text(size=18)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3)
+
+#rate of convergence - UCI
+
+attach(done2)
+done3 <- done2[order(gsamples),]
+detach(done2)
+
+done3$interval <- done3$uci - done3$lci
+
+hmm <- done3[which(done3$samples == 1250),]
+
+done3$maxdiff <- rep(hmm$interval, each = 6)
+
+for (i in 1:nrow(done3)) {
+  done3$error_diff[i] <- (abs((done3$interval[i]-done3$maxdiff[i])/done3$maxdiff[i])*100)
+}
+
+a <- ggplot(data=done3, aes(x=samples, y=error_diff)) +
+  geom_line(aes(color=factor(gsamples)), size=0.5) +
+  geom_point(aes(color=as.factor(gsamples)), size=3) +
+       xlab("Number of cases") +
+        ylab("Percentage decrease in CI uncertainty") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  labs(legend="Population") +
+  geom_vline(xintercept=10000, color="darkgrey")+
+  scale_x_continuous(trans='log', breaks = c(0, 1250,10000,100000))+
+  labs(color="Population") +
+  scale_y_continuous(breaks = c(0,20,40,60,80,100,120,140))+
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=100, color="black")+
+    geom_hline(yintercept=0, color="black")+
+  ggtitle("55% penetrance")
+
+#slope of 2 points
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- (abs(done3$error_diff[i+1]-done3$error_diff[i])/
+     (done3$samples[i+1]-done3$samples[i])) 
+} 
+
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- ifelse(done3$gsamples[i+1] != done3$gsamples[i], "0", done3$diff_slope[i])
+}
+
+done3$diff_slope <- as.numeric(done3$diff_slope)
+
+b <- ggplot(data=done3, aes(x=samples, y=diff_slope)) +
+  geom_line(aes(color=factor(gsamples)), size=0.5) +
+  geom_point(aes(color=as.factor(gsamples)), size=3) +
+       xlab("Number of cases") +
+        ylab("Rate of convergence") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  geom_vline(xintercept=10000, color="darkgrey") +
+  scale_x_continuous(trans='log', breaks = c(1250, 10000, 100000))+ labs(col="Population")+
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+########## pop samples
+
+c <- ggplot(data=done2, aes(x=gsamples, y=penetrance, col=as.factor(samples))) +
+   #     geom_point(position = position_dodge(width = 1), size = 2) +
+        xlab("Number of population participants (log scale)")+
+        ylab("Penetrance and 95% CI") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=16), axis.title = element_text(size=16),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=16),
+          axis.text.x = element_text(size=16),
+          legend.text=element_text(size=16),
+          legend.title=element_text(size=16)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3) +
+  geom_line(aes(x = gsamples, y = lci), size = 0.5, color="black", group=done2$gsamples) + 
+  geom_point(aes(x = gsamples, y = lci), size = 2) +
+  geom_line(aes(x = gsamples, y = uci), size = 0.5, color="black", group=done2$gsamples) + 
+    geom_point(aes(x = gsamples, y = uci), size = 2) +
+  geom_line(aes(x = gsamples, y = penetrance), size = 0.5, color="red", group=done2$gsamples) + labs(col="Number of cases")   +
+  geom_vline(xintercept=300000, color="darkgrey") +
+    scale_x_continuous(trans='log', breaks = c(75000, 300000,1500000,45000000))+
+  geom_vline(xintercept=0, color="black")
+
+#rate of convergence
+
+attach(done2)
+done3 <- done2[order(samples),]
+detach(done2)
+
+done3$interval <- done3$uci - done3$lci
+
+hmm <- done3[which(done3$gsamples == 75000),]
+
+done3$maxdiff <- rep(hmm$interval, each = 6)
+
+for (i in 1:nrow(done3)) {
+  done3$error_diff[i] <- (abs((done3$interval[i]-done3$maxdiff[i])/done3$maxdiff[i])*100)
+}
+
+d <- ggplot(data=done3, aes(x=gsamples, y=error_diff)) +
+  geom_line(aes(color=factor(samples)), size=0.5) +
+  geom_point(aes(color=as.factor(samples)), size=3) +
+       xlab("Number of population participants") +
+        ylab("Percentage decrease in uncertainty") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  labs(legend="Cases") +
+  geom_vline(xintercept=300000, color="darkgrey") +
+    scale_x_continuous(trans='log', breaks = c(75000, 1500000,45000000)) +
+  labs(color="Cases") +
+  scale_y_continuous(breaks = c(0,20,40,60,80,100,120,140))+
+  ylim(0,100) +
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=100, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+#slope of 2 points
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- (abs(done3$error_diff[i+1]-done3$error_diff[i])/
+     (done3$gsamples[i+1]-done3$gsamples[i])) 
+} 
+
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- ifelse(done3$samples[i+1] != done3$samples[i], "0", done3$diff_slope[i])
+}
+
+done3$diff_slope <- as.numeric(done3$diff_slope)
+
+e <- ggplot(data=done3, aes(x=gsamples, y=diff_slope)) +
+  geom_line(aes(color=factor(samples)), size=0.5) +
+  geom_point(aes(color=as.factor(samples)), size=3) +
+       xlab("Number of population participants") +
+        ylab("Rate of convergence") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text = element_text(size=12), 
+            axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  geom_vline(xintercept=300000, color="darkgrey") +
+      scale_x_continuous(trans='log', breaks = c(75000, 1500000,45000000)) +
+ labs(col="Cases") +
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+#####
+
+ggarrange(a , b , d, e, ncol = 2, nrow = 2, align = "v")
+```
+
+### Penetrance Systematic Plots - 75%
+
+```{r}
+#the fixed variant is found twice* in 2,500 cases (0.0008) and 4 times in 300k population (0.000013).
+#*changes with penetrance increase
+
+#for ~10% penetrance
+rm(done)
+rm(done2)
+rm(done3)
+options(scipen=999)
+
+h_ac <- c(2*7, 4*7, 8*7, 16*7, 64*7, 160*7)
+h_ac2 <- rep(h_ac, each= 6)
+h_an <- c(2500, 5000, 10000, 20000, 80000, 200000)
+h_an2 <- rep(h_an, each= 6)
+g_ac <- c(2, 4, 8, 16, 40, 1200)
+g_an <- c(150000, 300000, 600000, 1200000, 3e+06, 90000000)
+done <- data.frame(h_ac2)
+done$h_an2 <- h_an2
+done$g_an <- g_an
+done$g_ac <- g_ac
+done$samples <- done$h_an2/2
+done$num <- as.numeric(row.names(done))
+done$freq <- done$h_ac2/done$h_an2
+done$gfreq <- done$g_ac/done$g_an
+done$gsamples <- done$g_an/2
+dim(done)
+#36  
+
+done2 <- done
+dim(done2)
+#36
+done2[10:12] <- penetrance(x_D=97, n_D=52660, x_AgD=done2$h_ac2, n_AgD=done2$h_an2, x_A=done2$g_ac, n_A=done2$g_an)
+SoilSciGuylabs <- c("", unique(done2$freq))
+
+scaleFUN <- function(x) sprintf("%.f", x)
+
+d <-  ggplot(data=done2, aes(x=as.factor(samples), y=penetrance, colour=as.factor(gsamples))) +
+  geom_line(aes(x = samples, y = lci, color=as.factor(gsamples)), size = 0.5) + 
+  geom_point(aes(x = samples, y = lci, color=as.factor(gsamples)), size = 3) +
+  geom_line(aes(x = samples, y = uci, color=as.factor(gsamples)), size = 0.5) + 
+    geom_point(aes(x = samples, y = uci, color=as.factor(gsamples)), size = 3) +
+  geom_line(aes(x = samples, y = penetrance, group=as.factor(gsamples)), size = 0.5, color="black") +
+  labs(col="Population") +
+  geom_vline(xintercept=10000, color="darkgrey")+
+scale_x_continuous(trans='log', labels=scaleFUN, breaks = c(1250, 10000,100000)) +
+  geom_vline(xintercept=0, color="black") +
+       xlab("Number of cases (log scale)") +
+        ylab("Penetrance and 95% CI") +
+  ggtitle("75% penetrance") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=20), 
+              axis.title = element_text(size=18),
+              plot.title = element_text(size = 18, face = "bold"),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=18),
+          legend.title=element_text(size=18)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3)
+
+#rate of convergence - UCI
+
+attach(done2)
+done3 <- done2[order(gsamples),]
+detach(done2)
+
+done3$interval <- done3$uci - done3$lci
+
+hmm <- done3[which(done3$samples == 1250),]
+
+done3$maxdiff <- rep(hmm$interval, each = 6)
+
+for (i in 1:nrow(done3)) {
+  done3$error_diff[i] <- (abs((done3$interval[i]-done3$maxdiff[i])/done3$maxdiff[i])*100)
+}
+
+a <- ggplot(data=done3, aes(x=samples, y=error_diff)) +
+  geom_line(aes(color=factor(gsamples)), size=0.5) +
+  geom_point(aes(color=as.factor(gsamples)), size=3) +
+       xlab("Number of cases") +
+        ylab("Percentage decrease in CI uncertainty") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  labs(legend="Population") +
+  geom_vline(xintercept=10000, color="darkgrey")+
+  scale_x_continuous(trans='log', breaks = c(0, 1250,10000, 100000))+
+  labs(color="Population") +
+  scale_y_continuous(breaks = c(0,20,40,60,80,100,120,140))+
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=100, color="black")+
+    geom_hline(yintercept=0, color="black")+
+  ggtitle("75% penetrance")
+
+#slope of 2 points
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- (abs(done3$error_diff[i+1]-done3$error_diff[i])/
+     (done3$samples[i+1]-done3$samples[i])) 
+} 
+
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- ifelse(done3$gsamples[i+1] != done3$gsamples[i], "0", done3$diff_slope[i])
+}
+
+done3$diff_slope <- as.numeric(done3$diff_slope)
+
+b <- ggplot(data=done3, aes(x=samples, y=diff_slope)) +
+  geom_line(aes(color=factor(gsamples)), size=0.5) +
+  geom_point(aes(color=as.factor(gsamples)), size=3) +
+       xlab("Number of cases") +
+        ylab("Rate of convergence") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  geom_vline(xintercept=10000, color="darkgrey") +
+  scale_x_continuous(trans='log', breaks = c(1250, 10000, 100000))+ labs(col="Population")+
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+########## pop samples
+
+c <- ggplot(data=done2, aes(x=gsamples, y=penetrance, col=as.factor(samples))) +
+   #     geom_point(position = position_dodge(width = 1), size = 2) +
+        xlab("Number of population participants (log scale)")+
+        ylab("Penetrance and 95% CI") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=16), axis.title = element_text(size=16),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=16),
+          axis.text.x = element_text(size=16),
+          legend.text=element_text(size=16),
+          legend.title=element_text(size=16)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3) +
+  geom_line(aes(x = gsamples, y = lci), size = 0.5, color="black", group=done2$gsamples) + 
+  geom_point(aes(x = gsamples, y = lci), size = 2) +
+  geom_line(aes(x = gsamples, y = uci), size = 0.5, color="black", group=done2$gsamples) + 
+    geom_point(aes(x = gsamples, y = uci), size = 2) +
+  geom_line(aes(x = gsamples, y = penetrance), size = 0.5, color="red", group=done2$gsamples) + labs(col="Number of cases")   +
+  geom_vline(xintercept=300000, color="darkgrey") +
+    scale_x_continuous(trans='log', breaks = c(75000, 300000,1500000,45000000))+
+  geom_vline(xintercept=0, color="black")
+
+#rate of convergence
+
+attach(done2)
+done3 <- done2[order(samples),]
+detach(done2)
+
+done3$interval <- done3$uci - done3$lci
+
+hmm <- done3[which(done3$gsamples == 75000),]
+
+done3$maxdiff <- rep(hmm$interval, each = 6)
+
+for (i in 1:nrow(done3)) {
+  done3$error_diff[i] <- (abs((done3$interval[i]-done3$maxdiff[i])/done3$maxdiff[i])*100)
+}
+
+d <- ggplot(data=done3, aes(x=gsamples, y=error_diff)) +
+  geom_line(aes(color=factor(samples)), size=0.5) +
+  geom_point(aes(color=as.factor(samples)), size=3) +
+       xlab("Number of population participants") +
+        ylab("Percentage decrease in uncertainty") +
+        theme_minimal() +
+        theme(legend.position="top", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  labs(legend="Cases") +
+  geom_vline(xintercept=300000, color="darkgrey") +
+    scale_x_continuous(trans='log', breaks = c(75000, 1500000,45000000)) +
+  labs(color="Cases") +
+  scale_y_continuous(breaks = c(0,20,40,60,80,100,120,140))+
+  ylim(0,100) +
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=100, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+#slope of 2 points
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- (abs(done3$error_diff[i+1]-done3$error_diff[i])/
+     (done3$gsamples[i+1]-done3$gsamples[i])) 
+} 
+
+for (i in 1:nrow(done3)) {
+done3$diff_slope[i] <- ifelse(done3$samples[i+1] != done3$samples[i], "0", done3$diff_slope[i])
+}
+
+done3$diff_slope <- as.numeric(done3$diff_slope)
+
+e <- ggplot(data=done3, aes(x=gsamples, y=diff_slope)) +
+  geom_line(aes(color=factor(samples)), size=0.5) +
+  geom_point(aes(color=as.factor(samples)), size=3) +
+       xlab("Number of population participants") +
+        ylab("Rate of convergence") +
+        theme_minimal() +
+        theme(legend.position="none", axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              panel.grid.minor.y = element_line( size = 0.4),
+          panel.grid.major.y = element_line( size = 0.4),
+          axis.title.x = element_text(size=14),
+          axis.text.x = element_text(size=14),
+          legend.text=element_text(size=14),
+          legend.title=element_text(size=14)) +
+  geom_vline(xintercept=300000, color="darkgrey") +
+      scale_x_continuous(trans='log', breaks = c(75000, 1500000,45000000)) +
+ labs(col="Cases") +
+  geom_vline(xintercept=0, color="black")+
+    geom_hline(yintercept=0, color="black")
+
+####
+ggarrange(a , b , d, e, ncol = 2, nrow = 2, align = "v")
+```
+
+### join four plots for manuscript - suppl figure
+
+```{r}
+#install.packages('ggpubr')
+
+library(ggpubr)
+
+ggarrange(a + rremove("xlab"), b + rremove("xlab")+ rremove("ylab") , c, d+ rremove("ylab") , ncol = 2, nrow = 2, align = "v", common.legend = TRUE, legend = "top")
+```
+
+### Penetrance Systematic Plots - max, med, min HCM
+
+```{r}
+####################################
+####################################
+#HCM_AF
+#min = 0.0001
+#median = 0.0003
+#max = 0.008
+#gnukb_AF
+#min = 0.000002
+#median = 0.00001
+#max = 0.0009
+
+#HCM_AF = 0.008 (max) + gnubk
+rm(done)
+h_af <- 0.008
+g_af <- c(0.000002, 0.00001, 0.0004, 0.0009)
+gnoman <- c(100000,200000,300000,400000,500000,600000,700000,800000,900000,1000000)
+#70k - 1000K samples
+done <- as.integer(unlist(lapply(1:length(g_af), function(x) lapply(1:length(gnoman), function(y) as.matrix(g_af[[x]]) %*%  gnoman[[y]]))))
+done <- data.frame(done)
+done$done <- gsub("^0", "1", done$done)
+done$done <- as.integer(done$done)
+done$an <- gnoman
+dim(done)
+# 40
+colnames(done) <- c("g_ac", "g_an")
+
+h_an <- 20000
+h_ac <- as.integer(h_af*h_an)
+h_ac
+#160
+
+done[3:5] <- penetrance(x_D=97, n_D=52660, x_AgD=h_ac, n_AgD=h_an, x_A=done$g_ac, n_A=done$g_an)
+
+done$interval <- done$uci - done$lci
+done$group <- rep(c(1,2,3,4), each = 10)
+done$samples <- done$g_an/2
+done$num <- as.numeric(row.names(done))
+done$group <- as.factor(done$group)
+
+done2 <- done[which(done$g_ac >1),]
+dim(done2)
+#30
+done2$gaf <- done2$g_ac/done2$g_an
+SoilSciGuylabs <- c("", unique(done2$gaf))
+
+a <- ggplot(data=done2, aes(x=num, y=lci, group=group, color=as.factor(samples))) +
+        geom_point(position = position_dodge(width = 1), size=3) +
+        xlab("Variant frequency in the population") +
+        ggtitle("HCM AF = 0.008 (maximum)") +
+        ylab("Penetrance") +
+        theme_minimal() +
+        theme(legend.position="top", 
+              legend.text = element_text(size=14),
+              legend.title = element_text(size=14),
+              axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              title = element_text(size=14)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3) +
+  geom_line(aes(x = num, y = lci, color=as.factor(samples)), size = 0.5) + 
+    geom_line(aes(x = num, y = uci, color=as.factor(samples)), size = 0.5) + 
+      geom_line(aes(x = num, y = penetrance, color=as.factor(samples)), size = 0.5) + 
+  geom_point(aes(x=num, y=uci, col=as.factor(samples)), size=3) +
+    geom_point(aes(x=num, y=penetrance,   group=group), col="black", size=2) +
+          scale_x_continuous(breaks = seq(1, 41, by = 10), labels=SoilSciGuylabs) +
+  theme(axis.line.y.right = element_line(color = "blue"), 
+       axis.ticks.y.right = element_line(color = "blue"),
+       axis.title.y.right = element_text(colour = "blue"),
+       axis.line.y.left = element_line(color = "black"),
+       panel.grid.major.x = element_line(size = 0.5, colour = "grey"), 
+       panel.grid.minor.x = element_blank()) +labs(colour="Samples")             
+
+#same but zoom
+b <- ggplot(data=done2, aes(x=num, y=lci, group=group, color=as.factor(samples))) +
+        geom_point(position = position_dodge(width = 1), size=3) +
+        xlab("Variant frequency in the population") +
+        ggtitle("HCM AF = 0.008 (maximum), zoom") +
+        ylab("Penetrance") +
+        theme_minimal() +
+        theme(legend.position="top", 
+              legend.text = element_text(size=14),
+              legend.title = element_text(size=14),
+              axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              title = element_text(size=14)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3) +
+  geom_line(aes(x = num, y = lci, color=as.factor(samples)), size = 0.5) + 
+    geom_line(aes(x = num, y = uci, color=as.factor(samples)), size = 0.5) + 
+      geom_line(aes(x = num, y = penetrance, color=as.factor(samples)), size = 0.5) + 
+  geom_point(aes(x=num, y=uci, col=as.factor(samples)), size=3) +
+    geom_point(aes(x=num, y=penetrance,   group=group), col="black", size=2) +
+          scale_x_continuous(breaks = seq(1, 41, by = 10), labels=SoilSciGuylabs) +
+  theme(axis.line.y.right = element_line(color = "blue"), 
+       axis.ticks.y.right = element_line(color = "blue"),
+       axis.title.y.right = element_text(colour = "blue"),
+       axis.line.y.left = element_line(color = "black"),
+       panel.grid.major.x = element_line(size = 0.5, colour = "grey"), 
+       panel.grid.minor.x = element_blank()) +labs(colour="Samples")   +ylim(0,1)
+
+#HCM_AF = 0.0003 (median) + gnubk
+rm(done)
+h_af <- 0.0003
+g_af <- c(0.000002, 0.00001, 0.0004, 0.0009)
+gnoman <- c(100000,200000,300000,400000,500000,600000,700000,800000,900000,1000000)
+#70k - 1000K samples
+done <- as.integer(unlist(lapply(1:length(g_af), function(x) lapply(1:length(gnoman), function(y) as.matrix(g_af[[x]]) %*%  gnoman[[y]]))))
+done <- data.frame(done)
+done$done <- gsub("^0", "1", done$done)
+done$done <- as.integer(done$done)
+done$an <- gnoman
+dim(done)
+# 40
+colnames(done) <- c("g_ac", "g_an")
+
+h_an <- 20000
+h_ac <- as.integer(h_af*h_an)
+
+done[3:5] <- penetrance(x_D=97, n_D=52660, x_AgD=h_ac, n_AgD=h_an, x_A=done$g_ac, n_A=done$g_an)
+
+done$interval <- done$uci - done$lci
+done$group <- rep(c(1,2,3,4), each = 10)
+done$samples <- done$g_an/2
+done$num <- as.numeric(row.names(done))
+done$group <- as.factor(done$group)
+
+done2 <- done[which(done$g_ac >1),]
+dim(done2)
+#30
+
+c <- ggplot(data=done2, aes(x=num, y=lci, group=group, color=as.factor(samples))) +
+        geom_point(position = position_dodge(width = 1), size=3) +
+        xlab("Variant frequency in the population") +
+        ggtitle("HCM AF = 0.0003 (median)") +
+        ylab("Penetrance") +
+        theme_minimal() +
+        theme(legend.position="top", 
+              legend.text = element_text(size=14),
+              legend.title = element_text(size=14),
+              axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              title = element_text(size=14)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3) +
+  geom_line(aes(x = num, y = lci, color=as.factor(samples)), size = 0.5) + 
+    geom_line(aes(x = num, y = uci, color=as.factor(samples)), size = 0.5) + 
+      geom_line(aes(x = num, y = penetrance, color=as.factor(samples)), size = 0.5) + 
+  geom_point(aes(x=num, y=uci, col=as.factor(samples)), size=3) +
+    geom_point(aes(x=num, y=penetrance,   group=group), col="black", size=2) +
+          scale_x_continuous(breaks = seq(1, 41, by = 10), labels=SoilSciGuylabs) +
+  theme(axis.line.y.right = element_line(color = "blue"), 
+       axis.ticks.y.right = element_line(color = "blue"),
+       axis.title.y.right = element_text(colour = "blue"),
+       axis.line.y.left = element_line(color = "black"),
+       panel.grid.major.x = element_line(size = 0.5, colour = "grey"), 
+       panel.grid.minor.x = element_blank()) +labs(colour="Samples")             
+
+#HCM_AF = 0.0001 (min) + gnubk
+rm(done)
+h_af <- 0.0001
+g_af <- c(0.000002, 0.00001, 0.0004, 0.0009)
+gnoman <- c(100000,200000,300000,400000,500000,600000,700000,800000,900000,1000000)
+#70k - 1000K samples
+done <- as.integer(unlist(lapply(1:length(g_af), function(x) lapply(1:length(gnoman), function(y) as.matrix(g_af[[x]]) %*%  gnoman[[y]]))))
+done <- data.frame(done)
+done$done <- gsub("^0", "1", done$done)
+done$done <- as.integer(done$done)
+done$an <- gnoman
+dim(done)
+# 40
+colnames(done) <- c("g_ac", "g_an")
+
+h_an <- 20000
+h_ac <- as.integer(h_af*h_an)
+
+done[3:5] <- penetrance(x_D=97, n_D=52660, x_AgD=h_ac, n_AgD=h_an, x_A=done$g_ac, n_A=done$g_an)
+
+done$interval <- done$uci - done$lci
+done$group <- rep(c(1,2,3,4), each = 10)
+done$samples <- done$g_an/2
+done$num <- as.numeric(row.names(done))
+done$group <- as.factor(done$group)
+
+done2 <- done[which(done$g_ac >1),]
+
+d <- ggplot(data=done2, aes(x=num, y=lci, group=group, color=as.factor(samples))) +
+        geom_point(position = position_dodge(width = 1), size=3) +
+        xlab("Variant frequency in the population") +
+        ggtitle("HCM AF = 0.0001 (minimum)") +
+        ylab("Penetrance") +
+        theme_minimal() +
+        theme(legend.position="top", 
+              legend.text = element_text(size=14),
+              legend.title = element_text(size=14),
+              axis.text = element_text(size=14),
+              axis.title = element_text(size=14),
+              title = element_text(size=14)) +
+        geom_hline(yintercept=1, color ="black", size=0.3)  +
+        geom_hline(yintercept=0, color ="black", size=0.3) +
+  geom_line(aes(x = num, y = lci, color=as.factor(samples)), size = 0.5) + 
+    geom_line(aes(x = num, y = uci, color=as.factor(samples)), size = 0.5) + 
+      geom_line(aes(x = num, y = penetrance, color=as.factor(samples)), size = 0.5) + 
+  geom_point(aes(x=num, y=uci, col=as.factor(samples)), size=3) +
+    geom_point(aes(x=num, y=penetrance,   group=group), col="black", size=2) +
+          scale_x_continuous(breaks = seq(1, 41, by = 10), labels=SoilSciGuylabs) +
+  theme(axis.line.y.right = element_line(color = "blue"), 
+       axis.ticks.y.right = element_line(color = "blue"),
+       axis.title.y.right = element_text(colour = "blue"),
+       axis.line.y.left = element_line(color = "black"),
+       panel.grid.major.x = element_line(size = 0.5, colour = "grey"), 
+       panel.grid.minor.x = element_blank()) +labs(colour="Samples")             
+
+ggarrange(a , b , c, d, ncol = 2, nrow = 2, align = "v", common.legend = TRUE)
+```

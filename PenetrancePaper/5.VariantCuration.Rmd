@@ -1,0 +1,1729 @@
+# set up and packages
+
+```{r library or install.packages}
+#my_packages <- c("data.table", "ggplot2", "dplyr", "plyr") #e.g.
+#not_installed <- my_packages[!(my_packages %in% installed.packages()[ , "Package"])]
+#if(length(not_installed)) install.packages(not_installed)   
+
+library(data.table)
+library(ggplot2)
+library(dplyr)
+library(plyr)
+library(tidyr)
+library(ggpubr)
+set.seed(28061971)
+```
+
+# select definitive- and strong-evidence HCM and DCM associated genes
+
+```{r}
+vep <- data.frame(fread("vepresultsR", header=T)) #Load VEP105 results without comments at start of file.
+
+#MANE == Canonical in VEP105
+vep2 <- vep %>%
+filter(CANONICAL == "YES")
+
+#which genes included?
+# HCM
+#
+# *ACTC1 - nTV      # ACTC1	altered_gene_product_structure
+# *MYBPC3 - PAV     # MYBPC3	decreased_gene_product_level,altered_gene_product_structure
+# *MYH7 - nTV       # MYH7	altered_gene_product_structure
+# *MYL2 - nTV       # MYL2	altered_gene_product_structure
+# *MYL3 - nTV       # MYL3	altered_gene_product_structure
+# *TNNI3 - nTV      # TNNI3	altered_gene_product_structure
+# *TNNT2 - nTV      # TNNT2	altered_gene_product_structure
+# *TPM1 - nTV       # TPM1	altered_gene_product_structure
+
+# DCM
+# 
+# BAG3 - PAV                  #BAG3	decreased_gene_product_level,altered_gene_product_structure
+# DES - nTV                   #DES	altered_gene_product_structure
+# FLNC - TV #not included     #FLNC	decreased_gene_product_level
+# LMNA - PAV                  #LMNA	decreased_gene_product_level,altered_gene_product_structure
+# MYH7 - nTV                  #MYH7	altered_gene_product_structure
+# PLN - PAV                   #PLN	decreased_gene_product_level,altered_gene_product_structure
+# RBM20 - PAV                 #RBM20	decreased_gene_product_level,altered_gene_product_structure
+# SCN5A - PAV                 #SCN5A	decreased_gene_product_level,altered_gene_product_structure
+# TNNC1 - nTV                 #TNNC1	altered_gene_product_structure
+# TNNT2 - nTV                 #TNNT2	altered_gene_product_structure
+# TTN - TV                    #TTN	decreased_gene_product_level
+# DSP - strong - PAV          #DSP	decreased_gene_product_level,altered_gene_product_structure
+
+vep3 <- vep2[
+vep2$SYMBOL == "BAG3" |
+vep2$SYMBOL == "DSP"  |
+vep2$SYMBOL == "TTN" |
+vep2$SYMBOL == "MYH7"  |
+vep2$SYMBOL == "TNNC1"  |
+vep2$SYMBOL == "TNNT2"  |
+vep2$SYMBOL == "TPM1"  |
+vep2$SYMBOL == "LMNA"  |
+vep2$SYMBOL == "ACTC1"  |
+vep2$SYMBOL == "PLN"  |
+vep2$SYMBOL == "RBM20"|
+vep2$SYMBOL == "MYBPC3"|
+vep2$SYMBOL == "TNNI3" |
+vep2$SYMBOL == "MYL2" |
+vep2$SYMBOL == "MYL3" |
+vep2$SYMBOL == "DES" |
+vep2$SYMBOL == "SCN5A" ,
+]
+```
+
+# manual assessment of pathogenic non-coding variants (splice variants that are mis predicted)
+# filter for PAVs
+# add .bim file for variant info and case counts for each variant
+
+```{r}
+test <- vep2[which(vep2$ClinVar_CLNSIG == "Likely_pathogenic" | vep2$ClinVar_CLNSIG == "Pathogenic/Likely_pathogenic" | vep2$ClinVar_CLNSIG == "Pathogenic"),]
+table(test$Consequence)
+test$ClinVar[test$Consequence == "intron_variant"]
+#"138326" LP splice confirmed
+#"188544" P/LP splice confirmed
+#"219660" P/LP splice confirmed
+test$ClinVar[test$Consequence == "splice_polypyrimidine_tract_variant,intron_variant"]
+#"42807"  P/LP splice confirmed
+#"42805"  LP splice confirmed
+#"987382" P splice confirmed
+test$ClinVar[test$Consequence == "splice_polypyrimidine_tract_variant,splice_region_variant,intron_variant"]
+#"66856" P/LP splice confirmed
+#splice_donor_region_variant,intron_variant
+#"42556" P splice confirmed
+#"66419" P splice confirmed
+
+vep2$Consequence[(vep2$ClinVar == "138326" |
+                     vep2$ClinVar == "188544" |
+                     vep2$ClinVar == "219660" |
+                     vep2$ClinVar == "42807" |
+                     vep2$ClinVar == "42805" |
+                     vep2$ClinVar == "987382" |
+                     vep2$ClinVar == "66856" |
+                     vep2$ClinVar == "42556" |
+                     vep2$ClinVar == "66419")] <- "splice_confirmed"
+
+vepx32 <- vep2 %>% filter(Consequence == "frameshift_variant" | 
+                           Consequence == "frameshift_variant,splice_region_variant" |
+                           Consequence == "frameshift_variant,start_lost" |
+                           Consequence == "frameshift_variant,stop_lost" |
+                           Consequence == "inframe_deletion" |
+                           Consequence == "inframe_deletion,splice_region_variant" |
+                           Consequence == "inframe_insertion" |
+                           Consequence == "missense_variant" |
+                           Consequence == "missense_variant,splice_region_variant" |
+                           Consequence == "protein_altering_variant" |
+                           Consequence == "splice_acceptor_variant" |
+                           Consequence == "splice_confirmed" |
+                           Consequence == "splice_donor_5th_base_variant,intron_variant" |
+                           Consequence == "splice_donor_region_variant,intron_variant" |
+                           Consequence == "splice_donor_variant" |
+                           Consequence == "splice_donor_variant,coding_sequence_variant" |
+                           Consequence == "splice_donor_variant,splice_donor_5th_base_variant,coding_sequence_variant,intron_variant" |
+                           Consequence == "splice_donor_variant,splice_donor_region_variant,coding_sequence_variant,intron_variant" |
+                           Consequence == "splice_donor_variant,splice_donor_region_variant,intron_variant" |
+                           Consequence == "splice_polypyrimidine_tract_variant,intron_variant" |
+                           Consequence == "splice_polypyrimidine_tract_variant,splice_region_variant,intron_variant" |
+                           Consequence == "splice_region_variant,intron_variant" |
+                           Consequence == "splice_region_variant,synonymous_variant" |
+                           Consequence == "start_lost" |
+                           Consequence == "stop_gained" |
+                           Consequence == "stop_gained,frameshift_variant" |
+                           Consequence == "stop_gained,splice_region_variant" |
+                           Consequence == "stop_lost")
+
+# Add bim variant info to dataset
+# Add HCM and DCM counts to dataset (on DECIPHER)
+```
+
+# Add UKB 200k exome data counts
+### Identify the 200,000 participants in UKB with WES available and withdrawn participants removed
+### Identify subgroups by ancestry, sex, age at recruitment
+### UKB included in PCA flag to remove related individuals and other mismatches
+### Use plink --keep, --freq, --freq counts
+
+```{r}
+#3. remove relateds
+#4. create --frqs and frq counts
+
+#followed https://biobank.ndph.ox.ac.uk/ukb/ukb/docs/ukbgene_instruct.html
+#22020 column:
+#https://www.rdocumentation.org/packages/ukbtools/versions/0.11.3/topics/ukb_gen_samples_to_remove
+#(...) you could use the list of samples which we used to calculate the PCs, which is a (maximal) subset of unrelated participants after applying some QC filtering. Please read supplementary Section S3.3.2 for details. You can find the list of samples using the "used.in.pca.calculation" column in the sample-QC file (ukb_sqc_v2.txt) (...). Note that this set contains diverse ancestries. If you take the intersection with the white British ancestry subset you get ~337,500 unrelated samples.
+#Missing rate on autosomes > 0.02.
+#Not in a set of unrelated individuals (see Sections S 3.7.1 and S 3.7.4).
+#In the list of outliers based on heterozygosity and missing rates (see Section S3.5).
+#Mismatch between inferred sex and self-reported sex.
+#https://www.nature.com/articles/s41586-018-0579-z#Sec28
+#Bycroft et al. 2018
+
+#assess reported ancestry
+#agrees with population genetics in ensembl (e.g. https://www.ensembl.org/Homo_sapiens/Variation/Population?db=core;r=1:46404589-46405589;v=rs324420;vdb=variation;vf=158611)
+#AFR <- African + Caribbean
+#SAS <- The region consists of the countries of Afghanistan, Bangladesh, Bhutan, India, Maldives, Nepal, Pakistan, and Sri Lanka.[7] wikipedia
+   #Indian, Pakistani, Bangladeshi
+#EAS <- The modern states of East Asia include China, Japan, Mongolia, North Korea, South Korea, and Taiwan.
+  #Chinese
+#EUR is from previous estimate of european individuals https://doi.org/10.1038/s41586-020-2635-8
+#White British is UKB data field 22006 
+
+#join UKB datasets together
+# add .frq = MAF + NCHROBS(AN)
+# add .frq.counts = C1 = AC
+
+#join UKB counts with HCM/DCM variants = caseukb.txt
+```
+
+# filter splice synonymous
+
+```{r filter splice region and TTN PSI 90}
+caseukb <- read.table("caseukb.txt", header=T, sep="\t")
+
+#check 1 PAV
+caseukb[which(caseukb$Consequence == "protein_altering_variant"),] #Clinvar = 174799
+#This sequence change deletes 1 nucleotide and inserts 4 nucleotides in exon 2 of the MYBPC3 mRNA (c.239delinsGAGG). This leads to the deletion of one amino acid and insertion of 2 amino acid residues in the MYBPC3 protein (p.Ala80delinsGlyGly) but otherwise preserves the integrity of the reading frame.
+caseukb$Consequence[caseukb$Consequence == "protein_altering_variant"] <- "inframe_insertion"
+ 
+table(caseukb$Consequence)
+df <- caseukb %>%
+  filter(Consequence == "splice_donor_region_variant,intron_variant" |
+           Consequence == "splice_polypyrimidine_tract_variant,intron_variant" |
+           Consequence == "splice_polypyrimidine_tract_variant,splice_region_variant,intron_variant" |
+           Consequence == "splice_region_variant,intron_variant" |
+           Consequence == "splice_region_variant,synonymous_variant") %>% 
+  filter(SpliceAI_cutoff == "FAIL" | SpliceAI_cutoff == "-")
+dim(df)
+#366 for removal
+  
+caseukb$found <- caseukb$ID %in% df$ID
+table(caseukb$found)
+#TRUE = 366 woohoo
+
+caseukb3 <- caseukb[which(caseukb$found == "FALSE"),]
+dim(caseukb3)
+#4325
+caseukb3$found <- NULL
+```
+
+# filter out TTN missense and assess LOFTEE flags
+
+```{r TTN missense}
+#There are two TTN P/LP missense variants with strong evidence=
+#https://www.biorxiv.org/content/10.1101/2020.09.05.282913v1.full.pdf = Chr2(GRCh38):g.178741559A>T; p.Cys3575Ser - not in dataset.
+caseukb3[which(caseukb3$SYMBOL == "TTN" & caseukb3$POS == 178741559),]
+#Hinson et al PMID: 26315439 An iPS-derived cardiomyocyte model of the missense variant NM_001267550: c.2926T>C, p.(Trp976Arg) from Gerull et al PMID: 11788824 showed that this variant exhibited less than half the contractile force generated by WT, and was comparable to the effect of an A-band truncating variant also tested. Note: This variant has also been detected by a diagnostic laboratory in a DCM proband (https://www.ncbi.nlm.nih.gov/clinvar/variation/12651/), and scores PP1_strong, PM2, PS3_mod, PP3 – pathogenic by ACMG guidelines - not in dataset. #  2: 178782980 
+caseukb3[which(caseukb3$ClinVar == "12651"),]
+caseukb3[which(caseukb3$SYMBOL == "TTN" & caseukb3$POS == 178782980),]
+#Both not in dataset
+
+hmm <- caseukb3[caseukb3$SYMBOL == "TTN",]
+hmm <- caseukb3[(caseukb3$SYMBOL == "TTN" & (caseukb3$Consequence == "missense_variant" | caseukb3$Consequence == "inframe_deletion" | caseukb3$Consequence == "inframe_insertion")),]
+dim(hmm)
+#1896
+#none are P/LP
+
+caseukb4 <- caseukb3[!(caseukb3$SYMBOL == "TTN" & (caseukb3$Consequence == "missense_variant" | caseukb3$Consequence == "inframe_deletion" | caseukb3$Consequence == "inframe_insertion")),]
+dim(caseukb4)
+#2429
+
+#19 "missense_variant,splice_region_variant" in TTN
+hmm <- caseukb4 %>%
+  filter(SYMBOL == "TTN") %>%
+  filter(Consequence == "missense_variant,splice_region_variant") %>%
+    filter(SpliceAI_cutoff == "FAIL" | SpliceAI_cutoff == "-")
+dim(hmm)
+#38 - all to go
+caseukb4$found <- caseukb4$ID %in% hmm$ID
+table(caseukb4$found)
+doneant2 <- caseukb4[which(caseukb4$found == "FALSE"),]
+dim(doneant2)
+#2391
+doneant2$found <- NULL
+
+#Test LOFTEE flags for each gene
+table(doneant2$LoF_filter)
+#3UTR_SPLICE 5UTR_SPLICE 
+table(doneant2$LoF_flags)
+#NAGNAG_SITE PHYLOCSF_WEAK 
+
+doneant2$Consequence <- as.character(doneant2$Consequence)
+
+#flag LC LoFs and ID PAV that are mislabelled.
+doneant2$Consequence[doneant2$LoF_flags == "NAGNAG_SITE"] <- "inframe_insertion"
+doneant2$Consequence[doneant2$LoF_filter == "3UTR_SPLICE"] <- "splice_donor_variant_LC"
+doneant2$Consequence[doneant2$LoF_filter == "5UTR_SPLICE"] <- "splice_donor_variant_LC"
+#NAGNAG site = splice acceptor site rescued by inframe acceptor site
+#3UTR SPLICE = splice donor with pLof low confidence
+#5UTR SPLICE = splice donor with pLof low confidence
+
+#create a label for each variant = SYMBOL:HGVSc
+df3 <- doneant2 %>% separate(HGVSc, c("HGVSc.a", "HGVSc.b"), sep=":")
+df3$label <- paste0(df3$SYMBOL, ":", df3$HGVSc.b)
+```
+
+# split datasets by HCM and DCM-associated genes
+
+```{r}
+HCM <- df3 %>% filter(SYMBOL == "ACTC1" | SYMBOL == "MYBPC3" | SYMBOL == "MYH7" | SYMBOL == "MYL2" | SYMBOL == "MYL3" | SYMBOL == "TNNI3" | SYMBOL == "TNNT2" | SYMBOL == "TPM1")
+HCM <- HCM[which(HCM$AC_ALL_HCM>0),]
+dim(HCM)
+#1384 
+
+DCM <- df3 %>% filter(SYMBOL == "BAG3" | SYMBOL == "DES" | SYMBOL == "FLNC" | SYMBOL == "LMNA" | SYMBOL == "MYH7" | SYMBOL == "PLN" | SYMBOL == "RBM20" | SYMBOL == "SCN5A" | SYMBOL == "TNNC1" | SYMBOL == "TNNT2" | SYMBOL == "TTN" | SYMBOL == "DSP")
+DCM <- DCM[which(DCM$AC_ALL_DCM>0),]
+dim(DCM)
+#764 
+```
+
+# HCM specific filtering (assess variants, NMDi, filter for disease-associated variant consequences)
+
+```{r specific genes only - HCM}
+#check LC variants
+HCM$SYMBOL[HCM$Consequence == "splice_donor_variant_LC"] #MYBPC3 - can remove - in intron.
+HCM1 <- HCM[!(HCM$Consequence == "splice_donor_variant_LC"),]
+dim(HCM1)
+# 1383
+
+table(HCM1$Consequence)
+#go through variant consequences that require manual assessment:
+#start lost - below
+#stop lost = inframe insertion
+#inframe_deletion,splice_region_variant - below.
+
+read <- HCM1[which(HCM1$Consequence == "inframe_deletion,splice_region_variant"),]
+read$SpliceAI_cutoff # no info - no splice prediction, no databases - assume inframe deletion. Its in MYBPC3 so low risk.
+
+read <- HCM1[which(HCM1$Consequence == "start_lost"),]
+data.frame(read$ClinVar, read$SYMBOL, read$Consequence, read$ID, read$REF, read$ALT, read$chr,read$POS)
+#both MYBPC3 - no obvious rescues and they are missense vars. leave as is.
+
+read <- HCM1[which(HCM1$Consequence == "stop_lost"),]
+data.frame(read$ClinVar, read$SYMBOL, read$Consequence, read$ID, read$REF, read$ALT, read$chr,read$POS)
+#MYBPC3 - no obvious rescue - assume indel. 
+#MYL2 - no obvious rescue - assume indel. 
+
+table(HCM1$NMD)
+#NMDi:
+#  - NMD_escaping_variant 
+# 1292                   91 
+
+table(HCM1$Consequence)
+
+PAV_List=c("frameshift_variant",
+           "stop_gained",
+           "splice_donor_variant",
+           "splice_acceptor_variant",
+           "splice_region_variant",
+           "splice_polypyrimidine_tract_variant",
+           "splice_donor_5th_base_variant",
+           "splice_donor_region_variant",
+           "splice_confirmed")
+
+hmmx <- HCM1[grepl(paste(PAV_List, collapse="|"), HCM1$Consequence),]
+dim(hmmx) 
+#388
+
+head(hmmx$POS,10)
+hmmx$hgvk <- hmmx$HGVSp
+hmmx$hgvk <- gsub("\\?", 0, hmmx$hgvk)
+hmmx <- hmmx %>% separate(hgvk, c("hgvka", "hgvkb", "fs"), sep="\\*")
+hmmx$fs <- as.integer(as.character(hmmx$fs)) 
+hmmx$fs <- (hmmx$fs*3)
+
+for(i in (1:nrow(hmmx))){
+if((hmmx$Consequence[i] == "frameshift_variant" | hmmx$Consequence[i] == "frameshift_variant,splice_region_variant") &
+    (hmmx$SYMBOL[i] == "MYH7" | hmmx$SYMBOL[i] == "MYBPC3" | hmmx$SYMBOL[i] == "ACTC1" | 
+       hmmx$SYMBOL[i] == "TNNT2" | hmmx$SYMBOL[i] == "TNNI3" | hmmx$SYMBOL[i] == "MYL2" | hmmx$SYMBOL[i] == "MYL3")) {
+    hmmx$POS[i] <- hmmx$POS[i] - hmmx$fs[i] 
+        }
+    else if((hmmx$Consequence[i] == "frameshift_variant" | hmmx$Consequence[i] == "frameshift_variant,splice_region_variant") & 
+            (hmmx$SYMBOL[i] == "TPM1")){
+            hmmx$POS[i] <- hmmx$POS[i] + hmmx$fs[i] 
+    }
+   }
+
+hmm <- hmmx[which(hmmx$SYMBOL == "MYH7"),]
+#MYH7 <	23,413,759 + 55
+hmm2 <- hmm[which(hmm$POS < 23413814),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 14:23882988:TC:T frameshift_variant 23413749 ENSP00000347507.3:p.K1923*fs*10        -                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "MYBPC3"),]
+#MYBPC3 <47,331,881 - second last exon is short
+hmm2 <- hmm[which(hmm$POS < 47331881),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#none
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TNNT2"),]
+#TNNT2 < 	201,359,663 - second last exon is short
+hmm2 <- hmm[which(hmm$POS < 201359663),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 1:201328345:C:T                                  stop_gained 201359217 ENSP00000499593.1:p.W297* NMD_escaping_variant                 FAIL
+#2 1:201328746:C:T splice_donor_5th_base_variant,intron_variant 201359618                         -                    -                 FAIL
+#3 1:201328750:C:A                         splice_donor_variant 201359622                         -                    -                 PASS
+#4 1:201328750:C:G                         splice_donor_variant 201359622                         -                    -                 PASS
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TNNI3"),]
+#TNNI3 < 	55,154,030 + 55
+hmm2 <- hmm[which(hmm$POS < 55154085),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1  19:55663262:C:T                            stop_gained 55151894      ENSP00000341838.5:p.W191* NMD_escaping_variant                 FAIL
+#2  19:55665398:C:G missense_variant,splice_region_variant 55154030      ENSP00000341838.5:p.K183N                    -                 FAIL
+#3 19:55665403:CG:C                     frameshift_variant 55153981 ENSP00000341838.5:p.T181*fs*18                    -                 FAIL
+#4 19:55665408:TC:T                     frameshift_variant 55153983 ENSP00000341838.5:p.D180*fs*19                    -                 FAIL
+#5 19:55665440:CA:C                     frameshift_variant 55154048  ENSP00000341838.5:p.L169*fs*8                    -                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TPM1"),]
+#TPM1 > 63064142-55
+hmm2 <- hmm[which(hmm$POS > 63064087),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 15:63356340:A:G missense_variant,splice_region_variant 63064141 ENSP00000385107.4:p.I284V        -                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "MYL2"),]
+#MYL2 < 110,913,144  - second last exon is short
+hmm2 <- hmm[which(hmm$POS <  110913144),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 12:111350899:C:A                   splice_donor_variant 110913095                         -        -                 PASS
+#2 12:111350900:C:G missense_variant,splice_region_variant 110913096 ENSP00000228841.8:p.E134D        -                 FAIL
+#3 12:111350901:T:G missense_variant,splice_region_variant 110913097 ENSP00000228841.8:p.E134A        -                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "MYL3"),]
+#MYL3 <	46,858,272 - second last exon is short
+hmm2 <- hmm[which(hmm$POS < 46858272),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 3:46899716:C:G splice_donor_5th_base_variant,intron_variant 46858226          -        -                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "ACTC1"),]
+#ACTC1 < 	34,791,114 + 55
+hmm2 <- hmm[which(hmm$POS < 34791169),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#none
+
+HCM1$NMD[HCM1$Consequence == "missense_variant,splice_region_variant" & (HCM1$SpliceAI_cutoff == "FAIL" | HCM1$SpliceAI_cutoff == "-")] <- "-"
+
+# *ACTC1 - nTV
+# *MYBPC3 - PAV
+# *MYH7 - nTV
+# *MYL2 - nTV
+# *MYL3 - nTV
+# *TNNI3 - nTV
+# *TNNT2 - nTV
+# *TPM1 - nTV
+
+table(HCM1$Consequence)
+
+#MYBPC3 (usually NMD escaping only for LoF mechanisms but MYBPC3 = PAV)
+pav <- HCM1 %>%
+  filter(SYMBOL == "MYBPC3") 
+dim(pav)
+#639
+  
+miss_nmd <- HCM1 %>%
+  filter(SYMBOL == "MYH7"|
+         SYMBOL == "TNNT2" |
+        SYMBOL == "TNNI3" |
+        SYMBOL == "TPM1" |
+        SYMBOL == "MYL2" |
+        SYMBOL == "MYL3" |
+        SYMBOL == "ACTC1") %>%
+  filter(NMD == "NMD_escaping_variant")
+dim(miss_nmd)
+#  20
+
+miss <- HCM1 %>%
+  filter(SYMBOL == "MYH7"|
+         SYMBOL == "TNNT2" |
+        SYMBOL == "TNNI3" |
+        SYMBOL == "TPM1" |
+        SYMBOL == "MYL2" |
+        SYMBOL == "MYL3" |
+        SYMBOL == "ACTC1") %>%
+  filter(Consequence == "inframe_deletion" |
+         Consequence == "inframe_deletion,splice_region_variant" |
+         Consequence == "inframe_insertion" |
+         Consequence == "missense_variant" |
+         Consequence == "missense_variant,splice_region_variant" |
+         Consequence == "start_lost" |
+         Consequence == "stop_lost")
+dim(miss)
+#711
+
+HCM1$filter <- ifelse((HCM1$ID %in% pav$ID | HCM1$ID %in% miss_nmd$ID | HCM1$ID %in% miss$ID), "TRUE", "FALSE")
+table(HCM1$filter)
+#FALSE  TRUE 
+#    13  1370 
+
+HCMfilt <- HCM1[which(HCM1$filter == "TRUE"),]
+dim(HCMfilt)
+#1370
+```
+
+# DCM specific filtering (assess variants, NMDi, filter for TTNPSI>90 exons, filter for disease-associated variant consequences)
+
+```{r specific genes only - DCM}
+#check LC variants
+table(DCM$Consequence)
+#no LC LoF variants remain [not seen in >0 cases]
+
+#no variant consequences present that require additional curation
+
+#NMD
+table(DCM$NMD)
+#86 = NMD_escaping_variant
+
+doneant2 <- DCM
+
+PAV_List=c("frameshift_variant",
+           "stop_gained",
+           "splice_donor_variant",
+           "splice_acceptor_variant",
+           "splice_region_variant",
+           "splice_polypyrimidine_tract_variant",
+           "splice_donor_5th_base_variant",
+           "splice_donor_region_variant",
+           "splice_confirmed")
+
+hmmx <- doneant2[grepl(paste(PAV_List, collapse="|"), doneant2$Consequence),]
+dim(hmmx)
+#295
+
+#frameshift use HGVSp and ID frameshifts upstream to this that could have a PTC at 55 bp into penultimate exon ***
+hmmx$hgvk <- hmmx$HGVSp
+hmmx$hgvk <- gsub("\\?", 0, hmmx$hgvk)
+hmmx <- hmmx %>% separate(hgvk, c("hgvka", "hgvkb", "fs"), sep="\\*")
+hmmx$fs <- as.integer(as.character(hmmx$fs)) 
+hmmx$fs <- (hmmx$fs*3)
+
+hmmx$POS <- as.integer(as.character(hmmx$POS))
+hmmx$pos <- hmmx$POS
+
+for(i in (1:nrow(hmmx))){
+   if((hmmx$Consequence[i] == "frameshift_variant" | hmmx$Consequence[i] == "frameshift_variant,splice_region_variant") & (is.na(hmmx$fs[i]))) {
+    hmmx$POS[i] <- hmmx$pos[i]
+  }
+   else if((hmmx$Consequence[i] == "frameshift_variant" | hmmx$Consequence[i] == "frameshift_variant,splice_region_variant") &
+    (hmmx$SYMBOL[i] == "MYH7" | hmmx$SYMBOL[i] == "SCN5A" | hmmx$SYMBOL[i] == "TNNC1" | 
+       hmmx$SYMBOL[i] == "TNNT2" | hmmx$SYMBOL[i] == "TTN")) {
+    hmmx$POS[i] <- hmmx$POS[i] - hmmx$fs[i] 
+        }
+    else if((hmmx$Consequence[i] == "frameshift_variant" | hmmx$Consequence[i] == "frameshift_variant,splice_region_variant") & 
+            (hmmx$SYMBOL[i] == "BAG3" | hmmx$SYMBOL[i] == "DES" | hmmx$SYMBOL[i] == "DSP"
+            | hmmx$SYMBOL[i] == "FLNC" | hmmx$SYMBOL[i] == "LMNA" | hmmx$SYMBOL[i] == "PLN"
+            | hmmx$SYMBOL[i] == "RBM20")){
+            hmmx$POS[i] <- hmmx$POS[i] + hmmx$fs[i] 
+    }
+ 
+}
+
+tail(data.frame(hmmx$Consequence, hmmx$POS),10)
+
+hmm <- hmmx[which(hmmx$SYMBOL == "BAG3"),]
+hmm2 <- hmm[which(hmm$POS > (119672656 - 55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1         10:121435985:ACC:A frameshift_variant 119676506   ENSP00000358081.4:p.TH307T*fs*11        -
+#2 10:121436365:G:GGGGCTGGAGC frameshift_variant 119676883 ENSP00000358081.4:p.Q437RAGA*fs*10        -
+
+hmm <- hmmx[which(hmmx$SYMBOL == "DES"),]
+hmm2 <- hmm[which(hmm$POS >(219425745-55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#none
+
+hmm <- hmmx[which(hmmx$SYMBOL == "DSP"),]
+hmm2 <- hmm[which(hmm$POS >(7581569-55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 6:7583992:G:GAGATAGTCAT frameshift_variant  7583759 ENSP00000369129.3:p.Q2169HR*S*fs*3        -
+#2   6:7584586:GTATTCGCT:G frameshift_variant  7584386  ENSP00000369129.3:p.RLL2366*fs*11        -
+#3       6:7585569:CAGAA:C frameshift_variant  7585348    ENSP00000369129.3:p.QR2692*fs*4        -
+#4          6:7585681:TC:T frameshift_variant  7585496    ENSP00000369129.3:p.Q2730*fs*16        -
+
+#hmm <- hmmx[which(hmmx$SYMBOL == "FLNC"),]
+#hmm2 <- hmm[which(hmm$POS > (128858217-55)),]
+#data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$ClinVar)
+#doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+
+hmm <- hmmx[which(hmmx$SYMBOL == "LMNA"),]
+hmm2 <- hmm[which(hmm$POS > (156138757-55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#none
+
+hmm <- hmmx[which(hmmx$SYMBOL == "MYH7"),]
+hmm2 <- hmm[which(hmm$POS < (23413759+55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#none
+
+hmm <- hmmx[which(hmmx$SYMBOL == "PLN"),]
+hmm2 <- hmm[which(hmm$POS >(118548392-55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 6:118880119:T:TA frameshift_variant 118558977 ENSP00000350132.5:p.R13K*fs*7                    -
+#2  6:118880200:T:G        stop_gained 118559037      ENSP00000350132.5:p.L39* NMD_escaping_variant
+
+hmm <- hmmx[which(hmmx$SYMBOL == "RBM20"),]
+hmm2 <- hmm[which(hmm$POS >(110831182-55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#none
+
+hmm <- hmmx[which(hmmx$SYMBOL == "SCN5A"),]
+hmm2 <- hmm[which(hmm$POS <(38554279+55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 3:38591991:G:A      stop_gained 38550500 ENSP00000398266.2:p.R1957* NMD_escaping_variant
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TNNC1"),]
+hmm2 <- hmm[which(hmm$POS < (52451391+55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 3:52485409:T:A missense_variant,splice_region_variant 52451393 ENSP00000232975.3:p.D151V        -
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TNNT2"),]
+hmm2 <- hmm[which(hmm$POS < (201359623+55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#none
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TTN"),]
+hmm2 <- hmm[which(hmm$POS < (178527446+55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$ClinVar)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#none
+
+doneant2$NMD[doneant2$Consequence == "missense_variant,splice_region_variant" & (doneant2$SpliceAI_cutoff == "FAIL" | doneant2$SpliceAI_cutoff == "-")] <- "-"
+
+DCM1 <- doneant2
+
+#TTN PSI 90 regions only
+psi <- read.table("TTNpsi90.txt", header=F) #a file containing BP information on exons that have high expression in the heart
+DCM1$ttnfound <- ifelse(sapply(DCM1$POS, function(p) any (psi$V1 > p & psi$V2 < p)), "YES", "NO")
+dcm <- DCM1[!(DCM1$ttnfound == "NO" & DCM1$SYMBOL == "TTN"),]
+dim(dcm)
+#744
+dcm$ttnfound <- NULL
+
+DCM1 <- dcm
+
+# dcma$SYMBOL == "BAG3" | #PAV
+# dcma$SYMBOL == "DES" | #nTV
+# dcma$SYMBOL == "TTN" | #TV
+# dcma$SYMBOL == "MYH7"  | #nTV
+# dcma$SYMBOL == "TNNC1"  | #nTV (missense only)
+# dcma$SYMBOL == "TNNT2"  | #nTV (missense only)
+# dcma$SYMBOL == "LMNA"  | #PAV
+# dcma$SYMBOL == "FLNC"  | #TV
+# dcma$SYMBOL == "PLN"  | #PAV
+# dcma$SYMBOL == "SCN5A"  | #PAV
+# dcma$SYMBOL == "RBM20"| #PAV
+# dcma$SYMBOL == "DSP", #PAV
+
+table(DCM1$Consequence)
+
+#PAV
+pav <- DCM1 %>%
+  filter(SYMBOL == "BAG3"|
+         SYMBOL == "LMNA"|
+         SYMBOL == "PLN"|
+         SYMBOL == "SCN5A"|
+         SYMBOL == "RBM20"|
+         SYMBOL == "DSP")
+dim(pav)
+#372
+  
+miss_nmd <- DCM1 %>%
+  filter(SYMBOL == "MYH7"|
+         SYMBOL == "DES" |
+        SYMBOL == "TNNC1" |
+        SYMBOL == "TNNT2") %>%
+  filter(NMD == "NMD_escaping_variant")
+dim(miss_nmd)
+# 2
+
+miss <- DCM1 %>%
+  filter(SYMBOL == "MYH7"|
+         SYMBOL == "DES" |
+        SYMBOL == "TNNC1" |
+        SYMBOL == "TNNT2") %>%
+  filter(Consequence == "inframe_deletion" |
+         Consequence == "inframe_insertion" |
+         Consequence == "missense_variant" |
+         Consequence == "missense_variant,splice_region_variant")
+dim(miss)
+#171
+
+ttn <- DCM1 %>%
+  filter(SYMBOL == "TTN") %>%
+  filter(Consequence == "frameshift_variant" |
+         Consequence == "frameshift_variant,splice_region_variant" |
+         Consequence == "missense_variant,splice_region_variant" | #curated for splicing [there are none]
+         Consequence == "splice_acceptor_variant" |
+         Consequence == "splice_confirmed" |
+         Consequence == "splice_donor_5th_base_variant,intron_variant" |
+         Consequence == "splice_donor_variant" |
+         Consequence == "splice_donor_variant,coding_sequence_variant" |
+         Consequence == "splice_donor_variant,splice_donor_region_variant,coding_sequence_variant,intron_variant" |
+         Consequence == "splice_polypyrimidine_tract_variant,intron_variant" | 
+         Consequence == "stop_gained" |
+         Consequence == "stop_gained,frameshift_variant" |
+         Consequence == "stop_gained,splice_region_variant")
+dim(ttn)
+#193
+
+DCM1$filter <- ifelse((DCM1$ID %in% pav$ID | DCM1$ID %in% miss_nmd$ID | DCM1$ID %in% miss$ID | DCM1$ID %in% ttn$ID), "TRUE", "FALSE")
+DCMfilt <- DCM1[which(DCM1$filter == "TRUE"),]
+dim(DCMfilt)
+#738
+```
+
+# filter HCM by max AF in case cohort, gnomAD, and UKB
+
+```{r}
+dim(HCM)
+# 1370
+
+####### common, intermediate, rare PAVs
+hmm <- HCM[which(HCM$LMM_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T)
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.00100626 gnomad 0.002314 UKB n=612
+hmm <- HCM[which(HCM$OMG_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.000804405 gnomAD 0.00103 UKB n=586
+hmm <- HCM[which(HCM$BLF_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.00149709 gnomAD 0.002314 UKB n=104
+hmm <- HCM[which(HCM$GDX_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.00036598 gnoMAD 0.0007344 UKB n=410
+hmm <- HCM[which(HCM$SNG_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.0964262 gnomAD 0.131 UKB n=35
+hmm <- HCM[which(HCM$EGY_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.0964262 gnomAD 0.131 UKB n=145
+hmm <- HCM[which(HCM$RBH_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.0964262 gnomAD 0.131 UKB n=167
+hmm <- HCM[which(HCM$SLD_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.0964262 gnomAD 0.148522 faf 0.131 UKB n=84
+
+#min = GDX
+#0.00036598 gnoMAD 0.0007344 UKB n=410
+
+full5 <- HCM[which(HCM$gnomADg_AF <= 0.00036598 | is.na(HCM$gnomADg_AF)),]
+dim(full5)
+#1341
+
+full5a <- full5[which(full5$ukbMAF_qced <= 0.0007344 | is.na(full5$ukbMAF_qced)),]
+dim(full5a)
+#1340
+
+full5a$gnomADg_AC0[full5a$gnomADg_AC == 0] <- "AC0" #call those flagged as bad by gnomAD
+
+which( colnames(full5a)=="gnomADg" )
+which( colnames(full5a)=="gnomADg_AN_nfe_female" )
+
+for (i in 1:nrow(full5a)) {
+ if (full5a$gnomADg_AC0[i] == "AC0") {
+   full5a[i,50:96] <- NA #all gnomAD data - call it NA
+ }
+}
+
+write.table(full5a, "HCMx.txt", quote=F, row.names=F, sep="\t")
+
+table(full5a$SYMBOL)
+#ACTC1 MYBPC3   MYH7   MYL2   MYL3  TNNI3  TNNT2   TPM1 
+#   17    616    459     42     33     64     62     47 
+```
+
+# filter DCM by max AF in case cohort gnomAD and UKB (QCed) + add counts [dcmx.txt]
+
+```{r}
+### DCM
+DCM <- read.table("DCMfilt.txt", header=T, sep="\t")
+dim(DCM)
+# 738 
+
+####### common, intermediate, rare PAVs
+hmm <- DCM[which(DCM$LMM_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T)
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.00927996 gnomad 0.004344 UKB n=156
+hmm <- DCM[which(DCM$OMG_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.000552987 gnomAD 0.0006031 UKB n=111
+hmm <- DCM[which(DCM$SNG_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.803171 gnomAD 0.8533 UKB n=74
+hmm <- DCM[which(DCM$EGY_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.803171 gnomAD 0.8533 UKB n=54
+hmm <- DCM[which(DCM$RBH_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.803171 gnomAD 0.8533 UKB n=3
+hmm <- DCM[which(DCM$LM2_AC>0),]
+max(hmm$gnomADg_AF, na.rm=T) 
+max(hmm$ukbMAF_qced, na.rm=T)
+dim(hmm)
+#0.00141774 gnomAD 0.00266 UKB n=85
+
+#min = OMG
+#0.000552987 gnomAD 0.0006031 UKB n=111
+
+full5 <- DCM[which(DCM$gnomADg_AF <= 0.000552987 | is.na(DCM$gnomADg_AF)),]
+dim(full5)
+#671
+
+full5a <- full5[which(full5$ukbMAF_qced <= 0.0006031 | is.na(full5$ukbMAF_qced)),]
+dim(full5a)
+#665
+
+full5a$gnomADg_AC0 <- as.character(full5a$gnomADg_AC0)
+full5a$gnomADg_AC0[full5a$gnomADg_AC == 0] <- "AC0" #call those flagged as bad by gnomAD
+full5a$gnomADg_AN <- as.character(full5a$gnomADg_AN) 
+
+which( colnames(full5a)=="gnomADg" )
+which( colnames(full5a)=="gnomADg_AN_nfe_female" )
+
+for (i in 1:nrow(full5a)) {
+ if (full5a$gnomADg_AC0[i] == "AC0") {
+   full5a[i,50:96] <- NA #all gnomAD data - call it NA
+ }
+}
+
+write.table(full5a, "DCMx.txt", quote=F, row.names=F, sep="\t")
+
+table(full5a$SYMBOL)
+#BAG3   DES   DSP  LMNA  MYH7   PLN RBM20 SCN5A TNNC1 TNNT2   TTN 
+# 22    25   113    60   109     5    54    54     9    23   191
+```
+
+# variants to be included in the analysis
+
+```{r}
+HCMx <- read.table("HCMx.txt", header=T, sep="\t")
+
+HCMxfilt <- HCMx %>%
+  filter(AC_ALL_HCM > 1) %>%
+  filter(gnukb_AC > 1)
+
+dim(HCMxfilt)
+# 257
+
+write.table(HCMxfilt, "HCMpen.txt", quote=F, row.names=F, sep="\t")
+
+####DCM
+
+DCMx <- read.table("DCMx.txt", header=T, sep="\t")
+
+DCMxfilt <- DCMx %>%
+  filter(AC_ALL_DCM > 1) %>%
+  filter(gnukb_AC > 1)
+
+dim(DCMxfilt)
+# 59
+
+write.table(DCMxfilt, "DCMpen.txt", quote=F, row.names=F, sep="\t")
+```
+
+# Penetrance - aggregate analyses
+
+# UKB aggregate analyses HCM set up
+
+```{r}
+#aim get counts for genes, consequences, 
+#filtering
+#- 8 genes only
+#- same filtering thresholds
+#all HCM-associated genes
+#genes separately
+#variant consequences - MYBPC3 
+#Curation
+#allele frequency
+
+#HCM
+vep <- data.frame(fread("vepresults_hcmnormukbR", header=T, sep="\t"))
+
+vep2 <- vep %>%
+filter(CANONICAL == "YES")
+
+vep3 <- vep2[
+#vep2$SYMBOL == "BAG3" |
+#vep2$SYMBOL == "DSP"  |
+#vep2$SYMBOL == "TTN" |
+vep2$SYMBOL == "MYH7"  |
+#vep2$SYMBOL == "TNNC1"  |
+vep2$SYMBOL == "TNNT2"  |
+vep2$SYMBOL == "TPM1"  |
+#vep2$SYMBOL == "LMNA"  |
+vep2$SYMBOL == "ACTC1"  |
+#vep2$SYMBOL == "PLN"  |
+#vep2$SYMBOL == "RBM20"|
+vep2$SYMBOL == "MYBPC3"|
+vep2$SYMBOL == "TNNI3" |
+vep2$SYMBOL == "MYL2" |
+vep2$SYMBOL == "MYL3" ,
+#vep2$SYMBOL == "DES" |
+#vep2$SYMBOL == "SCN5A" ,
+]
+
+test <- vep3[which(vep3$ClinVar_CLNSIG == "Likely_pathogenic" | vep3$ClinVar_CLNSIG == "Pathogenic/Likely_pathogenic" | vep3$ClinVar_CLNSIG == "Pathogenic"),]
+table(test$Consequence)
+test$ClinVar[test$Consequence == "intron_variant"]
+#splice_polypyrimidine_tract_variant,intron_variant
+#splice_polypyrimidine_tract_variant,splice_region_variant,intron_variant
+#splice_donor_region_variant,intron_variant
+
+vep3$Consequence[(   vep3$ClinVar == "188544" |
+                     vep3$ClinVar == "42807" |
+                     vep3$ClinVar == "693982" |
+                     vep3$ClinVar == "42556")] <- "splice_confirmed"
+
+table(vep3$Consequence)
+
+vepx32 <- vep3 %>% filter(Consequence == "frameshift_variant" | 
+                           Consequence == "frameshift_variant,splice_region_variant" |
+                           Consequence == "frameshift_variant,start_lost" |
+                           Consequence == "frameshift_variant,stop_lost" |
+                           Consequence == "inframe_deletion" |
+                           Consequence == "inframe_deletion,splice_region_variant" |
+                           Consequence == "inframe_insertion" |
+                           Consequence == "missense_variant" |
+                           Consequence == "missense_variant,splice_region_variant" |
+                           Consequence == "protein_altering_variant" |
+                           Consequence == "splice_acceptor_variant" |
+                           Consequence == "splice_confirmed" |
+                           Consequence == "splice_donor_5th_base_variant,intron_variant" |
+                           Consequence == "splice_donor_region_variant,intron_variant" |
+                           Consequence == "splice_donor_variant" |
+                           Consequence == "splice_donor_variant,coding_sequence_variant" |
+                           Consequence == "splice_donor_variant,splice_donor_5th_base_variant,coding_sequence_variant,intron_variant" |
+                           Consequence == "splice_donor_variant,splice_donor_region_variant,coding_sequence_variant,intron_variant" |
+                           Consequence == "splice_donor_variant,splice_donor_region_variant,intron_variant" |
+                           Consequence == "splice_polypyrimidine_tract_variant,intron_variant" |
+                           Consequence == "splice_polypyrimidine_tract_variant,splice_region_variant,intron_variant" |
+                           Consequence == "splice_region_variant,intron_variant" |
+                           Consequence == "splice_region_variant,synonymous_variant" |
+                           Consequence == "splice_region_variant,splice_polypyrimidine_tract_variant,intron_variant" |
+                           Consequence == "start_lost" |
+                           Consequence == "start_lost,splice_region_variant" |
+                           Consequence == "stop_gained" |
+                           Consequence == "stop_gained,frameshift_variant" |
+                           Consequence == "stop_gained,splice_region_variant" |
+                           Consequence == "stop_lost")
+
+colnames(hcmfrq)[1:2] <- c("CHR", "ID")
+colnames(vepx32)[1] <- "ID"
+
+frq <- left_join(vepx32, hcmfrq, by="ID")
+
+# caseukb$Consequence[caseukb$Consequence == "protein_altering_variant"] <- "inframe_insertion"
+ 
+caseukb <- frq
+#Check for duplicated IDs before removal
+df <- caseukb %>%
+  filter(Consequence == "splice_donor_region_variant,intron_variant" |
+           Consequence == "splice_polypyrimidine_tract_variant,intron_variant" |
+           Consequence == "splice_polypyrimidine_tract_variant,splice_region_variant,intron_variant" |
+           Consequence == "splice_region_variant,intron_variant" |
+           Consequence == "splice_region_variant,synonymous_variant") %>% 
+  filter(SpliceAI_cutoff == "FAIL" | SpliceAI_cutoff == "-")
+dim(df)
+#445 for removal
+  
+caseukb$found <- caseukb$ID %in% df$ID
+table(caseukb$found)
+#TRUE = 445 woohoo
+
+caseukb2 <- caseukb[which(caseukb$found == "FALSE"),]
+dim(caseukb2)
+#2113
+caseukb2$found <- NULL
+
+doneant2 <- caseukb2
+
+#Test LOFTEE flags for each gene
+table(doneant2$LoF_filter)
+#3UTR_SPLICE 5UTR_SPLICE 
+table(doneant2$LoF_flags)
+#NAGNAG_SITE PHYLOCSF_WEAK 
+
+doneant2$Consequence <- as.character(doneant2$Consequence)
+
+#remove LC LoFs and ID PAV that are mislabelled.
+doneant2$Consequence[doneant2$LoF_flags == "NAGNAG_SITE"] <- "inframe_insertion"
+doneant2$Consequence[doneant2$LoF_filter == "3UTR_SPLICE"] <- "splice_donor_variant_LC"
+doneant2$Consequence[doneant2$LoF_filter == "5UTR_SPLICE"] <- "splice_donor_variant_LC"
+#NAGNAG site = splice acceptor site rescued by inframe acceptor site
+#3UTR SPLICE = splice donor with pLof low confidence
+#5UTR SPLICE = splice donor with pLof low confidence
+
+#add labels
+df3 <- doneant2 %>% separate(HGVSc, c("HGVSc.a", "HGVSc.b"), sep=":")
+df3$label <- paste0(df3$SYMBOL, ":", df3$HGVSc.b)
+head(df3$label)
+table(duplicated(df3$label))
+table(is.na(df3$label))
+
+HCM <- df3[which(df3$ukbAC_qced>0),]
+dim(HCM)
+#1975 
+
+#check LC variants
+
+table(HCM$Consequence)
+
+HCM1 <- HCM[!(HCM$Consequence == "splice_donor_variant_LC"),]
+dim(HCM1)
+# 1974
+
+table(HCM1$Consequence)
+#go through all manual variants:
+#start lost - below
+#stop lost = inframe insertion
+#inframe_deletion,splice_region_variant - below.
+
+table(HCM1$NMD)
+#NMDi:
+#  - NMD_escaping_variant 
+# 1936                   38 
+
+PAV_List=c("frameshift_variant",
+           "stop_gained",
+           "splice_donor_variant",
+           "splice_acceptor_variant",
+           "splice_region_variant",
+           "splice_polypyrimidine_tract_variant",
+           "splice_donor_5th_base_variant",
+           "splice_donor_region_variant",
+           "splice_confirmed")
+
+hmmx <- HCM1[grepl(paste(PAV_List, collapse="|"), HCM1$Consequence),]
+dim(hmmx) 
+#398
+
+hmmx$POS <- hmmx$ID
+hmmx2 <- hmmx %>% separate(POS, c("chr", "POS", "ref", "alt"), sep=":")
+hmmx2$chr <- NULL
+hmmx2$ref <- NULL
+hmmx2$alt <- NULL
+hmmx2$POS <- as.integer(hmmx2$POS)
+hmmx <- hmmx2
+
+head(hmmx$POS,10)
+hmmx$hgvk <- hmmx$HGVSp
+hmmx$hgvk <- gsub("\\?", 0, hmmx$hgvk)
+hmmx <- hmmx %>% separate(hgvk, c("hgvka", "hgvkb", "fs"), sep="\\*")
+hmmx$fs <- as.integer(as.character(hmmx$fs)) 
+hmmx$fs <- (hmmx$fs*3)
+
+for(i in (1:nrow(hmmx))){
+if((hmmx$Consequence[i] == "frameshift_variant" | hmmx$Consequence[i] == "frameshift_variant,splice_region_variant") &
+    (hmmx$SYMBOL[i] == "MYH7" | hmmx$SYMBOL[i] == "MYBPC3" | hmmx$SYMBOL[i] == "ACTC1" | 
+       hmmx$SYMBOL[i] == "TNNT2" | hmmx$SYMBOL[i] == "TNNI3" | hmmx$SYMBOL[i] == "MYL2" | hmmx$SYMBOL[i] == "MYL3")) {
+    hmmx$POS[i] <- hmmx$POS[i] - hmmx$fs[i] 
+        }
+    else if((hmmx$Consequence[i] == "frameshift_variant" | hmmx$Consequence[i] == "frameshift_variant,splice_region_variant") & 
+            (hmmx$SYMBOL[i] == "TPM1")){
+            hmmx$POS[i] <- hmmx$POS[i] + hmmx$fs[i] 
+    }
+   }
+
+hmm <- hmmx[which(hmmx$SYMBOL == "MYH7"),]
+#MYH7 <	23,413,759 + 55
+hmm2 <- hmm[which(hmm$POS < 23413814),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 14:23412872:C:A splice_acceptor_variant 23412872          -        -                 PASS
+#2 14:23413757:A:G    splice_donor_variant 23413757          -        -                 PASS
+
+hmm <- hmmx[which(hmmx$SYMBOL == "MYBPC3"),]
+#MYBPC3 <47,331,881 - second last exon is short
+hmm2 <- hmm[which(hmm$POS < 47331881),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 11:47331879:G:A missense_variant,splice_region_variant 47331879 ENSP00000442795.1:p.P1273S        -                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TNNT2"),]
+#TNNT2 < 	201,359,663 - second last exon is short
+hmm2 <- hmm[which(hmm$POS < 201359663),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 1:201359217:C:T                                                              stop_gained 201359217
+#2 1:201359258:G:T splice_region_variant,splice_polypyrimidine_tract_variant,intron_variant 201359258
+#3 1:201359651:G:A                                                              stop_gained 201359651
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TNNI3"),]
+#TNNI3 < 	55,154,030 + 55
+hmm2 <- hmm[which(hmm$POS < 55154085),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#none
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TPM1"),]
+#TPM1 > 63064142-55
+hmm2 <- hmm[which(hmm$POS > 63064087),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 15:63064141:A:G                                   missense_variant,splice_region_variant 63064141 ENSP00000385107.4:p.I284V
+#2 15:63064142:T:C                                   missense_variant,splice_region_variant 63064142 ENSP00000385107.4:p.I284T
+#3 15:63064143:G:A                                                     splice_donor_variant 63064143                         -
+#4 15:63065889:C:G splice_region_variant,splice_polypyrimidine_tract_variant,intron_variant 63065889                         -
+#5 15:63065891:C:T splice_region_variant,splice_polypyrimidine_tract_variant,intron_variant 63065891                         -
+#6 15:63065892:G:A splice_region_variant,splice_polypyrimidine_tract_variant,intron_variant 63065892                         -
+
+hmm <- hmmx[which(hmmx$SYMBOL == "MYL2"),]
+#MYL2 < 110,913,144  - second last exon is short
+hmm2 <- hmm[which(hmm$POS <  110913144),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+# 1 12:110911146:D:1                                                       frameshift_variant 110911137
+# 2 12:110911176:C:G                                                  splice_acceptor_variant 110911176
+# 3 12:110911176:C:T                                                  splice_acceptor_variant 110911176
+# 4 12:110911181:A:G splice_region_variant,splice_polypyrimidine_tract_variant,intron_variant 110911181
+# 5 12:110913094:D:3                             splice_donor_variant,coding_sequence_variant 110913094
+# 6 12:110913095:C:A                                                     splice_donor_variant 110913095
+# 7 12:110913097:T:G                                   missense_variant,splice_region_variant 110913097
+# 8 12:110913143:C:T                                   missense_variant,splice_region_variant 110913143
+
+hmm <- hmmx[which(hmmx$SYMBOL == "MYL3"),]
+#MYL3 <	46,858,272 - second last exon is short
+hmm2 <- hmm[which(hmm$POS < 46858272),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 3:46858226:C:G splice_donor_5th_base_variant,intron_variant 46858226          -        -                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "ACTC1"),]
+#ACTC1 < 	34,791,114 + 55
+hmm2 <- hmm[which(hmm$POS < 34791169),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+HCM1$NMD[which(HCM1$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 15:34790493:D:2 frameshift_variant 34790466 ENSP00000290378.4:p.L351*fs*9        -                 FAIL
+
+HCM1$NMD[HCM1$Consequence == "missense_variant,splice_region_variant" & (HCM1$SpliceAI_cutoff == "FAIL" | HCM1$SpliceAI_cutoff == "-")] <- "-"
+
+# *ACTC1 - nTV
+# *MYBPC3 - PAV
+# *MYH7 - nTV
+# *MYL2 - nTV
+# *MYL3 - nTV
+# *TNNI3 - nTV
+# *TNNT2 - nTV
+# *TPM1 - nTV
+
+#MYBPC3 (usually NMD escaping only for LoF mechanisms but MYBPC3 = PAV)
+pav <- HCM1 %>%
+  filter(SYMBOL == "MYBPC3") 
+dim(pav)
+#716
+  
+miss_nmd <- HCM1 %>%
+  filter(SYMBOL == "MYH7"|
+         SYMBOL == "TNNT2" |
+        SYMBOL == "TNNI3" |
+        SYMBOL == "TPM1" |
+        SYMBOL == "MYL2" |
+        SYMBOL == "MYL3" |
+        SYMBOL == "ACTC1") %>%
+  filter(NMD == "NMD_escaping_variant")
+dim(miss_nmd)
+#  45
+
+miss <- HCM1 %>%
+  filter(SYMBOL == "MYH7"|
+         SYMBOL == "TNNT2" |
+        SYMBOL == "TNNI3" |
+        SYMBOL == "TPM1" |
+        SYMBOL == "MYL2" |
+        SYMBOL == "MYL3" |
+        SYMBOL == "ACTC1") %>%
+  filter(Consequence == "inframe_deletion" |
+         Consequence == "inframe_deletion,splice_region_variant" |
+         Consequence == "inframe_insertion" |
+         Consequence == "missense_variant" |
+         Consequence == "missense_variant,splice_region_variant" |
+         Consequence == "start_lost" |
+         Consequence == "start_lost,splice_region_variant" |
+         Consequence == "stop_lost")
+dim(miss)
+#1009
+
+HCM1$filter <- ifelse((HCM1$ID %in% pav$ID | HCM1$ID %in% miss_nmd$ID | HCM1$ID %in% miss$ID), "TRUE", "FALSE")
+table(HCM1$filter)
+#FALSE  TRUE 
+#     204  1770 
+
+HCMfilt <- HCM1[which(HCM1$filter == "TRUE"),]
+dim(HCMfilt)
+#1770
+
+#min = GDX
+#0.00036598 gnoMAD 0.0007344 UKB n=410
+
+full5 <- HCMfilt[which(HCMfilt$gnomADg_AF <= 0.00036598 | is.na(HCMfilt$gnomADg_AF)),]
+dim(full5)
+#1736
+
+full5a <- full5[which(full5$ukbMAF_qced <= 0.0007344 | is.na(full5$ukbMAF_qced)),]
+dim(full5a)
+#1735
+
+full5a$gnomADg_AC0 <- as.character(full5a$gnomADg_AC0)
+full5a$gnomADg_AC0[full5a$gnomADg_AC == 0] <- "AC0" #call those flagged as bad by gnomAD
+full5a$gnomADg_AN <- as.character(full5a$gnomADg_AN) 
+
+which( colnames(full5a)=="gnomADg" )
+which( colnames(full5a)=="gnomADg_AN_nfe_female" )
+
+for (i in 1:nrow(full5a)) {
+ if (full5a$gnomADg_AC0[i] == "AC0") {
+   full5a[i,50:96] <- NA #all gnomAD data - call it NA
+ }
+}
+```
+
+# UKB all aggregate analyses DCM set up
+
+```{r}
+#aim get counts for genes, consequences, 
+#filtering
+#- dcm genes only
+#- same filtering thresholds
+#all DCM-associated genes
+#genes separately
+#variant consequences - TTN 
+#Curation
+#allele frequency
+
+#DCM
+vep <- data.frame(fread("vepresults_dcmnormukbR", header=T, sep="\t"))
+
+vep2 <- vep %>%
+filter(CANONICAL == "YES")
+
+vep3 <- vep2[
+vep2$SYMBOL == "BAG3" |
+vep2$SYMBOL == "DSP"  |
+vep2$SYMBOL == "TTN" |
+vep2$SYMBOL == "MYH7"  |
+vep2$SYMBOL == "TNNC1"  |
+vep2$SYMBOL == "TNNT2"  |
+#vep2$SYMBOL == "TPM1"  |
+vep2$SYMBOL == "LMNA"  |
+#vep2$SYMBOL == "ACTC1"  |
+vep2$SYMBOL == "PLN"  |
+vep2$SYMBOL == "RBM20"|
+#vep2$SYMBOL == "MYBPC3"|
+#vep2$SYMBOL == "TNNI3" |
+#vep2$SYMBOL == "MYL2" |
+#vep2$SYMBOL == "MYL3" ,
+vep2$SYMBOL == "DES" |
+vep2$SYMBOL == "SCN5A" ,
+]
+
+vep <- data.frame(fread("vepresults_ttnnormukbR", header=T, sep="\t")) #kept TTN separately to reduce compute time
+
+vep2 <- vep %>%
+filter(CANONICAL == "YES")
+
+vep4 <- vep2[
+vep2$SYMBOL == "TTN",
+]
+
+done <- rbind(vep3,vep4)
+vep3 <- done
+
+test <- vep3[which(vep3$ClinVar_CLNSIG == "Likely_pathogenic" | vep3$ClinVar_CLNSIG == "Pathogenic/Likely_pathogenic" | vep3$ClinVar_CLNSIG == "Pathogenic"),]
+table(test$Consequence)
+test$ClinVar[test$Consequence == "intron_variant"]
+
+#splice_polypyrimidine_tract_variant,intron_variant
+test$ClinVar[test$Consequence == "splice_polypyrimidine_tract_variant,intron_variant"]
+#splice_polypyrimidine_tract_variant,splice_region_variant,intron_variant
+#splice_donor_region_variant,intron_variant
+#splice_region_variant,synonymous_variant
+#vep3$Consequence[( vep3$ClinVar == "638303" | vep3$ClinVar == "987382")] <- "splice_confirmed" ###not enough evidence
+
+vepx32 <- vep3 %>% filter(Consequence == "frameshift_variant" | 
+                           Consequence == "frameshift_variant,splice_region_variant" |
+                           Consequence == "frameshift_variant,start_lost" |
+                           Consequence == "frameshift_variant,stop_lost" |
+                           Consequence == "inframe_deletion" |
+                           Consequence == "inframe_deletion,splice_region_variant" |
+                           Consequence == "inframe_insertion" |
+                           Consequence == "missense_variant" |
+                           Consequence == "missense_variant,splice_region_variant" |
+                           Consequence == "protein_altering_variant" |
+                           Consequence == "splice_acceptor_variant" |
+                           Consequence == "splice_acceptor_variant,splice_polypyrimidine_tract_variant,intron_variant" |
+                           Consequence == "splice_confirmed" |
+                           Consequence == "splice_donor_5th_base_variant,intron_variant" |
+                           Consequence == "splice_donor_region_variant,intron_variant" |
+                           Consequence == "splice_donor_variant" |
+                           Consequence == "splice_donor_variant,coding_sequence_variant" |
+                           Consequence == "splice_donor_variant,splice_donor_5th_base_variant,coding_sequence_variant,intron_variant" |
+                           Consequence == "splice_donor_variant,splice_donor_region_variant,coding_sequence_variant,intron_variant" |
+                           Consequence == "splice_donor_variant,splice_donor_region_variant,intron_variant" |
+                           Consequence == "splice_polypyrimidine_tract_variant,intron_variant" |
+                           Consequence == "splice_polypyrimidine_tract_variant,splice_region_variant,intron_variant" |
+                           Consequence == "splice_region_variant,5_prime_UTR_variant" |
+                           Consequence == "splice_region_variant,intron_variant" |
+                           Consequence == "splice_region_variant,synonymous_variant" |
+                           Consequence == "splice_region_variant,splice_polypyrimidine_tract_variant,intron_variant" |
+                           Consequence == "start_lost" |
+                           Consequence == "start_lost,splice_region_variant" |
+                           Consequence == "stop_gained" |
+                           Consequence == "stop_gained,frameshift_variant" |
+                           Consequence == "stop_gained,splice_region_variant" |
+                           Consequence == "stop_lost")
+
+colnames(dcmfrq)[1:2] <- c("CHR", "ID")
+colnames(vepx32)[1] <- "ID"
+
+frq <- left_join(vepx32, dcmfrq, by="ID")
+dim(frq)
+#22643
+
+table(frq$Consequence)
+
+caseukb <- frq
+caseukb$Consequence[caseukb$Consequence == "protein_altering_variant"] <- "inframe_insertion"
+
+#Check for duplicated IDs before removal
+df <- caseukb %>%
+  filter(Consequence == "splice_donor_region_variant,intron_variant" |
+           Consequence == "splice_polypyrimidine_tract_variant,intron_variant" |
+           Consequence == "splice_polypyrimidine_tract_variant,splice_region_variant,intron_variant" |
+           Consequence == "splice_region_variant,intron_variant" |
+           Consequence == "splice_region_variant,synonymous_variant" |
+           Consequence == "splice_region_variant,5_prime_UTR_variant") %>% 
+  filter(SpliceAI_cutoff == "FAIL" | SpliceAI_cutoff == "-")
+dim(df)
+#2124 for removal
+  
+caseukb$found <- caseukb$ID %in% df$ID
+table(caseukb$found)
+caseukb2 <- caseukb[which(caseukb$found == "FALSE"),]
+dim(caseukb2)
+caseukb2$found <- NULL
+
+#the 2 P/LP TTN missense variants aren't in the case data
+caseukb4 <- caseukb2[!(caseukb2$SYMBOL == "TTN" & (caseukb2$Consequence == "missense_variant" | caseukb2$Consequence == "inframe_deletion" | caseukb2$Consequence == "inframe_insertion")),]
+dim(caseukb4)
+#5779
+
+#19 "missense_variant,splice_region_variant" in TTN
+hmm <- caseukb4 %>%
+  filter(SYMBOL == "TTN") %>%
+  filter(Consequence == "missense_variant,splice_region_variant" |
+         Consequence == "inframe_deletion,splice_region_variant") %>%
+    filter(SpliceAI_cutoff == "FAIL" | SpliceAI_cutoff == "-")
+dim(hmm)
+#316 - all to go
+caseukb4$found <- caseukb4$ID %in% hmm$ID
+table(caseukb4$found)
+doneant2 <- caseukb4[which(caseukb4$found == "FALSE"),]
+dim(doneant2)
+#5463
+doneant2$found <- NULL
+
+#Test LOFTEE flags for each gene
+table(doneant2$LoF_filter)
+#5UTR_SPLICE   END_TRUNC #END_TRUNC The LoF variant falls in the last filter_position of the transcript (default = 0.05).
+doneant2$NMD[doneant2$LoF_filter == "END_TRUNC"]
+doneant2$Consequence[doneant2$LoF_filter == "END_TRUNC"]
+#frameshifts + NMD escaping...
+doneant2$SYMBOL[doneant2$LoF_filter == "END_TRUNC"]
+#SCN5A
+#.... i think ignore for SCN5A which is PAV
+
+table(doneant2$LoF_flags)
+#NAGNAG_SITE NON_CAN_SPLICE #NON_CAN_SPLICE The LoF is a splice variant that falls in a non-canonical splice site (not GT..AG).
+
+doneant2$Consequence <- as.character(doneant2$Consequence)
+
+#remove LC LoFs and ID PAV that are mislabelled.
+doneant2$Consequence[doneant2$LoF_flags == "NAGNAG_SITE"] <- "inframe_insertion"
+doneant2$Consequence[doneant2$LoF_filter == "5UTR_SPLICE"] <- "splice_donor_variant_LC"
+doneant2$Consequence[doneant2$LoF_flags == "NON_CAN_SPLICE"] <- "splice_donor_variant_LC"
+#NAGNAG site = splice acceptor site rescued by inframe acceptor site
+#3UTR SPLICE = splice donor with pLof low confidence
+#5UTR SPLICE = splice donor with pLof low confidence
+
+df3 <- doneant2 %>% separate(HGVSc, c("HGVSc.a", "HGVSc.b"), sep=":")
+df3$label <- paste0(df3$SYMBOL, ":", df3$HGVSc.b)
+head(df3$label)
+table(duplicated(df3$label))
+table(is.na(df3$label))
+
+DCM <- df3[which(df3$ukbAC_qced>0),]
+dim(DCM)
+#5111 
+
+#check LC variants
+
+table(DCM$Consequence)
+
+DCM1 <- DCM[!(DCM$Consequence == "splice_donor_variant_LC"),]
+dim(DCM1)
+# 5108
+
+table(DCM1$Consequence)
+#go through all manual variants:
+#start lost - below
+#stop lost = inframe insertion
+#inframe_deletion,splice_region_variant - below.
+
+table(DCM1$NMD)
+#NMDi:
+#  - NMD_escaping_variant 
+# 1936                   38 
+
+PAV_List=c("frameshift_variant",
+           "stop_gained",
+           "splice_donor_variant",
+           "splice_acceptor_variant",
+           "splice_region_variant",
+           "splice_polypyrimidine_tract_variant",
+           "splice_donor_5th_base_variant",
+           "splice_donor_region_variant",
+           "splice_confirmed")
+
+hmmx <- DCM1[grepl(paste(PAV_List, collapse="|"), DCM1$Consequence),]
+dim(hmmx) 
+#1200
+
+hmmx$POS <- hmmx$ID
+hmmx2 <- hmmx %>% separate(POS, c("chr", "POS", "ref", "alt"), sep=":")
+hmmx2$chr <- NULL
+hmmx2$ref <- NULL
+hmmx2$alt <- NULL
+hmmx2$POS <- as.integer(hmmx2$POS)
+hmmx <- hmmx2
+
+#frameshift use HGVSp and ID frameshifts upstream to this that could have a PTC at 55 bp into penultimate exon ***
+hmmx$hgvk <- hmmx$HGVSp
+hmmx$hgvk <- gsub("\\?", 0, hmmx$hgvk)
+hmmx <- hmmx %>% separate(hgvk, c("hgvka", "hgvkb", "fs"), sep="\\*")
+hmmx$fs <- as.integer(as.character(hmmx$fs)) 
+hmmx$fs <- (hmmx$fs*3)
+
+hmmx$POS <- as.integer(as.character(hmmx$POS))
+hmmx$pos <- hmmx$POS
+
+for(i in (1:nrow(hmmx))){
+   if((hmmx$Consequence[i] == "frameshift_variant" | hmmx$Consequence[i] == "frameshift_variant,splice_region_variant") & (is.na(hmmx$fs[i]))) {
+    hmmx$POS[i] <- hmmx$pos[i]
+  }
+   else if((hmmx$Consequence[i] == "frameshift_variant" | hmmx$Consequence[i] == "frameshift_variant,splice_region_variant") &
+    (hmmx$SYMBOL[i] == "MYH7" | hmmx$SYMBOL[i] == "SCN5A" | hmmx$SYMBOL[i] == "TNNC1" | 
+       hmmx$SYMBOL[i] == "TNNT2" | hmmx$SYMBOL[i] == "TTN")) {
+    hmmx$POS[i] <- hmmx$POS[i] - hmmx$fs[i] 
+        }
+    else if((hmmx$Consequence[i] == "frameshift_variant" | hmmx$Consequence[i] == "frameshift_variant,splice_region_variant") & 
+            (hmmx$SYMBOL[i] == "BAG3" | hmmx$SYMBOL[i] == "DES" | hmmx$SYMBOL[i] == "DSP"
+            | hmmx$SYMBOL[i] == "FLNC" | hmmx$SYMBOL[i] == "LMNA" | hmmx$SYMBOL[i] == "PLN"
+            | hmmx$SYMBOL[i] == "RBM20")){
+            hmmx$POS[i] <- hmmx$POS[i] + hmmx$fs[i] 
+    }
+ 
+}
+
+tail(data.frame(hmmx$Consequence, hmmx$POS),10)
+
+hmm <- hmmx[which(hmmx$SYMBOL == "BAG3"),]
+hmm2 <- hmm[which(hmm$POS > (119672656 - 55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+# 1 10:119672661:G:A splice_donor_5th_base_variant,intron_variant 119672661                         -                    -                 FAIL
+# 2 10:119676479:C:T                                  stop_gained 119676479 ENSP00000358081.4:p.R309* NMD_escaping_variant                 FAIL
+# 3 10:119676935:G:T                                  stop_gained 119676935 ENSP00000358081.4:p.E461* NMD_escaping_variant                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "DES"),]
+hmm2 <- hmm[which(hmm$POS >(219425745-55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 2:219425745:G:C missense_variant,splice_region_variant 219425745 ENSP00000363071.3:p.E457D        -                 FAIL
+#2 2:219425746:G:A                   splice_donor_variant 219425746                         -        -                 PASS
+
+hmm <- hmmx[which(hmmx$SYMBOL == "DSP"),]
+hmm2 <- hmm[which(hmm$POS >(7581569-55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+# 1   6:7581510:D:4 frameshift_variant  7581522     ENSP00000369129.3:p.ER1776*fs*4                    -                 FAIL
+# 2   6:7582690:C:T        stop_gained  7582690          ENSP00000369129.3:p.Q1810* NMD_escaping_variant                 FAIL
+# 3   6:7582693:G:T        stop_gained  7582693          ENSP00000369129.3:p.E1811* NMD_escaping_variant                 FAIL
+# 4   6:7582927:G:T        stop_gained  7582927          ENSP00000369129.3:p.E1889* NMD_escaping_variant                 FAIL
+# 5   6:7583139:G:A        stop_gained  7583139          ENSP00000369129.3:p.W1959* NMD_escaping_variant                 FAIL
+# 6   6:7583393:D:2 frameshift_variant  7583438     ENSP00000369129.3:p.T2045*fs*15                    -                 FAIL
+# 7   6:7583604:D:4 frameshift_variant  7583604    ENSP00000369129.3:p.*F2115*fs*19                    -                 FAIL
+# 8   6:7583740:C:T        stop_gained  7583740          ENSP00000369129.3:p.R2160* NMD_escaping_variant                 FAIL
+# 9   6:7583758:C:T        stop_gained  7583758          ENSP00000369129.3:p.R2166* NMD_escaping_variant                 FAIL
+# 10  6:7583775:D:2 frameshift_variant  7583922     ENSP00000369129.3:p.F2172*fs*49                    -                 FAIL
+# 11  6:7583872:C:T        stop_gained  7583872          ENSP00000369129.3:p.Q2204* NMD_escaping_variant                 FAIL
+# 12  6:7583872:D:5 frameshift_variant  7583914    ENSP00000369129.3:p.RS2206*fs*14                    -                    -
+# 13  6:7583982:D:2 frameshift_variant  7583991      ENSP00000369129.3:p.I2241*fs*3                    -                 FAIL
+# 14  6:7584112:C:T        stop_gained  7584112          ENSP00000369129.3:p.R2284* NMD_escaping_variant                 FAIL
+# 15  6:7584316:C:T        stop_gained  7584316          ENSP00000369129.3:p.Q2352* NMD_escaping_variant                 FAIL
+# 16  6:7584338:D:1 frameshift_variant  7584368     ENSP00000369129.3:p.I2359*fs*10                    -                 FAIL
+# 17 6:7584406:D:17 frameshift_variant  7584412 ENSP00000369129.3:p.ESHRLP2382*fs*2                    -                    -
+# 18  6:7584825:D:4 frameshift_variant  7584939    ENSP00000369129.3:p.KK2522*fs*38                    -                 FAIL
+# 19  6:7584845:I:1 frameshift_variant  7584848      ENSP00000369129.3:p.-2529*fs*1                    -                 FAIL
+# 20  6:7584846:T:A        stop_gained  7584846          ENSP00000369129.3:p.Y2528* NMD_escaping_variant                 FAIL
+# 21  6:7584903:C:G        stop_gained  7584903          ENSP00000369129.3:p.Y2547* NMD_escaping_variant                 FAIL
+# 22  6:7584904:C:T        stop_gained  7584904          ENSP00000369129.3:p.R2548* NMD_escaping_variant                 FAIL
+# 23  6:7585018:C:T        stop_gained  7585018          ENSP00000369129.3:p.R2586* NMD_escaping_variant                 FAIL
+# 24  6:7585028:D:4 frameshift_variant  7585061    ENSP00000369129.3:p.SK2591*fs*11                    -                 FAIL
+# 25  6:7585207:I:1 frameshift_variant  7585303     ENSP00000369129.3:p.-2650*fs*32                    -                 FAIL
+# 26  6:7585228:D:5 frameshift_variant  7585300  ENSP00000369129.3:p.CTG2656W*fs*24                    -                    -
+# 27  6:7585247:D:1 frameshift_variant  7585298     ENSP00000369129.3:p.P2663*fs*17                    -                 FAIL
+# 28  6:7585328:D:1 frameshift_variant  7585352      ENSP00000369129.3:p.K2689*fs*8                    -                 FAIL
+# 29  6:7585336:C:T        stop_gained  7585336          ENSP00000369129.3:p.Q2692* NMD_escaping_variant                 FAIL
+# 30  6:7585336:D:4 frameshift_variant  7585348     ENSP00000369129.3:p.QR2692*fs*4                    -                 FAIL
+# 31  6:7585448:D:1 frameshift_variant  7585496     ENSP00000369129.3:p.Q2730*fs*16                    -                 FAIL
+# 32  6:7585713:C:A        stop_gained  7585713          ENSP00000369129.3:p.Y2817* NMD_escaping_variant                 FAIL
+# 33  6:7585776:I:2 frameshift_variant  7585911     ENSP00000369129.3:p.-2839*fs*45                    -                    -
+# 34  6:7585777:D:2 frameshift_variant  7585813     ENSP00000369129.3:p.S2839*fs*12                    -                 FAIL
+
+#hmm <- hmmx[which(hmmx$SYMBOL == "FLNC"),]
+#hmm2 <- hmm[which(hmm$POS > (128858217-55)),]
+#data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$ClinVar)
+#doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+
+hmm <- hmmx[which(hmmx$SYMBOL == "LMNA"),]
+hmm2 <- hmm[which(hmm$POS > (156138757-55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 1:156138562:I:1 frameshift_variant 156138895 ENSP00000357283.4:p.-593*fs*111                    -                 FAIL
+#2 1:156138749:C:T        stop_gained 156138749       ENSP00000357283.4:p.R654* NMD_escaping_variant                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "MYH7"),]
+hmm2 <- hmm[which(hmm$POS < (23413759+55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 14:23412872:C:A splice_acceptor_variant 23412872          -        -                 PASS
+#2 14:23413757:A:G    splice_donor_variant 23413757          -        -                 PASS
+
+hmm <- hmmx[which(hmmx$SYMBOL == "PLN"),]
+hmm2 <- hmm[which(hmm$POS >(118548392-55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 6:118558982:I:2 frameshift_variant 118559039 ENSP00000350132.5:p.Q22L*fs*19        -                    -
+#2 6:118558997:D:1 frameshift_variant 118559036  ENSP00000350132.5:p.K27*fs*13        -                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "RBM20"),]
+hmm2 <- hmm[which(hmm$POS >(110831182-55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1  10:110831180:C:A missense_variant,splice_region_variant 110831180             ENSP00000358532.3:p.Q1191K        -                 FAIL
+#2  10:110831180:C:G missense_variant,splice_region_variant 110831180             ENSP00000358532.3:p.Q1191E        -                 FAIL
+#3 10:110835876:I:19                     frameshift_variant 110835942 ENSP00000358532.3:p.S1195WNICGIF*fs*22        -                    -
+
+hmm <- hmmx[which(hmmx$SYMBOL == "SCN5A"),]
+hmm2 <- hmm[which(hmm$POS <(38554279+55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+# 1  3:38550354:I:1 frameshift_variant 38550330 ENSP00000398266.2:p.P2005P*fs*8                    -                 FAIL
+# 2  3:38550500:G:A        stop_gained 38550500      ENSP00000398266.2:p.R1957* NMD_escaping_variant                 FAIL
+# 3  3:38550542:G:A        stop_gained 38550542      ENSP00000398266.2:p.R1943* NMD_escaping_variant                 FAIL
+# 4  3:38550545:D:2 frameshift_variant 38550509 ENSP00000398266.2:p.P1941*fs*12                    -                 FAIL
+# 5  3:38550546:D:1 frameshift_variant 38550516 ENSP00000398266.2:p.P1941*fs*10                    -                 FAIL
+# 6  3:38550599:I:1 frameshift_variant 38550542 ENSP00000398266.2:p.-1924*fs*19                    -                 FAIL
+# 7  3:38550606:D:2 frameshift_variant 38550543 ENSP00000398266.2:p.K1921*fs*21                    -                 FAIL
+# 8  3:38550647:G:A        stop_gained 38550647      ENSP00000398266.2:p.Q1908* NMD_escaping_variant                 FAIL
+# 9  3:38550786:D:1 frameshift_variant 38550756 ENSP00000398266.2:p.L1861*fs*10                    -                 FAIL
+# 10 3:38551014:D:2 frameshift_variant 38551008  ENSP00000398266.2:p.L1785*fs*2                    -                 FAIL
+# 11 3:38551487:G:A        stop_gained 38551487      ENSP00000398266.2:p.R1628* NMD_escaping_variant                 FAIL
+# 12 3:38551505:G:A        stop_gained 38551505      ENSP00000398266.2:p.R1622* NMD_escaping_variant                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TNNC1"),]
+hmm2 <- hmm[which(hmm$POS < (52451391+55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+# 1 3:52451441:I:1 frameshift_variant 52451390 ENSP00000232975.3:p.E135G*fs*17        -                 FAIL
+# 2 3:52451480:I:2 frameshift_variant 52451429 ENSP00000232975.3:p.Q122L*fs*17        -                    -
+# 3 3:52451481:D:2 frameshift_variant 52451391  ENSP00000232975.3:p.L121*fs*30        -                 FAIL
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TNNT2"),]
+hmm2 <- hmm[which(hmm$POS < (201359623+55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+# 1 1:201359217:C:T                            stop_gained 201359217 ENSP00000499593.1:p.W297* NMD_escaping_variant                 FAIL
+# 2 1:201359651:G:A                            stop_gained 201359651 ENSP00000499593.1:p.R275* NMD_escaping_variant                 FAIL
+# 3 1:201359663:T:A missense_variant,splice_region_variant 201359663 ENSP00000499593.1:p.I271F                    -                 FAIL
+# 4 1:201359665:T:G                splice_acceptor_variant 201359665                         -                    -                 PASS
+
+hmm <- hmmx[which(hmmx$SYMBOL == "TTN"),]
+hmm2 <- hmm[which(hmm$POS < (178527446+55)),]
+data.frame(hmm2$ID, hmm2$Consequence, hmm2$POS, hmm2$HGVSp, hmm2$NMD, hmm2$SpliceAI_cutoff)
+doneant2$NMD[which(doneant2$ID %in% hmm2$ID)] <- "NMD_escaping_variant"
+#1 2:178527062:C:A        stop_gained 178527062      ENSP00000467141.1:p.E35976* NMD_escaping_variant                 FAIL
+#2 2:178527120:D:1 frameshift_variant 178527072 ENSP00000467141.1:p.L35956*fs*16                    -                 FAIL
+#3 2:178527188:C:A        stop_gained 178527188      ENSP00000467141.1:p.G35934* NMD_escaping_variant                 FAIL
+#4 2:178527481:D:1 frameshift_variant 178527448 ENSP00000467141.1:p.S35882*fs*11                    -                 FAIL
+#5 2:178527491:G:A        stop_gained 178527491      ENSP00000467141.1:p.Q35879*                    -                 FAIL
+
+doneant2$NMD[doneant2$Consequence == "missense_variant,splice_region_variant" & (doneant2$SpliceAI_cutoff == "FAIL" | doneant2$SpliceAI_cutoff == "-")] <- "-"
+
+DCM1 <- doneant2
+
+#TTN PSI 90 regions
+psi <- read.table("TTNpsi90.txt", header=F) ## a file containing regions of exons PSI>90%
+DCM1$ttnfound <- ifelse(sapply(DCM1$POS, function(p) any (psi$V1 > p & psi$V2 < p)), "YES", "NO")
+table(DCM1$ttnfound)
+# NO  YES 
+#4918  545
+dcm <- DCM1[!(DCM1$ttnfound == "NO" & DCM1$SYMBOL == "TTN"),]
+dim(dcm)
+#5076
+dcm$ttnfound <- NULL
+dim(dcm)
+#5076
+
+DCM1 <- dcm
+
+# dcma$SYMBOL == "BAG3" | #PAV
+# dcma$SYMBOL == "DES" | #nTV
+# dcma$SYMBOL == "TTN" | #TV
+# dcma$SYMBOL == "MYH7"  | #nTV
+# dcma$SYMBOL == "TNNC1"  | #nTV (missense only)
+# dcma$SYMBOL == "TNNT2"  | #nTV (missense only)
+# dcma$SYMBOL == "LMNA"  | #PAV
+# dcma$SYMBOL == "FLNC"  | #TV
+# dcma$SYMBOL == "PLN"  | #PAV
+# dcma$SYMBOL == "SCN5A"  | #PAV
+# dcma$SYMBOL == "RBM20"| #PAV
+# dcma$SYMBOL == "DSP", #PAV
+
+table(DCM1$Consequence)
+
+#PAV
+pav <- DCM1 %>%
+  filter(SYMBOL == "BAG3"|
+         SYMBOL == "LMNA"|
+         SYMBOL == "PLN"|
+         SYMBOL == "SCN5A"|
+         SYMBOL == "RBM20"|
+         SYMBOL == "DSP")
+dim(pav)
+#3382
+  
+miss_nmd <- DCM1 %>%
+  filter(SYMBOL == "MYH7"|
+         SYMBOL == "DES" |
+        SYMBOL == "TNNC1" |
+        SYMBOL == "TNNT2") %>%
+  filter(NMD == "NMD_escaping_variant")
+dim(miss_nmd)
+# 33
+
+miss <- DCM1 %>%
+  filter(SYMBOL == "MYH7"|
+         SYMBOL == "DES" |
+        SYMBOL == "TNNC1" |
+        SYMBOL == "TNNT2") %>%
+  filter(Consequence == "inframe_deletion" |
+         Consequence == "inframe_insertion" |
+         Consequence == "missense_variant" |
+         Consequence == "missense_variant,splice_region_variant"|
+           Consequence == "start_lost"|
+           Consequence == "stop_lost")
+dim(miss)
+#1029
+
+ttn <- DCM1 %>%
+  filter(SYMBOL == "TTN") %>%
+  filter(Consequence == "frameshift_variant" |
+         Consequence == "frameshift_variant,splice_region_variant" |
+         Consequence == "missense_variant,splice_region_variant" | #curated for splicing [there are none]
+         Consequence == "splice_acceptor_variant" |
+           Consequence == "splice_acceptor_variant,splice_polypyrimidine_tract_variant,intron_variant" |
+         Consequence == "splice_confirmed" |
+           Consequence == "splice_donor_region_variant,intron_variant" |
+         Consequence == "splice_donor_5th_base_variant,intron_variant" |
+         Consequence == "splice_donor_variant" |
+         Consequence == "splice_donor_variant,coding_sequence_variant" |
+         Consequence == "splice_donor_variant,splice_donor_region_variant,coding_sequence_variant,intron_variant" |
+           Consequence == "splice_donor_variant,splice_donor_region_variant,intron_variant" |
+         Consequence == "splice_polypyrimidine_tract_variant,intron_variant" | 
+           Consequence == "splice_polypyrimidine_tract_variant,splice_region_variant,intron_variant" |
+           Consequence == "splice_region_variant,intron_variant" |
+           Consequence == "splice_region_variant,synonymous_variant" |
+         Consequence == "stop_gained" |
+         Consequence == "stop_gained,frameshift_variant" |
+         Consequence == "stop_gained,splice_region_variant")
+dim(ttn)
+#544
+
+DCM1$filter <- ifelse((DCM1$ID %in% pav$ID | DCM1$ID %in% miss_nmd$ID | DCM1$ID %in% miss$ID | DCM1$ID %in% ttn$ID), "TRUE", "FALSE")
+table(DCM1$filter)
+#FALSE  TRUE 
+# 88  4988 
+
+DCMfilt <- DCM1[which(DCM1$filter == "TRUE"),]
+dim(DCMfilt)
+#4988
+
+DCMfilt <- DCMfilt[!DCMfilt$Consequence == "splice_donor_variant_LC",]
+dim(DCMfilt)
+# 4985 
+
+#min = OMG
+#0.000552987 gnomAD 0.0006031 UKB n=111
+
+full5 <- DCM[which(DCM$gnomADg_AF <= 0.000552987 | is.na(DCM$gnomADg_AF)),]
+dim(full5)
+#4906
+
+full5a <- full5[which(full5$ukbMAF_qced <= 0.0006031 | is.na(full5$ukbMAF_qced)),]
+dim(full5a)
+#4898
+
+full5a$gnomADg_AC0 <- as.character(full5a$gnomADg_AC0)
+full5a$gnomADg_AC0[full5a$gnomADg_AC == 0] <- "AC0" #call those flagged as bad by gnomAD
+full5a$gnomADg_AN <- as.character(full5a$gnomADg_AN) 
+
+which( colnames(full5a)=="gnomADg" )
+which( colnames(full5a)=="gnomADg_AN_nfe_female" )
+
+for (i in 1:nrow(full5a)) {
+ if (full5a$gnomADg_AC0[i] == "AC0") {
+   full5a[i,49:95] <- NA #all gnomAD data - call it NA
+ }
+}
+```

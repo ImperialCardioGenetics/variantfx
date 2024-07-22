@@ -1,0 +1,253 @@
+# Penetrance - specific variants
+
+# HCM estimate penetrance
+
+```{r}
+df <- read.table("HCMpen.txt", header=T, sep="\t") ## variants for penetrance estimate
+
+#### as a function
+penetrance <- function(x_D, n_D, x_AgD, n_AgD, x_A, n_A){
+set.seed(28061971)
+digits <- 6   
+alpha <- 0.05  
+p_D <- x_D / n_D
+p_AgD <- x_AgD / n_AgD
+p_A <- x_A / n_A
+d <- 0.5   
+p_D_wod <- (x_D + d) / (n_D + d)
+p_AgD_wod <- (x_AgD + d) / (n_AgD + d)
+p_A_wod <- (x_A + d) / (n_A + d)
+log_AR <- log(p_D_wod * p_AgD_wod / p_A_wod) + 1/2 * ((1 / p_A_wod) * (1 - p_A_wod) / (n_A + d) - 
+                                                       (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) - 
+                                                       (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d))
+Var_log_AR <- (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) + 
+              (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d) + 
+              (1 / p_A_wod) * (1 - p_A_wod) / (n_A + d)
+log_LCI <- log_AR - qnorm(1 - alpha / 2) * sqrt(Var_log_AR)
+log_UCI <- log_AR + qnorm(1 - alpha / 2) * sqrt(Var_log_AR)
+penetrance <- pmin(1,pmax(0,exp(log_AR)))
+log_lCI <- pmin(1,pmax(0,exp(log_LCI)))
+log_uCI <- pmin(1,pmax(0,exp(log_UCI)))
+my_list <- list("penetrance" = penetrance, "lci" = log_lCI, "uci" = log_uCI)
+return(my_list)
+}
+
+names(df)
+
+#total
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_ALL_HCM, n_AgD=df$AN_ALL_HCM, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance", "lci", "uci")
+
+#EUR
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_HCM_EUR, n_AgD=df$AN_HCM_EUR, x_A=df$gnukb_AC_eu, n_A=df$gnukb_AN_eu)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_eu", "lci_eu", "uci_eu")
+
+#nwe
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_HCM_EUR, n_AgD=df$AN_HCM_EUR, x_A=df$gnukb_AC_nwe, n_A=df$gnukb_AN_nwe)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_nwe", "lci_nwe", "uci_nwe")
+
+#gnomad only
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_ALL_HCM, n_AgD=df$AN_ALL_HCM, x_A=df$gnomADg_AC, n_A=df$gnomADg_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_gnomad", "lci_gnomad", "uci_gnomad")
+
+#ukb only
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_ALL_HCM, n_AgD=df$AN_ALL_HCM, x_A=df$ukbAC_qced, n_A=df$ukbAN_qced)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_ukb", "lci_ukb", "uci_ukb")
+
+#NWE - gnomAD and UKB separate
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_HCM_EUR, n_AgD=df$AN_HCM_EUR, x_A=df$ukbAC_brit, n_A=df$ukbAN_brit)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_ukb_brit", "lci_ukb_brit", "uci_ukb_brit")
+
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_HCM_EUR, n_AgD=df$AN_HCM_EUR, x_A=df$gnomADg_AC_nfe_nwe, n_A=df$gnomADg_AN_nfe_nwe)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_gnomad_nwe", "lci_gnomad_nwe", "uci_gnomad_nwe")
+
+#EU - gnomAD and UKB separate
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_HCM_EUR, n_AgD=df$AN_HCM_EUR, x_A=df$ukbAC_eu, n_A=df$ukbAN_eu)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_ukb_eu", "lci_ukb_eu", "uci_ukb_eu")
+
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_HCM_EUR, n_AgD=df$AN_HCM_EUR, x_A=df$gnomADg_AC_nfe, n_A=df$gnomADg_AN_nfe)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_gnomad_eu", "lci_gnomad_eu", "uci_gnomad_eu")
+
+#afr
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_HCM_AFR, n_AgD=df$AN_HCM_AFR, x_A=df$gnukb_AC_afr, n_A=df$gnukb_AN_afr)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_afr", "lci_afr", "uci_afr")
+
+#eas
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_HCM_EAS, n_AgD=df$AN_HCM_EAS, x_A=df$gnukb_AC_eas, n_A=df$gnukb_AN_eas)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_eas", "lci_eas", "uci_eas")
+
+#sas
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=97, n_D=52660, x_AgD=df$AC_HCM_SAS, n_AgD=df$AN_HCM_SAS, x_A=df$gnukb_AC_sas, n_A=df$gnukb_AN_sas)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_sas", "lci_sas", "uci_sas")
+
+#male
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=68, n_D=24411, x_AgD=df$AC_HCM_male, n_AgD=df$AN_HCM_male, x_A=df$gnukb_AC_male, n_A=df$gnukb_AN_male)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_male", "lci_male", "uci_male")
+
+#female
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=15, n_D=19646, x_AgD=df$AC_HCM_female, n_AgD=df$AN_HCM_female, x_A=df$gnukb_AC_female, n_A=df$gnukb_AN_female)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_female", "lci_female", "uci_female")
+
+#0s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(97*(df$AN_HCM_0s/df$AN_HCM_80s)), n_D=(52660), x_AgD=df$AC_HCM_0s, n_AgD=df$AN_HCM_0s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_0s", "lci_0s", "uci_0s")
+
+#10s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(97*(df$AN_HCM_10s/df$AN_HCM_80s)), n_D=(52660), x_AgD=df$AC_HCM_10s, n_AgD=df$AN_HCM_10s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_10s", "lci_10s", "uci_10s")
+
+#20s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(97*(df$AN_HCM_20s/df$AN_HCM_80s)), n_D=(52660), x_AgD=df$AC_HCM_20s, n_AgD=df$AN_HCM_20s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_20s", "lci_20s", "uci_20s")
+
+#30s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(97*(df$AN_HCM_30s/df$AN_HCM_80s)), n_D=(52660), x_AgD=df$AC_HCM_30s, n_AgD=df$AN_HCM_30s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_30s", "lci_30s", "uci_30s")
+
+#40s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(97*(df$AN_HCM_40s/df$AN_HCM_80s)), n_D=(52660), x_AgD=df$AC_HCM_40s, n_AgD=df$AN_HCM_40s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_40s", "lci_40s", "uci_40s")
+
+#50s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(97*(df$AN_HCM_50s/df$AN_HCM_80s)), n_D=(52660), x_AgD=df$AC_HCM_50s, n_AgD=df$AN_HCM_50s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_50s", "lci_50s", "uci_50s")
+
+#60s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(97*(df$AN_HCM_60s/df$AN_HCM_80s)), n_D=(52660), x_AgD=df$AC_HCM_60s, n_AgD=df$AN_HCM_60s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_60s", "lci_60s", "uci_60s")
+
+#70s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(97*(df$AN_HCM_70s/df$AN_HCM_80s)), n_D=(52660), x_AgD=df$AC_HCM_70s, n_AgD=df$AN_HCM_70s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_70s", "lci_70s", "uci_70s")
+
+#80s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(97*(df$AN_HCM_80s/df$AN_HCM_80s)), n_D=(52660), x_AgD=df$AC_HCM_80s, n_AgD=df$AN_HCM_80s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_80s", "lci_80s", "uci_80s")
+
+write.table(df, "HCM_penetrance.txt", quote=F, row.names=F, sep="\t")
+```
+
+# DCM estimate penetrance
+
+```{r}
+df <- read.table("DCMpen.txt", header=T, sep="\t") ## variants for penetrance estimate
+
+#### as a function
+penetrance <- function(x_D, n_D, x_AgD, n_AgD, x_A, n_A){
+set.seed(28061971)
+digits <- 6   
+alpha <- 0.05  
+p_D <- x_D / n_D
+p_AgD <- x_AgD / n_AgD
+p_A <- x_A / n_A
+d <- 0.5   
+p_D_wod <- (x_D + d) / (n_D + d)
+p_AgD_wod <- (x_AgD + d) / (n_AgD + d)
+p_A_wod <- (x_A + d) / (n_A + d)
+log_AR <- log(p_D_wod * p_AgD_wod / p_A_wod) + 1/2 * ((1 / p_A_wod) * (1 - p_A_wod) / (n_A + d) - 
+                                                       (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) - 
+                                                       (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d))
+Var_log_AR <- (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) + 
+              (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d) + 
+              (1 / p_A_wod) * (1 - p_A_wod) / (n_A + d)
+log_LCI <- log_AR - qnorm(1 - alpha / 2) * sqrt(Var_log_AR)
+log_UCI <- log_AR + qnorm(1 - alpha / 2) * sqrt(Var_log_AR)
+penetrance <- pmin(1,pmax(0,exp(log_AR)))
+log_lCI <- pmin(1,pmax(0,exp(log_LCI)))
+log_uCI <- pmin(1,pmax(0,exp(log_UCI)))
+my_list <- list("penetrance" = penetrance, "lci" = log_lCI, "uci" = log_uCI)
+return(my_list)
+}
+
+names(df)
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_ALL_DCM, n_AgD=df$AN_ALL_DCM, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance", "lci", "uci")
+
+#EUR
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_DCM_EUR, n_AgD=df$AN_DCM_EUR, x_A=df$gnukb_AC_eu, n_A=df$gnukb_AN_eu)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_eu", "lci_eu", "uci_eu")
+
+#nwe
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_DCM_EUR, n_AgD=df$AN_DCM_EUR, x_A=df$gnukb_AC_nwe, n_A=df$gnukb_AN_nwe)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_nwe", "lci_nwe", "uci_nwe")
+
+#gnomad only
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_ALL_DCM, n_AgD=df$AN_ALL_DCM, x_A=df$gnomADg_AC, n_A=df$gnomADg_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_gnomad", "lci_gnomad", "uci_gnomad")
+
+#ukb only
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_ALL_DCM, n_AgD=df$AN_ALL_DCM, x_A=df$ukbAC_qced, n_A=df$ukbAN_qced)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_ukb", "lci_ukb", "uci_ukb")
+
+#NWE - gnomAD and UKB separate
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_DCM_EUR, n_AgD=df$AN_DCM_EUR, x_A=df$ukbAC_brit, n_A=df$ukbAN_brit)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_ukb_brit", "lci_ukb_brit", "uci_ukb_brit")
+
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_DCM_EUR, n_AgD=df$AN_DCM_EUR, x_A=df$gnomADg_AC_nfe_nwe, n_A=df$gnomADg_AN_nfe_nwe)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_gnomad_nwe", "lci_gnomad_nwe", "uci_gnomad_nwe")
+
+#EU - gnomAD and UKB separate
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_DCM_EUR, n_AgD=df$AN_DCM_EUR, x_A=df$ukbAC_eu, n_A=df$ukbAN_eu)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_ukb_eu", "lci_ukb_eu", "uci_ukb_eu")
+
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_DCM_EUR, n_AgD=df$AN_DCM_EUR, x_A=df$gnomADg_AC_nfe, n_A=df$gnomADg_AN_nfe)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_gnomad_eu", "lci_gnomad_eu", "uci_gnomad_eu")
+
+#afr
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_DCM_AFR, n_AgD=df$AN_DCM_AFR, x_A=df$gnukb_AC_afr, n_A=df$gnukb_AN_afr)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_afr", "lci_afr", "uci_afr")
+
+#eas
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_DCM_EAS, n_AgD=df$AN_DCM_EAS, x_A=df$gnukb_AC_eas, n_A=df$gnukb_AN_eas)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_eas", "lci_eas", "uci_eas")
+
+#sas
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=177, n_D=39003, x_AgD=df$AC_DCM_SAS, n_AgD=df$AN_DCM_SAS, x_A=df$gnukb_AC_sas, n_A=df$gnukb_AN_sas)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_sas", "lci_sas", "uci_sas")
+
+#male
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=116, n_D=18687, x_AgD=df$AC_DCM_male, n_AgD=df$AN_DCM_male, x_A=df$gnukb_AC_male, n_A=df$gnukb_AN_male)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_male", "lci_male", "uci_male")
+
+#female
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=60, n_D=20316, x_AgD=df$AC_DCM_female, n_AgD=df$AN_DCM_female, x_A=df$gnukb_AC_female, n_A=df$gnukb_AN_female)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_female", "lci_female", "uci_female")
+
+#0s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(177*(df$AN_DCM_0s/df$AN_DCM_80s)), n_D=(39003), x_AgD=df$AC_DCM_0s, n_AgD=df$AN_DCM_0s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_0s", "lci_0s", "uci_0s")
+
+#10s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(177*(df$AN_DCM_10s/df$AN_DCM_80s)), n_D=(39003), x_AgD=df$AC_DCM_10s, n_AgD=df$AN_DCM_10s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_10s", "lci_10s", "uci_10s")
+
+#20s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(177*(df$AN_DCM_20s/df$AN_DCM_80s)), n_D=(39003), x_AgD=df$AC_DCM_20s, n_AgD=df$AN_DCM_20s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_20s", "lci_20s", "uci_20s")
+
+#30s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(177*(df$AN_DCM_30s/df$AN_DCM_80s)), n_D=(39003), x_AgD=df$AC_DCM_30s, n_AgD=df$AN_DCM_30s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_30s", "lci_30s", "uci_30s")
+
+#40s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(177*(df$AN_DCM_40s/df$AN_DCM_80s)), n_D=(39003), x_AgD=df$AC_DCM_40s, n_AgD=df$AN_DCM_40s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_40s", "lci_40s", "uci_40s")
+
+#50s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(177*(df$AN_DCM_50s/df$AN_DCM_80s)), n_D=(39003), x_AgD=df$AC_DCM_50s, n_AgD=df$AN_DCM_50s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_50s", "lci_50s", "uci_50s")
+
+#60s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(177*(df$AN_DCM_60s/df$AN_DCM_80s)), n_D=(39003), x_AgD=df$AC_DCM_60s, n_AgD=df$AN_DCM_60s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_60s", "lci_60s", "uci_60s")
+
+#70s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(177*(df$AN_DCM_70s/df$AN_DCM_80s)), n_D=(39003), x_AgD=df$AC_DCM_70s, n_AgD=df$AN_DCM_70s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_70s", "lci_70s", "uci_70s")
+
+#80s
+df[(ncol(df)+1):(ncol(df)+3)] <- penetrance(x_D=(177*(df$AN_DCM_80s/df$AN_DCM_80s)), n_D=(39003), x_AgD=df$AC_DCM_80s, n_AgD=df$AN_DCM_80s, x_A=df$gnukb_AC, n_A=df$gnukb_AN)
+colnames(df)[(ncol(df)-2):(ncol(df))] <- c("penetrance_80s", "lci_80s", "uci_80s")
+
+write.table(df, "DCM_penetrance.txt", quote=F, row.names=F, sep="\t")
+```

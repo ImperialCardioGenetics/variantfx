@@ -1,0 +1,1106 @@
+### 1 - Script_R_1_Solution_n_x_Binomial_prop --> using meta analysis p and CI, get n + x via Agresti-Couli method (error is best)
+
+```{r}
+rm(list = ls())
+set.seed(28061971)
+digits <- 6   # ***
+
+# Setup #
+
+alpha <- 0.05  # ***
+z <- qnorm(1 - alpha /2)
+
+# Input from meta-analysis #
+#0.001841 (95%CI=0.001492-0.002225) 
+phat <- 0.001841   # From meta-analysis results
+qhat <- 1 - phat
+CI_phat_LL <- 0.001492   # From meta-analysis results
+CI_phat_UL <- 0.002225   # From meta-analysis results
+
+# Storing #
+
+Table_Methods <- matrix(NA, 4, 2)
+rownames(Table_Methods) <- c("Wald method", "Arcsine method", "Agresti–Coull method", "Clopper–Pearson method")
+colnames(Table_Methods) <- c("Est. x", "Est. n")
+
+Table_Methods_Error <- matrix(NA, 4, 10) 
+rownames(Table_Methods_Error) <- c("Wald method", "Arcsine method", "Agresti–Coull method", "Clopper–Pearson method")
+colnames(Table_Methods_Error) <- c("MA phat", "Est. phat", "Rel. Error (%) phat",
+                                   "MA CI(phat) LL", "Est. CI(phat) LL", "Rel. Error (%) CI(phat) LL",
+                                   "MA CI(phat) UL", "Est. CI(phat) UL", "Rel. Error (%) CI(phat) UL", 
+                                   "Distance")
+
+# Wald method #
+
+sigma2hat <- ((CI_phat_UL - CI_phat_LL) / (2 * z)) ^2
+
+n <- ceiling(phat * qhat / sigma2hat)
+x <- ceiling(n * phat)
+pest <- x / n
+qest <- 1 - pest
+
+print("*** Wald method ***")
+c("Wald method estimated n:", n, "Wald method estimated x:", x)
+
+Table_Methods[1, 1] <- x
+Table_Methods[1, 2] <- n
+
+# Wald method: Error (%) #
+
+print("*** Wald method Error (%) ***")
+c("Meta-analysis phat:", phat, "Wald method phat:", round(pest, digits = digits))
+c("Real. Error (%) Wald method phat:", round((phat - pest) / phat * 100, digits = digits /2))
+
+c("Meta-analysis CI(phat) lower:", CI_phat_LL, "Wald method CI(phat) lower:", round(pest - z * sqrt(pest * qest / n), digits = digits))
+c("Real. Error (%) Wald method CI(phat) lower:", round((CI_phat_LL - (pest - z * sqrt(pest * qest / n))) / CI_phat_LL * 100, digits = digits /2))
+
+c("Meta-analysis CI(phat) upper:", CI_phat_UL, "Wald method CI(phat) upper:", round(pest + z * sqrt(pest * qest / n), digits = digits))
+c("Real. Error (%) Wald method CI(phat) upper:", round((CI_phat_UL - (pest + z * sqrt(pest * qest / n))) / CI_phat_UL * 100, digits = digits /2))
+
+Table_Methods_Error[1, 1] <- phat
+Table_Methods_Error[1, 2] <- round(pest, digits = digits)
+Table_Methods_Error[1, 3] <- round((phat - pest) / phat * 100, digits = digits /2)
+Table_Methods_Error[1, 4] <- CI_phat_LL
+Table_Methods_Error[1, 5] <- round(pest - z * sqrt(pest * qest / n), digits = digits)
+Table_Methods_Error[1, 6] <- round((CI_phat_LL - (pest - z * sqrt(pest * qest / n))) / CI_phat_LL * 100, digits = digits /2)
+Table_Methods_Error[1, 7] <- CI_phat_UL
+Table_Methods_Error[1, 8] <- round(pest + z * sqrt(pest * qest / n), digits = digits)
+Table_Methods_Error[1, 9] <- round((CI_phat_UL - (pest + z * sqrt(pest * qest / n))) / CI_phat_UL * 100, digits = digits /2)
+Table_Methods_Error[1, 10] <- round(sqrt((phat - pest) ^2 + 
+                                         (CI_phat_LL - (pest - z * sqrt(pest * qest / n))) ^2 + 
+                                         (CI_phat_UL - (pest + z * sqrt(pest * qest / n))) ^2), digits = digits)
+
+# Arcsine method #
+
+n <- ceiling((z / (2 * (asin(sqrt(CI_phat_LL)) - asin(sqrt(phat))))) ^2)
+x <- ceiling(n * phat)
+pest <- x / n
+qest <- 1 - pest
+
+print("*** Arcsine method ***")
+c("Arcsine method estimated n:", n, "Arcsine method estimated x:", x)
+
+Table_Methods[2, 1] <- x
+Table_Methods[2, 2] <- n
+
+# Arcsine method: Error (%) #
+
+print("*** Arcsine method Error (%) ***")
+c("Meta-analysis phat:", phat, "Arcsine method phat:", round(pest, digits = digits))
+c("Real. Error (%) Arcsine method phat:", round((phat - pest) / phat * 100, digits = digits /2))
+
+c("Meta-analysis CI(phat) lower:", CI_phat_LL, "Arcsine method CI(phat) lower:", round(sin(asin(sqrt(pest) - z / (2 * sqrt(n)))) ^2, digits = digits))
+c("Real. Error (%) Arcsine method CI(phat) lower:", round((CI_phat_LL - (sin(asin(sqrt(pest) - z / (2 * sqrt(n)))) ^2)) / CI_phat_LL * 100, digits = digits /2))
+
+c("Meta-analysis CI(phat) upper:", CI_phat_UL, "Arcsine method CI(phat) upper:", round(sin(asin(sqrt(pest) + z / (2 * sqrt(n)))) ^2, digits = digits))
+c("Real. Error (%) Arcsine method CI(phat) upper:", round((CI_phat_UL - (sin(asin(sqrt(pest) + z / (2 * sqrt(n)))) ^2)) / CI_phat_UL * 100, digits = digits /2))
+
+Table_Methods_Error[2, 1] <- phat
+Table_Methods_Error[2, 2] <- round(pest, digits = digits)
+Table_Methods_Error[2, 3] <- round((phat - pest) / phat * 100, digits = digits /2)
+Table_Methods_Error[2, 4] <- CI_phat_LL
+Table_Methods_Error[2, 5] <- round(sin(asin(sqrt(pest) - z / (2 * sqrt(n)))) ^2, digits = digits)
+Table_Methods_Error[2, 6] <- round((CI_phat_LL - (sin(asin(sqrt(pest) - z / (2 * sqrt(n)))) ^2)) / CI_phat_LL * 100, digits = digits /2)
+Table_Methods_Error[2, 7] <- CI_phat_UL
+Table_Methods_Error[2, 8] <- round(sin(asin(sqrt(pest) + z / (2 * sqrt(n)))) ^2, digits = digits)
+Table_Methods_Error[2, 9] <- round((CI_phat_UL - (sin(asin(sqrt(pest) + z / (2 * sqrt(n)))) ^2)) / CI_phat_UL * 100, digits = digits /2)
+Table_Methods_Error[2, 10] <- round(sqrt((phat - pest) ^2 + 
+                                         (CI_phat_LL - (sin(asin(sqrt(pest) - z / (2 * sqrt(n)))) ^2)) ^2 + 
+                                         (CI_phat_UL - (sin(asin(sqrt(pest) + z / (2 * sqrt(n)))) ^2)) ^2), digits = digits)
+
+# Agresti–Coull method #
+
+nStore <- NULL
+xStore <- NULL
+
+dif <- 1
+C0 <- 1e-6   # ***
+iter <- 1
+
+while (dif > 0)
+{
+    ptilda <- phat + C0 * (iter - 1)
+    qtilda <- 1 - ptilda
+    
+    n <- ceiling(ptilda * qtilda / ((ptilda - CI_phat_LL) / z) ^2 - z ^2)
+    ntilda <- n + z ^2
+    xtilda <- ntilda * ptilda
+    x <- ceiling(xtilda - z ^2 /2)
+    pest <- x / n
+    
+    nStore <- c(nStore, n)
+    xStore <- c(xStore, x)
+    
+    dif <- phat - pest
+    
+    print(c("Iter:", iter))
+    print(c("phat:", round(phat, digits = digits), "pest:", round(pest, digits = digits)))
+    print(c("ptilda:", round((x + z ^2 /2) / (n + z ^2), digits = digits), "ptildaest:", round((phat + z ^2 / (2 * n)) / (1 + z ^2 / n), digits = digits)))
+    
+    print(c("Agresti–Coull method estimated n:", n, "Agresti–Coull method estimated x:", x))
+    print(c("Agresti–Coull method estimated ntilda:", round(ntilda, digits = digits), "Agresti–Coull method estimated xtilda:", round(xtilda, digits = digits)))
+    
+    iter <- iter + 1
+}
+
+print("*** Agresti–Coull method ***")
+c("Agresti–Coull method n:", n, "Agresti–Coull method x:", x)
+c("Agresti–Coull method ntilda:", round(ntilda, digits = digits), "Agresti–Coull method xtilda:", round(xtilda, digits = digits))
+
+Table_Methods[3, 1] <- x
+Table_Methods[3, 2] <- n
+
+# Agresti–Coull method: Error (%) #
+
+print("*** Agresti–Coull method Error (%) ***")
+c("Meta-analysis phat:", phat, "Agresti–Coull method phat:", round(pest, digits = digits))
+c("Real. Error (%) Agresti–Coull method phat:", round((phat - pest) / phat * 100, digits = digits /2))
+
+c("Meta-analysis CI(phat) lower:", CI_phat_LL, "Agresti–Coull method CI(phat) lower:", round(xtilda / ntilda - z * sqrt((xtilda / ntilda) * (1 - xtilda / ntilda) / ntilda), digits = digits))
+c("Real. Error (%) Agresti–Coull method CI(phat) lower:", round((CI_phat_LL - (xtilda / ntilda - z * sqrt((xtilda / ntilda) * (1 - xtilda / ntilda) / ntilda))) / CI_phat_LL * 100, digits = digits /2))
+
+c("Meta-analysis CI(phat) upper:", CI_phat_UL, "Agresti–Coull method CI(phat) upper:", round(xtilda / ntilda + z * sqrt((xtilda / ntilda) * (1 - xtilda / ntilda) / ntilda), digits = digits))
+c("Real. Error (%) Agresti–Coull method CI(phat) upper:", round((CI_phat_UL - (xtilda / ntilda + z * sqrt((xtilda / ntilda) * (1 - xtilda / ntilda) / ntilda))) / CI_phat_UL * 100, digits = digits /2))
+
+Table_Methods_Error[3, 1] <- phat
+Table_Methods_Error[3, 2] <- round(pest, digits = digits)
+Table_Methods_Error[3, 3] <- round((phat - pest) / phat * 100, digits = digits /2)
+Table_Methods_Error[3, 4] <- CI_phat_LL
+Table_Methods_Error[3, 5] <- round(xtilda / ntilda - z * sqrt((xtilda / ntilda) * (1 - xtilda / ntilda) / ntilda), digits = digits)
+Table_Methods_Error[3, 6] <- round((CI_phat_LL - (xtilda / ntilda - z * sqrt((xtilda / ntilda) * (1 - xtilda / ntilda) / ntilda))) / CI_phat_LL * 100, digits = digits /2)
+Table_Methods_Error[3, 7] <- CI_phat_UL
+Table_Methods_Error[3, 8] <- round(xtilda / ntilda + z * sqrt((xtilda / ntilda) * (1 - xtilda / ntilda) / ntilda), digits = digits)
+Table_Methods_Error[3, 9] <- round((CI_phat_UL - (xtilda / ntilda + z * sqrt((xtilda / ntilda) * (1 - xtilda / ntilda) / ntilda))) / CI_phat_UL * 100, digits = digits /2)
+Table_Methods_Error[3, 10] <- round(sqrt((phat - pest) ^2 + 
+                                         (CI_phat_LL - (xtilda / ntilda - z * sqrt((xtilda / ntilda) * (1 - xtilda / ntilda) / ntilda))) ^2 + 
+                                         (CI_phat_UL - (xtilda / ntilda + z * sqrt((xtilda / ntilda) * (1 - xtilda / ntilda) / ntilda))) ^2), digits = digits)
+
+# Clopper–Pearson method # takes a long time to run
+
+magnitude <- 10 ^(floor(log10(n)))
+n_min <- floor(n / magnitude) * magnitude
+n_max <- ceiling(n / magnitude) * magnitude
+q_LLStore <- NULL
+q_ULStore <- NULL
+nStore <- NULL
+xStore <- NULL
+
+n_min <- 55000 #added this to speed it up, knowing the answer
+n_max <- 55200 #added this to speed it up, knowing the answer
+
+for (n in n_min : n_max)
+   {
+    
+    for (x in 1 : ceiling(2 * n * phat))
+    {
+        q_LL <- qbeta(alpha /2, x, n - x + 1)
+        q_UL <- qbeta(1 - alpha /2, x + 1, n - x)
+        q_LLStore <- c(q_LLStore, qbeta(alpha /2, x, n - x + 1))
+        q_ULStore <- c(q_ULStore, qbeta(1 - alpha /2, x + 1, n - x))
+        nStore <- c(nStore, n)
+        xStore <- c(xStore, x)
+    }
+    
+    if (n %% 100 == 0)
+    {
+        print(c("n:", n))
+    }
+
+}
+
+dist <- sqrt((CI_phat_LL - q_LLStore) ^2 + (CI_phat_UL - q_ULStore) ^2)
+idx <- which.min(dist)
+n <- nStore[idx]
+x <- xStore[idx]
+pest <- x / n
+
+print("*** Clopper–Pearson method ***")
+c("Clopper–Pearson method n:", n, "Clopper–Pearson method x:", x)
+
+Table_Methods[4, 1] <- x
+Table_Methods[4, 2] <- n
+
+# Clopper–Pearson method: Error (%) #
+
+print("*** Clopper–Pearson method Error (%) ***")
+c("Meta-analysis phat:", phat, "Clopper–Pearson method phat:", round(pest, digits = digits))
+c("Real. Error (%) Clopper–Pearson method phat:", round((phat - pest) / phat * 100, digits = digits /2))
+
+c("Meta-analysis CI(phat) lower:", CI_phat_LL, "Clopper–Pearson method CI(phat) lower:", round(qbeta(alpha /2, x, n - x + 1), digits = digits))
+c("Real. Error (%) Clopper–Pearson method CI(phat) lower:", round((CI_phat_LL - qbeta(alpha /2, x, n - x + 1)) / CI_phat_LL * 100, digits = digits /2))
+
+c("Meta-analysis CI(phat) upper:", CI_phat_UL, "Clopper–Pearson method CI(phat) upper:", round(qbeta(1 - alpha /2, x + 1, n - x), digits = digits))
+c("Real. Error (%) Clopper–Pearson method CI(phat) upper:", round((CI_phat_UL - qbeta(1 - alpha /2, x + 1, n - x)) / CI_phat_UL * 100, digits = digits /2))
+
+Table_Methods_Error[4, 1] <- phat
+Table_Methods_Error[4, 2] <- round(pest, digits = digits)
+Table_Methods_Error[4, 3] <- round((phat - pest) / phat * 100, digits = digits /2)
+Table_Methods_Error[4, 4] <- CI_phat_LL
+Table_Methods_Error[4, 5] <- round(qbeta(alpha /2, x, n - x + 1), digits = digits)
+Table_Methods_Error[4, 6] <- round((CI_phat_LL - qbeta(alpha /2, x, n - x + 1)) / CI_phat_LL * 100, digits = digits /2)
+Table_Methods_Error[4, 7] <- CI_phat_UL
+Table_Methods_Error[4, 8] <- round(qbeta(1 - alpha /2, x + 1, n - x), digits = digits)
+Table_Methods_Error[4, 9] <- round((CI_phat_UL - qbeta(1 - alpha /2, x + 1, n - x)) / CI_phat_UL * 100, digits = digits /2)
+Table_Methods_Error[4, 10] <- round(sqrt((phat - pest) ^2 + 
+                                         (CI_phat_LL - (qbeta(alpha /2, x, n - x + 1))) ^2 + 
+                                         (CI_phat_UL - (qbeta(1 - alpha /2, x + 1, n - x))) ^2), digits = digits)
+
+# Summary Tables #
+
+print("*** All methods estimated x and n ***")
+print(Table_Methods)
+#                       Est. x Est. n
+#Wald method                97  52554
+#Arcsine method             97  52328
+#Agresti–Coull method       97  52660
+#Clopper–Pearson method     101  55146
+
+print("*** All methods relative error (%) ***")
+print(Table_Methods_Error)
+#                        MA phat Est. phat Rel. Error (%) phat MA CI(phat) LL Est. CI(phat) LL Rel. Error (%) CI(phat) LL MA CI(phat) UL
+# Wald method            0.001841  0.001846              -0.256       0.001492         0.001479                      0.888       0.002225
+# Arcsine method         0.001841  0.001854              -0.689       0.001492         0.001503                     -0.747       0.002225
+# Agresti–Coull method   0.001841  0.001842              -0.055       0.001492         0.001492                      0.000       0.002225
+# Clopper–Pearson method 0.001841  0.001832               0.516       0.001492         0.001492                     -0.002       0.002225
+#                        Est. CI(phat) UL Rel. Error (%) CI(phat) UL Distance
+# Wald method                    0.002213                      0.553  1.9e-05
+# Arcsine method                 0.002241                     -0.716  2.3e-05
+# Agresti–Coull method           0.002228                     -0.135  3.0e-06
+# Clopper–Pearson method         0.002225                      0.000  9.0e-06
+```
+
+### 2 - Script_R_2_Approx_RR_AR_Binomial_props --> Use meta analysis + agresti couli data. Approx Penetrance p(DgA) + CI (estimate!!) using relative risk as model
+
+```{r}
+rm(list = ls())
+set.seed(28061971)
+digits <- 6   # ***
+
+# Loading libraries #
+
+library("ratesci")
+library("plotrix")
+
+# Setup #
+
+alpha <- 0.05   # ***
+
+# p_D <-     # Baseline risk (the lifetime risk of the disease in the general population)
+             # This is prevalence of HCM in UK Biobank cohort. We can't get lifetime risk so we use prevalence as a proxy
+
+# p_AgD <-   # Allele frequency in cases
+             # This is the number of times the allele is seen / the number of times the allele is counted, i.e.,  where 
+             # an allele is measured twice in each individual (everyone has two copies - so 10k people were measured for 
+             # 20k alleles)
+
+# p_A <-     # Allele frequency in population controls
+             # This is the number of times the allele is seen / the number of times the allele is counted, i.e.,  where 
+             # an allele is measured twice in each individual (everyone has two copies - so 125k people were measured for 
+             # 250k alleles)
+
+# Input #
+
+#0.001841 (95%CI=0.001492-0.002225)
+#97	52660
+x_D <- 97          # From Agresti–Coull method estimated x
+n_D <- 52660       # From Agresti–Coull method estimated n
+
+x_A <- 3           # Input example provided by Kathryn
+n_A <- 600000      # Input example provided by Kathryn
+
+x_AgD <- 10        # Input example provided by Kathryn
+n_AgD <- 20000     # Input example provided by Kathryn
+
+# Input from meta-analysis #
+
+phat <- 0.001841   # From meta-analysis results
+CI_phat_LL <- 0.001492   # From meta-analysis results
+CI_phat_UL <- 0.002225   # From meta-analysis results
+
+p_D <- x_D / n_D
+p_AgD <- x_AgD / n_AgD
+p_A <- x_A / n_A
+
+#We need also to think about the degeneracy correction (if we correct) (now in the code, x_d = x +dx and n_d = n + dn). If we think we can have only degeneracy because any probabilities could be = 0, then dx=dn=0.5 is fine. However, if we have also p=1, the choice dx=0.5 and dn=1 is better.
+
+d <- 0.5   # ***
+p_D_wod <- (x_D + d) / (n_D + d)
+p_AgD_wod <- (x_AgD + d) / (n_AgD + d)
+p_A_wod <- (x_A + d) / (n_A + d)
+
+# Printing #
+
+print("*** P(D), P(A|D) and P(A) ***")
+print(c("p D:", round(p_D, digits = digits)))
+print(c("p AgD:", round(p_AgD, digits = digits)))
+print(c("p A:", round(p_A, digits = digits)))
+
+# Storing #
+
+PE_CI <- matrix(0, 10, 3)
+rownames(PE_CI) <- c("DM log(RR)", "DM log(RR) w/o deg.", 
+                     "moverci RR", "moverci RR cc", 
+                     "moverbci RR", "moverbci RR cc", 
+                     "scasci RR", "scasci RR cc", 
+                     "DM log(Penetrance)", "DM log(Penetrance) w/o deg.")
+colnames(PE_CI) <- c("Penetrance hat", "CI(Penetrance hat) LL", "CI(Penetrance hat) UL")
+
+# Solution 1.1: Delta Method on log(Relative Risk)                          #
+#                                                                           #
+# - Noether, G. E. (1957). Two confidence intervals for the ratio of two    #
+#   probabilities and some measures of effectiveness. Journal of the        #
+#   American Statistical Association 52, 36-45.                             #
+
+RR <- (x_AgD / n_AgD) / (x_A / n_A)
+Var_log_RR <- 1 / x_AgD - 1 / n_AgD + 1 / x_A - 1 / n_A
+Var_log_RR_check <- (1 / p_AgD) * (1 - p_AgD) / (n_AgD) + 
+                    (1 / p_A) * (1 - p_A) / (n_A)
+log_CI_RR <- c(log(RR) - qnorm(1 - alpha / 2) * sqrt(Var_log_RR), 
+               log(RR) + qnorm(1 - alpha / 2) * sqrt(Var_log_RR))
+
+PE_RR <- RR
+PE_Penetrance <- p_D * PE_RR
+CI_RR <- exp(log_CI_RR)
+CI_Penetrance <- p_D * CI_RR
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[1, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 1.2: Delta Method on log(Relative Risk) without degeneracy       #
+#                                                                           #
+# - Katz, D., Baptista, J., Azen, S. P., and Pike, M. C. (1978). Obtaining  #
+#   confidence intervals for the risk ratio in cohort studies. Biometrics   #
+#   34, 469-474.                                                            #
+# - Pettigrew, H. M., Gart, J. J., and Thomas, D. G. (1986). The bias and   #
+#   higher cumulants of the logarithm of a binomial variate. Biometrika 73, #
+#   425-435.                                                                #
+
+RR <- ((x_AgD + d) / (n_AgD + d)) / ((x_A + d) / (n_A + d))
+Var_log_RR <- 1 / (x_AgD + d) - 1 / (n_AgD + d) + 1 / (x_A + d) - 1 / (n_A + d)
+Var_log_RR_check <- 1 / (x_AgD + d) - 1 / (n_AgD + d) + 1 / (x_A + d) - 1 / (n_A + d)
+log_CI_RR <- c(log(RR) - qnorm(1 - alpha / 2) * sqrt(Var_log_RR), 
+               log(RR) + qnorm(1 - alpha / 2) * sqrt(Var_log_RR))
+
+PE_RR <- RR
+PE_Penetrance <- p_D * PE_RR
+CI_RR <- exp(log_CI_RR)
+CI_Penetrance <- p_D * CI_RR
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[2, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 2.1: Relative Risk as Ratio of Binomial proportions              #
+#                                                                           #
+# "MOVER" confidence intervals for comparisons of independent binomial or   #
+# Poisson rates                                                             #
+#                                                                           #
+# - Laud, P. J. (2017). Equal-tailed confidence intervals for comparison of #
+#   rates. Pharmaceutical Statistics. 16, 334-348.                          #
+# - Donner, A., and Zou, G. Y. (2012). Closed-form confidence intervals for #
+#   functions of the normal mean and standard deviation. Statistical Methods#
+#   in Medical Research. 21, 347-359.                                       #
+# - Newcombe, R. G. (1998). Interval estimation for the difference between  #
+#   independent proportions: comparison of eleven methods. Statistics in    #
+#   Medicine. 17, 857-872.                                                  #
+
+res <- moverci(x1 = x_AgD, n1 = n_AgD, x2 = x_A, n2 = n_A, 
+               distrib = "bin", contrast = "RR", type = "exact", level = 1 - alpha, cc = FALSE)
+
+PE_RR <- res[2]
+PE_Penetrance <- p_D * PE_RR
+CI_RR <- res[c(1, 3)]
+CI_Penetrance <- p_D * CI_RR
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[3, ] = c(PE_Penetrance, CI_Penetrance)
+
+res <- moverci(x1 = x_AgD, n1 = n_AgD, x2 = x_A, n2 = n_A, 
+               distrib = "bin", contrast = "RR", type = "exact", level = 1 - alpha, cc = TRUE)
+
+PE_RR <- res[2]
+PE_Penetrance <- p_D * PE_RR
+CI_RR <- res[c(1, 3)]
+CI_Penetrance <- p_D * CI_RR
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[4, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 2.2: Relative Risk as Ratio of Binomial proportions              #
+#                                                                           #
+# Approximate Bayesian ("MOVER-B") confidence intervals for comparisons of  #
+# independent binomial or Poisson rates                                     #
+#                                                                           #
+# - Laud, P. J. (2017). Equal-tailed confidence intervals for comparison of #
+#   rates. Pharmaceutical Statistics. 16, 334-348.                          #
+# - Donner, A., and Zou, G. Y. (2012). Closed-form confidence intervals for #
+#   functions of the normal mean and standard deviation. Statistical Methods#
+#   in Medical Research. 21, 347-359.                                       #
+# - Li, Y., Koval, J. J., Donner, A., and Zou, G.Y. (2010). Interval        #
+#   estimation for the area under the receiver operating characteristic     #
+#   curve when data are subject to error. Statistics in Medicine. 29, 2521– #
+#   2531.                                                                   #
+# - Newcombe, R. G. (1998). Interval estimation for the difference between  #
+#   independent proportions: Comparison of eleven methods. Statistics in    #
+#   Medicine. 17, 857-872.                                                  #
+
+res <- moverbci(x1 = x_AgD, n1 = n_AgD, x2 = x_A, n2 = n_A, 
+                a1 = 0.5, b1 = 0.5, a2 = 0.5, b2 = 0.5, 
+                distrib = "bin", contrast = "RR", level = 1 - alpha, cc = FALSE)
+
+PE_RR <- res[2]
+PE_Penetrance <- p_D * PE_RR
+CI_RR <- res[c(1, 3)]
+CI_Penetrance <- p_D * CI_RR
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[5, ] = c(PE_Penetrance, CI_Penetrance)
+
+res <- moverbci(x1 = x_AgD, n1 = n_AgD, x2 = x_A, n2 = n_A, 
+                a1 = 0.5, b1 = 0.5, a2 = 0.5, b2 = 0.5, 
+                distrib = "bin", contrast = "RR", level = 1 - alpha, cc = TRUE)
+
+PE_RR <- res[2]
+PE_Penetrance <- p_D * PE_RR
+CI_RR <- res[c(1, 3)]
+CI_Penetrance <- p_D * CI_RR
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[6, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 3.1: Relative Risk as Ratio of Binomial proportions              #
+#                                                                           #
+# Skewness-corrected asymptotic score ("SCAS") confidence intervals for     #
+# comparisons of independent binomial or Poisson rates                      #
+#                                                                           #
+# - Laud, P. J., and Dane, A. (2014). Confidence intervals for the          #
+#   difference between independent binomial proportions: Comparison using a #
+#   graphical approach and moving averages. Pharmaceutical Statistics. 13,  #
+#   294–308.                                                                #
+# - Gart, J.J., and Nam, J. M. (1990). Approximate interval estimation of   #
+#   the difference in binomial parameters: Correction for skewness and      #
+#   extension to multiple tables. Biometrics. 46, 637-643.                  #
+# - Gart, J.J., and Nam, J. M. (1988). Approximate interval estimation of   #
+#   the ratio of binomial parameters: A review and corrections for skewness.#
+#   Biometrics, 44, 323-338.                                                #
+
+res <- scasci(x1 = x_AgD, n1 = n_AgD, x2 = x_A, n2 = n_A, 
+              distrib = "bin", contrast = "RR", level = 1 - alpha, cc = FALSE)
+
+PE_RR <- res$estimates[2]
+PE_Penetrance <- p_D * PE_RR
+CI_RR <- res$estimates[c(1, 3)]
+CI_Penetrance <- p_D * CI_RR
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[7, ] = c(PE_Penetrance, CI_Penetrance)
+
+res <- scasci(x1 = x_AgD, n1 = n_AgD, x2 = x_A, n2 = n_A, 
+              distrib = "bin", contrast = "RR", level = 1 - alpha, cc = TRUE)
+
+PE_RR <- res$estimates[2]
+PE_Penetrance <- p_D * PE_RR
+CI_RR <- res$estimates[c(1, 3)]
+CI_Penetrance <- p_D * CI_RR
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[8, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 4.1: Delta Method on log(Absolute Risk)                          #
+
+log_Penetrance <- log(p_D * p_AgD / p_A)
+Var_log_Penetrance <- (1 / p_D) * (1 - p_D) / n_D + 
+              (1 / p_AgD) * (1 - p_AgD) / n_AgD + 
+              (1 / p_A) * (1 - p_A) / n_A
+log_CI_Penetrance <- c(log_Penetrance - qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance), 
+                       log_Penetrance + qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance))
+
+PE_Penetrance <- exp(log_Penetrance)
+CI_Penetrance <- exp(log_CI_Penetrance)
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[9, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 4.2: Delta Method on log(Absolute Risk) without degeneracy       #
+#                                                                           #
+# - Katz, D., Baptista, J., Azen, S. P., and Pike, M. C. (1978). Obtaining  #
+#   confidence intervals for the risk ratio in cohort studies. Biometrics   #
+#   34, 469-474.                                                            #
+# - Pettigrew, H. M., Gart, J. J., and Thomas, D. G. (1986). The bias and   #
+#   higher cumulants of the logarithm of a binomial variate. Biometrika 73, #
+#   425-435.                                                                #
+
+log_Penetrance_ <- log(p_D_wod * p_AgD_wod / p_A_wod)
+Var_log_Penetrance <- (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) + 
+                      (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d) + 
+                      (1 / p_A_wod) * (1 - p_A_wod) / (n_A + d)
+log_CI_Penetrance <- c(log_Penetrance - qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance), 
+                       log_Penetrance + qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance))
+
+PE_Penetrance <- exp(log_Penetrance)
+CI_Penetrance <- exp(log_CI_Penetrance)
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[10, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Printing #
+
+print("*** All methods estimated Absolute Risk and CI ***")
+print(round(PE_CI, digits = digits))
+
+#                             Penetrance hat CI(Penetrance hat) LL CI(Penetrance hat) UL
+# DM log(RR)                        0.184201              0.050698              0.669248
+# DM log(RR) w/o deg.               0.165776              0.049452              0.555725
+# moverci RR                        0.177096              0.049337              0.974654
+# moverci RR cc                     0.177096              0.049337              0.974654
+# moverbci RR                       0.177096              0.055448              0.725399
+# moverbci RR cc                    0.177096              0.049337              0.974654
+# scasci RR                         0.177412              0.054657              0.794391
+# scasci RR cc                      0.177412              0.046482              1.000000
+# DM log(Penetrance)                0.184201              0.049932              0.679519
+# DM log(Penetrance) w/o deg.       0.184201              0.054068              0.627540
+
+# Setup plot #
+
+cex <- 0.8
+cex.axis <- 0.8
+cex.lab <- 0.9
+
+# Plotting #
+
+df <- data.frame(PE_CI)
+colnames(df)<- c("PE", "LL", "UL")
+n_df <- nrow(df)
+
+plot(df$PE, xaxt = "n", xlim = c(1, n_df), xlab = "Method", ylim = c(0, 1), ylab = paste("Est. Penetrance and", 1 - alpha, "% CI(Penetrance hat)", sep = " "),
+     main = paste("P(D) =", round(p_D, digits = digits), "and P(A|D) =", round(p_AgD, digits = digits)))
+plotCI(df$PE, y = NULL, uiw = df$UL - df$PE, liw = df$PE- df$LL, err="y", pch = 20, slty = 3, scol = "black", add = TRUE)
+axis(1, at = 1 : n_df, labels = FALSE)
+text(x = 1 : n_df, y = par()$usr[3] - 0.075 * (par()$usr[4] - par()$usr[3]), 
+     labels = rownames(PE_CI), srt = 45, adj = 1, xpd = TRUE)
+abline(h = CI_phat_LL, lty = 3, lwd = 1, col = "grey")
+abline(h = CI_phat_UL, lty = 3, lwd = 1, col = "grey")
+abline(v = 8.5, lty = 2, lwd = 2, col = "grey")
+
+idx <- c(1, 3, 5, 7, 9)
+df <- data.frame(PE_CI[idx, ])
+colnames(df)<- c("PE", "LL", "UL")
+n_df <- nrow(df)
+
+plot(df$PE, xaxt = "n", xlim = c(1, n_df), xlab = "Method", ylim = c(0, 1), ylab = paste("Est. Penetrance and", 1 - alpha, "% CI(Penetrance hat)", sep = " "),
+     main = paste("P(D) =", round(p_D, digits = digits), "and P(A|D) =", round(p_AgD, digits = digits)))
+plotCI(df$PE, y = NULL, uiw = df$UL - df$PE, liw = df$PE- df$LL, err="y", pch = 20, slty = 3, scol = "black", add = TRUE)
+axis(1, at = 1 : n_df, labels = FALSE)
+text(x = 1 : n_df, y = par()$usr[3] - 0.075 * (par()$usr[4] - par()$usr[3]), 
+     labels = rownames(PE_CI)[idx], srt = 45, adj = 1, xpd = TRUE)
+abline(h = CI_phat_LL, lty = 3, lwd = 1, col = "grey")
+abline(h = CI_phat_UL, lty = 3, lwd = 1, col = "grey")
+abline(v = 8.5, lty = 2, lwd = 2, col = "grey")
+
+idx <- c(2, 4, 6, 8, 10)
+df <- data.frame(PE_CI[idx, ])
+colnames(df)<- c("PE", "LL", "UL")
+n_df <- nrow(df)
+
+plot(df$PE, xaxt = "n", xlim = c(1, n_df), xlab = "Method", ylim = c(0, 1), ylab = paste("Est. Penetrance and", 1 - alpha, "% CI(Penetrance hat)", sep = " "),
+     main = paste("P(D) =", round(p_D, digits = digits), "and P(A|D) =", round(p_AgD, digits = digits)))
+plotCI(df$PE, y = NULL, uiw = df$UL - df$PE, liw = df$PE- df$LL, err="y", pch = 20, slty = 3, scol = "black", add = TRUE)
+axis(1, at = 1 : n_df, labels = FALSE)
+text(x = 1 : n_df, y = par()$usr[3] - 0.075 * (par()$usr[4] - par()$usr[3]), 
+     labels = rownames(PE_CI)[idx], srt = 45, adj = 1, xpd = TRUE)
+abline(h = CI_phat_LL, lty = 3, lwd = 1, col = "grey")
+abline(h = CI_phat_UL, lty = 3, lwd = 1, col = "grey")
+abline(v = 8.5, lty = 2, lwd = 2, col = "grey")
+```
+
+### 3 - Script_R_3_Approx_g_Binomial_props_DeltaMeth --> As with 2 but Approx Penetrance p(DgA) + CI using asymptotic. LB recommends Delta log improved mean cc method
+
+```{r}
+rm(list = ls())
+set.seed(28061971)
+digits <- 6   # ***
+
+# Loading libraries #
+
+library("plotrix")
+
+# Setup #
+
+alpha <- 0.05   # ***
+
+# p_D <-     # Baseline risk (the lifetime risk of the disease in the general population)
+             # This is prevalence of HCM in UK Biobank cohort. We can't get lifetime risk so we use prevalence as a proxy
+
+# p_AgD <-   # Allele frequency in cases
+             # This is the number of times the allele is seen / the number of times the allele is counted, i.e.,  where 
+             # an allele is measured twice in each individual (everyone has two copies - so 10k people were measured for 
+             # 20k alleles)
+
+# p_A <-     # Allele frequency in population controls
+             # This is the number of times the allele is seen / the number of times the allele is counted, i.e.,  where 
+             # an allele is measured twice in each individual (everyone has two copies - so 125k people were measured for 
+             # 250k alleles)
+
+# Input #
+
+#0.001841 (95%CI=0.001492-0.002225)
+#97	52660
+
+x_D <- 97          # From Agresti–Coull method estimated X
+n_D <- 52660       # From Agresti–Coull method estimated n
+
+x_A <- 3           # Input example provided by Kathryn
+n_A <- 600000      # Input example provided by Kathryn
+  
+x_AgD <- 10        # Input example provided by Kathryn
+n_AgD <- 20000     # Input example provided by Kathryn
+
+# Input from meta-analysis #
+
+phat <- 0.001841   # From meta-analysis results
+CI_phat_LL <- 0.001492   # From meta-analysis results
+CI_phat_UL <- 0.002225   # From meta-analysis results
+
+p_D <- x_D / n_D
+p_AgD <- x_AgD / n_AgD
+p_A <- x_A / n_A
+
+d <- 0.5   # ***
+p_D_wod <- (x_D + d) / (n_D + d)
+p_AgD_wod <- (x_AgD + d) / (n_AgD + d)
+p_A_wod <- (x_A + d) / (n_A + d)
+
+# Printing #
+
+print("*** P(D), P(A|D) and P(A) ***")
+print(c("p D:", round(p_D, digits = digits)))
+print(c("p AgD:", round(p_AgD, digits = digits)))
+print(c("p A:", round(p_A, digits = digits)))
+
+# Storing #
+
+PE_CI <- matrix(0, 8, 3)
+rownames(PE_CI) <- c("DM log(Penetrance)", "Delta log(Penetrance) w/o deg.", 
+                     "DM log(Penetrance) impr. mean", "DM log(Penetrance) impr. mean w/o deg.", 
+                     "DM Penetrance", "DM Penetrance w/o deg.", 
+                     "DM Penetrance impr. mean", "DM Penetrance impr. mean w/o deg.")
+colnames(PE_CI) <- c("Penetrance hat", "CI(Penetrance hat) LL", "CI(Penetrance hat) UL")
+
+# Solution 1.1: Delta Method on log(Absolute Risk)                          #
+
+log_Penetrance <- log(p_D * p_AgD / p_A)
+Var_log_Penetrance <- (1 / p_D) * (1 - p_D) / n_D + 
+                      (1 / p_AgD) * (1 - p_AgD) / n_AgD + 
+                      (1 / p_A) * (1 - p_A) / n_A
+log_CI_Penetrance <- c(log_Penetrance - qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance), 
+                       log_Penetrance + qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance))
+
+PE_Penetrance <- exp(log_Penetrance)
+CI_Penetrance <- exp(log_CI_Penetrance)
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[1, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 1.2: Delta Method on log(Absolute Risk) without degeneracy       #
+
+log_Penetrance_ <- log(p_D_wod * p_AgD_wod / p_A_wod)
+Var_log_Penetrance <- (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) + 
+                      (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d) + 
+                      (1 / p_A_wod) * (1 - p_A_wod) / (n_A + d)
+log_CI_Penetrance <- c(log_Penetrance - qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance), 
+                       log_Penetrance + qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance))
+
+PE_Penetrance <- exp(log_Penetrance)
+CI_Penetrance <- exp(log_CI_Penetrance)
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[2, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 1.3: Delta Method on log(Absolute Risk) with improved mean      # 
+#               approximation                                              #
+
+log_Penetrance <- log(p_D * p_AgD / p_A) + 1 /2 * ((1 / p_A) * (1 - p_A) / n_A - 
+                                                   (1 / p_D) * (1 - p_D) / n_D - 
+                                                   (1 / p_AgD) * (1 - p_AgD) / n_AgD)
+Var_log_Penetrance <- (1 / p_D) * (1 - p_D) / n_D + 
+                      (1 / p_AgD) * (1 - p_AgD) / n_AgD + 
+                      (1 / p_A) * (1 - p_A) / n_A
+log_CI_Penetrance <- c(log_Penetrance - qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance), 
+                       log_Penetrance + qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance))
+
+PE_Penetrance <- exp(log_Penetrance)
+CI_Penetrance <- exp(log_CI_Penetrance)
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[3, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 1.4: Delta Method on log(Absolute Risk) with improved mean      # 
+#               approximation without degeneracy                           #
+
+log_Penetrance <- log(p_D_wod * p_AgD_wod / p_A_wod) + 1 /2 * ((1 / p_A_wod) * (1 - p_A_wod) / (n_A + d) - 
+                                                               (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) - 
+                                                               (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d))
+Var_log_Penetrance <- (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) + 
+                      (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d) + 
+                      (1 / p_A_wod) * (1 - p_A_wod) / (n_A + d)
+log_CI <- c(log_Penetrance - qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance), 
+            log_Penetrance + qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance))
+
+PE_Penetrance <- exp(log_Penetrance)
+CI_Penetrance <- exp(log_CI)
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[4, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 2.1: Delta Method on Absolute Risk                               #
+
+Penetrance <- p_D * p_AgD / p_A
+Var_Penetrance <- Penetrance ^2 * ((1 / p_D) * (1 - p_D) / n_D + 
+                                  (1 / p_AgD) * (1 - p_AgD) / n_AgD + 
+                                  (1 / p_A) * (1 - p_A) / n_A)
+CI <- c(Penetrance - qnorm(1 - alpha / 2) * sqrt(Var_Penetrance), 
+        Penetrance + qnorm(1 - alpha / 2) * sqrt(Var_Penetrance))
+
+PE_Penetrance <- Penetrance
+CI_Penetrance <- CI
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[5, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 2.2: Delta Method on Absolute Risk without degeneracy            #
+
+Penetrance <- p_D_wod * p_AgD_wod / p_A_wod
+Var_Penetrance <- Penetrance ^2 * ((1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) + 
+                                   (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d) + 
+                                   (1 / p_A_wod) * (1 - p_A_wod) / (n_A + d))
+CI <- c(Penetrance - qnorm(1 - alpha / 2) * sqrt(Var_Penetrance), 
+        Penetrance + qnorm(1 - alpha / 2) * sqrt(Var_Penetrance))
+
+PE_Penetrance <- Penetrance
+CI_Penetrance <- CI
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[6, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 2.3: Delta Method on Absolute Risk with improved mean           #
+#               approximation                                              #
+
+Penetrance <- (p_D * p_AgD / p_A) * (1 + (1 / p_A) * (1 - p_A) / n_A)
+Var_Penetrance <- (p_D * p_AgD / p_A) ^2 * ((1 / p_D) * (1 - p_D) / n_D + 
+                                            (1 / p_AgD) * (1 - p_AgD) / n_AgD + 
+                                            (1 / p_A) * (1 - p_A) / n_A)
+CI <- c(Penetrance - qnorm(1 - alpha / 2) * sqrt(Var_Penetrance), 
+        Penetrance + qnorm(1 - alpha / 2) * sqrt(Var_Penetrance))
+
+PE_Penetrance <- Penetrance
+CI_Penetrance <- CI
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[7, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Solution 2.4: Delta Method on Absolute Risk with improved mean           #
+#               approximation without degeneracy                           #
+
+Penetrance <- (p_D_wod * p_AgD_wod / p_A_wod)  * (1 + (1 / p_A_wod) * (1 - p_A_wod) / (n_A + d))
+Var_Penetrance <- (p_D_wod * p_AgD_wod / p_A_wod) ^2 * ((1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) + 
+                                                        (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d) + 
+                                                        (1 / p_A_wod) * (1 - p_A_wod) / (n_A + d))
+CI <- c(Penetrance - qnorm(1 - alpha / 2) * sqrt(Var_Penetrance), 
+        Penetrance + qnorm(1 - alpha / 2) * sqrt(Var_Penetrance))
+
+PE_Penetrance <- Penetrance
+CI_Penetrance <- CI
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+PE_CI[8, ] = c(PE_Penetrance, CI_Penetrance)
+
+# Printing #
+
+print("*** Delta Methods on log(AR) and AR with Confidence Interval ***")
+print(round(PE_CI, digits = digits))
+
+#                                        Penetrance hat CI(Penetrance hat) LL CI(Penetrance hat) UL
+# DM log(Penetrance)                           0.184201              0.049932              0.679519
+# Delta log(Penetrance) w/o deg.               0.184201              0.054068              0.627540
+# DM log(Penetrance) impr. mean                0.205937              0.055824              0.759705
+# DM log(Penetrance) impr. mean w/o deg.       0.182348              0.053524              0.621228
+# DM Penetrance                                0.184201              0.000000              0.424648
+# DM Penetrance w/o deg.                       0.166629              0.000000              0.370881
+# DM Penetrance impr. mean                     0.245600              0.005152              0.486048
+# DM Penetrance impr. mean w/o deg.            0.214238              0.009986              0.418489
+
+# Setup plot #
+
+cex <- 0.8
+cex.axis <- 0.8
+cex.lab <- 0.9
+
+# Plotting #
+
+df <- data.frame(PE_CI)
+colnames(df)<- c("PE", "LL", "UL")
+n_df <- nrow(df)
+
+plot(df$PE, xaxt = "n", xlim = c(1, n_df), xlab = "Method", ylim = c(0, 1), ylab = paste("Est. Penetrance and", 1 - alpha, "% CI(Penetrance hat)", sep = " "),
+     main = paste("P(D) =", round(p_D, digits = digits), "and P(A|D) =", round(p_AgD, digits = digits)))
+plotCI(df$PE, y = NULL, uiw = df$UL - df$PE, liw = df$PE- df$LL, err="y", pch = 20, slty = 3, scol = "black", add = TRUE)
+axis(1, at = 1 : n_df, labels = FALSE)
+text(x = 1 : n_df, y = par()$usr[3] - 0.075 * (par()$usr[4] - par()$usr[3]), 
+     labels = rownames(PE_CI), srt = 45, adj = 1, xpd = TRUE, cex = cex.axis)
+abline(h = CI_phat_LL, lty = 3, lwd = 1, col = "grey")
+abline(h = CI_phat_UL, lty = 3, lwd = 1, col = "grey")
+abline(v = 4.5, lty = 2, lwd = 2, col = "grey")
+
+idx <- c(1, 3, 5, 7)
+df <- data.frame(PE_CI[idx, ])
+colnames(df)<- c("PE", "LL", "UL")
+n_df <- nrow(df)
+
+plot(df$PE, xaxt = "n", xlim = c(1, n_df), xlab = "Method", ylim = c(0, 1), ylab = paste("Est. Penetrance and", 1 - alpha, "% CI(Penetrance hat)", sep = " "),
+     main = paste("P(D) =", round(p_D, digits = digits), "and P(A|D) =", round(p_AgD, digits = digits)))
+plotCI(df$PE, y = NULL, uiw = df$UL - df$PE, liw = df$PE- df$LL, err="y", pch = 20, slty = 3, scol = "black", add = TRUE)
+axis(1, at = 1 : n_df, labels = FALSE)
+text(x = 1 : n_df, y = par()$usr[3] - 0.075 * (par()$usr[4] - par()$usr[3]), 
+     labels = rownames(PE_CI)[idx], srt = 45, adj = 1, xpd = TRUE, cex = cex.axis)
+abline(h = CI_phat_LL, lty = 3, lwd = 1, col = "grey")
+abline(h = CI_phat_UL, lty = 3, lwd = 1, col = "grey")
+abline(v = 8.5, lty = 2, lwd = 2, col = "grey")
+
+idx <- c(2, 4, 6, 8)
+df <- data.frame(PE_CI[idx, ])
+colnames(df)<- c("PE", "LL", "UL")
+n_df <- nrow(df)
+
+plot(df$PE, xaxt = "n", xlim = c(1, n_df), xlab = "Method", ylim = c(0, 1), ylab = paste("Est. Penetrance and", 1 - alpha, "% CI(Penetrance hat)", sep = " "),
+     main = paste("P(D) =", round(p_D, digits = digits), "and P(A|D) =", round(p_AgD, digits = digits)))
+plotCI(df$PE, y = NULL, uiw = df$UL - df$PE, liw = df$PE- df$LL, err="y", pch = 20, slty = 3, scol = "black", add = TRUE)
+axis(1, at = 1 : n_df, labels = FALSE)
+text(x = 1 : n_df, y = par()$usr[3] - 0.075 * (par()$usr[4] - par()$usr[3]), 
+     labels = rownames(PE_CI)[idx], srt = 45, adj = 1, xpd = TRUE, cex = cex.axis)
+abline(h = CI_phat_LL, lty = 3, lwd = 1, col = "grey")
+abline(h = CI_phat_UL, lty = 3, lwd = 1, col = "grey")
+abline(v = 8.5, lty = 2, lwd = 2, col = "grey")
+```
+
+### plot - different LB methods for penetrance equations
+
+```{r}
+meth <- read.table("methods.txt", header=T)
+
+ggplot(meth, aes(x=Method,y=AR.hat)) +
+        geom_point() +
+          theme_minimal() +
+        geom_errorbar(aes(ymax = AR.hat.CI.UL, ymin = AR.hat.CI.LL)) +
+    coord_flip() +
+        ylab("Penetrance and 95% CI") +
+        xlab("Method") +
+        theme(axis.text = element_text(size=16), axis.title = element_text(size=16), legend.position="none") + 
+  scale_x_discrete(labels = c(
+   #       expression("DM "[p]*'(D) x '[p]*'(A|D) / '[p]*'(A)'),
+         expression("DM "[p]*'(D) x '[p]*'(A|D) / '[p]*'(A) d'),
+   #   expression("DM "[p]*'(D) x '[p]*'(A|D) / '[p]*'(A) mean approx.'),
+       expression("DM "[p]*'(D) x '[p]*'(A|D) / '[p]*'(A) mean approx. d'),
+        
+    #    expression("DM log("[p]*'(A|D) / '[p]*'(A))'),
+        expression("DM log("[p]*'(A|D) / '[p]*'(A)) d'),
+    #    expression("DM log("[p]*'(D) x '[p]*'(A|D) / '[p]*'(A))'),
+        expression("DM log("[p]*'(D) x '[p]*'(A|D) / '[p]*'(A)) d'),
+    #    expression("DM log("[p]*'(D) x '[p]*'(A|D) / '[p]*'(A)) mean approx.'),
+        expression("DM log("[p]*'(D) x '[p]*'(A|D) / '[p]*'(A)) mean approx. d'),
+     
+ #   expression("MOVER "[p]*'(A|D) / '[p]*'(A)'),
+    expression("MOVER "[p]*'(A|D) / '[p]*'(A) cc'),
+ #   expression("MOVER-B "[p]*'(A|D) / '[p]*'(A)'),
+    expression("MOVER-B "[p]*'(A|D) / '[p]*'(A) cc'),
+  #  expression("SCAS "[p]*'(A|D) / '[p]*'(A)'),
+      expression("SCAS "[p]*'(A|D) / '[p]*'(A) cc')
+    ))
+```
+
+### 4 - Script_R_4_Bayesian_way - Bayesian penetrance
+
+```{r}
+rm(list = ls())
+set.seed(28061971)
+digits <- 6   # ***
+
+# Setup #
+
+alpha <- 0.05  # ***
+
+# Input from meta-analysis #
+
+#0.001841 (95%CI=0.001492-0.002225)
+#97	52660
+
+phat <- 0.001841   # From meta-analysis results
+pCIL <- 0.001492   # From meta-analysis results
+pCIU <- 0.002225   # From meta-analysis results
+
+# Loading libraries #
+
+library("TailRank")
+#download correct biovase version needed for HPC R version 3.6.0, then install TailRank.
+
+# Baseline risk (Prevalence)  #
+
+X_D <- 97   # From Agresti–Coull method estimated X
+n_D <- 52660   # From Agresti–Coull method estimated n
+
+alpha_D <- X_D + 1
+beta_D <- n_D - X_D + 1
+
+# Allele frequency in cases #
+
+X_AgD <- 10      # Input example provided by Kathryn
+n_AgD <- 20000   # Input example provided by Kathryn
+
+# Allele frequency in general population #
+
+X_A <- 3         # Input example provided by Kathryn
+n_A <- 600000    # Input example provided by Kathryn
+
+# Printing #
+
+print("*** Baseline risk (Prevalence) as a Beta density ***")
+c("Est. phat:", round(X_D / n_D, digits = digits),  
+  "Mean baseline risk:", round(alpha_D / (alpha_D + beta_D), digits = digits), 
+  "Std baseline risk:", round(sqrt((alpha_D * beta_D) / ((alpha_D + beta_D) ^2 * (alpha_D + beta_D + 1))), digits = digits))
+
+# Penetrance (posterior distribution) #
+
+mu_D <- alpha_D / (alpha_D + beta_D)
+M_D <- alpha_D + beta_D
+
+alpha_DgA <- X_AgD + M_D * mu_D
+beta_DgA <- n_AgD - X_AgD + M_D * (1 - mu_D) - 1
+
+# Printing #
+
+print("*** Credible interval Penetrance ***")
+c("CI(p_DgA) lower:", round(qbeta(alpha /2, alpha_DgA, beta_DgA), digits = digits),  
+  "CI(p_DgA) upper:", round(qbeta(1 - alpha /2, alpha_DgA, beta_DgA), digits = digits))
+
+# Plotting #
+
+ys <- seq(0, 1, by = 1e-6)
+f_D <- dbeta(ys, alpha_D, beta_D)
+f_DgA <- dbeta(ys, alpha_DgA, beta_DgA)
+legend_texts = c(  expression(""[p]*"(D)"), expression(""[p]*'(D) 95% CI'),  expression(""[p]*'(D|A)'),   expression(""[p]*'(D|A) 95% CI'))
+
+plot(ys, f_D, xlim = c(0, 0.01), xlab = "Prior and posterior probability", 
+              ylim = c(0, max(max(f_D), max(f_DgA)) * 1.1), ylab = "Density", 
+              type = "l", lty = 1, lwd = 2, col = "blue",
+     cex.main=1.25, cex.lab=1.5, cex.axis=1.5)
+abline(v = qbeta(alpha /2, alpha_D, beta_D), lty = 2, lwd = 1, col = "blue")
+abline(v = qbeta(1 - alpha /2, alpha_D, beta_D), lty = 2, lwd = 1, col = "blue")
+lines(ys, f_DgA, type = "l", lty = 1, lwd = 2, col = "red")
+abline(v = qbeta(alpha /2, alpha_DgA, beta_DgA), lty = 2, lwd = 1, col = "red")
+abline(v = qbeta(1 - alpha /2, alpha_DgA, beta_DgA), lty = 2, lwd = 1, col = "red")
+legend("center", legend = , lty = c(1, 2, 1, 2), lwd = c(2, 1, 2, 1), col = c("blue", "blue", "red", "red"), box.lwd = 0, box.col = "white", cex = 1.5)
+
+# Plotting #
+
+x <- 0 : (X_A * 20)
+y <- dbinom(x, n_A, X_A / n_A)
+yy <- dbb(x, n_AgD, alpha_D, beta_D)
+legend_texts = c(
+  expression("Binomial "[p]*'(A)'), 
+  expression("Beta-Binomial "[p]*'(A)'))
+  
+barplot(t(matrix(c(y, yy), ncol = 2)), beside = TRUE, col = c("blue", "red") ,
+     cex.main=1.25, cex.lab=1.5, cex.axis=1.5)
+legend("center", legend = legend_texts, col = c("blue", "red"), pch = 15, box.lwd = 0, box.col = "white" , cex = 1.5)
+abline(v = X_A, lty = 2, lwd = 2, col = "grey")
+```
+
+### Concl 
+
+```{r}
+rm(list = ls())
+set.seed(28061971)
+digits <- 6   # ***
+alpha <- 0.05  # **
+library("ratesci")
+library("plotrix")
+
+#HCM
+#HCM meta analysis
+#0.001841 [0.001492-0.002225]
+
+phat <- 0.001841   # From meta-analysis results
+CI_p_LL <- 0.001492   # From meta-analysis results
+CI_p_UL <- 0.002225   # From meta-analysis results
+
+x_D <- 97          # From Agresti–Coull method estimated X
+n_D <- 52660       # From Agresti–Coull method estimated n
+
+x_A <- 3           # Input example provided by Kathryn
+n_A <- 600000      # Input example provided by Kathryn
+  
+x_AgD <- 10        # Input example provided by Kathryn
+n_AgD <- 20000     # Input example provided by Kathryn
+
+p_D <- x_D / n_D
+p_AgD <- x_AgD / n_AgD
+p_A <- x_A / n_A
+
+d <- 0.5   # ***
+p_D_wod <- (x_D + d) / (n_D + d)
+p_AgD_wod <- (x_AgD + d) / (n_AgD + d)
+p_A_wod <- (x_A + d) / (n_A + d)
+
+# Solution 1.4: Delta Method on log(Absolute Risk) with improved mean      # 
+#               approximation without degeneracy                           #
+
+log_Penetrance <- log(p_D_wod * p_AgD_wod / p_A_wod) + 1 /2 * ((1 / p_A_wod) * (1 - p_A_wod) / (n_A + d) - 
+                                                               (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) - 
+                                                               (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d))
+Var_log_Penetrance <- (1 / p_D_wod) * (1 - p_D_wod) / (n_D + d) + 
+                      (1 / p_AgD_wod) * (1 - p_AgD_wod) / (n_AgD + d) + 
+                      (1 / p_A_wod) * (1 - p_A_wod) / (n_A + d)
+log_CI <- c(log_Penetrance - qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance), 
+            log_Penetrance + qnorm(1 - alpha / 2) * sqrt(Var_log_Penetrance))
+
+PE_Penetrance <- exp(log_Penetrance)
+CI_Penetrance <- exp(log_CI)
+PE_Penetrance[PE_Penetrance < 0] <- 0
+PE_Penetrance[PE_Penetrance > 1] <- 1
+CI_Penetrance[CI_Penetrance < 0] <- 0
+CI_Penetrance[CI_Penetrance > 1] <- 1
+```
